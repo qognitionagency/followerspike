@@ -1,3 +1,4 @@
+import { GoogleGenAI, type GenerateContentConfig } from "@google/genai";
 import { optionalEnv } from "@/lib/env";
 
 type AiProvider = "gemini" | "deepseek";
@@ -5,20 +6,6 @@ type AiProvider = "gemini" | "deepseek";
 export type AiMessage = {
   role: "system" | "user";
   content: string;
-};
-
-type GeminiPart = {
-  text?: string;
-};
-
-type GeminiCandidate = {
-  content?: {
-    parts?: GeminiPart[];
-  };
-};
-
-type GeminiResponse = {
-  candidates?: GeminiCandidate[];
 };
 
 type DeepSeekResponse = {
@@ -29,6 +16,8 @@ type DeepSeekResponse = {
   }>;
 };
 
+export type JsonSchema = Record<string, unknown>;
+
 function stripJsonFence(text: string): string {
   return text
     .trim()
@@ -38,40 +27,36 @@ function stripJsonFence(text: string): string {
     .trim();
 }
 
-async function callGemini(messages: AiMessage[]): Promise<string> {
+async function callGemini(messages: AiMessage[], schema?: JsonSchema): Promise<string> {
   const apiKey = optionalEnv("GEMINI_API_KEY");
   if (!apiKey) {
     throw new Error("Gemini API key is not configured");
   }
 
+  const model = optionalEnv("GEMINI_MODEL", "gemini-3-pro-preview");
+  const ai = new GoogleGenAI({ apiKey });
   const system = messages.find((message) => message.role === "system")?.content ?? "";
   const user = messages
     .filter((message) => message.role === "user")
     .map((message) => message.content)
     .join("\n\n");
+  const config: GenerateContentConfig = {
+    systemInstruction: system,
+    responseMimeType: "application/json",
+    maxOutputTokens: 4096,
+    ...(schema ? { responseJsonSchema: schema } : {}),
+  };
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: system }] },
-        contents: [{ role: "user", parts: [{ text: user }] }],
-        generationConfig: {
-          temperature: 0.7,
-          responseMimeType: "application/json",
-        },
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Gemini request failed with ${response.status}`);
+  if (!model.startsWith("gemini-3")) {
+    config.temperature = 0.6;
   }
 
-  const json = (await response.json()) as GeminiResponse;
-  const text = json.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("") ?? "";
+  const response = await ai.models.generateContent({
+    model,
+    contents: user,
+    config,
+  });
+  const text = response.text ?? "";
   if (!text) {
     throw new Error("Gemini returned an empty response");
   }
@@ -110,21 +95,18 @@ async function callDeepSeek(messages: AiMessage[]): Promise<string> {
   return text;
 }
 
-async function callProvider(provider: AiProvider, messages: AiMessage[]): Promise<string> {
-  return provider === "gemini" ? callGemini(messages) : callDeepSeek(messages);
-}
-
 export async function generateJson<T>(
   messages: AiMessage[],
   fallback: T,
-  validate: (value: unknown) => value is T
+  validate: (value: unknown) => value is T,
+  schema?: JsonSchema
 ): Promise<T> {
   const providers: AiProvider[] = ["gemini", "deepseek"];
   const errors: string[] = [];
 
   for (const provider of providers) {
     try {
-      const raw = await callProvider(provider, messages);
+      const raw = provider === "gemini" ? await callGemini(messages, schema) : await callDeepSeek(messages);
       const parsed = JSON.parse(stripJsonFence(raw)) as unknown;
       if (validate(parsed)) {
         return parsed;

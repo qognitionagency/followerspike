@@ -24,6 +24,8 @@ export const ROUTES = {
 } as const;
 
 export type SubscriptionTier = "free" | "starter" | "pro" | "scale";
+export type BillingCycle = "monthly" | "annual";
+export type BillingCurrency = "USD";
 export type ApprovalMode = "review" | "auto" | "off";
 export type AutomationAction = "post" | "comment" | "invite" | "like" | "withdraw" | "profile_scrape";
 
@@ -34,7 +36,9 @@ export const PRICING = [
     monthlyInr: "₹799",
     monthlyUsd: "$9",
     annualUsd: "$90",
-    planEnv: "RAZORPAY_PLAN_STARTER",
+    planEnv: "RAZORPAY_PLAN_STARTER_MONTHLY_USD",
+    legacyPlanEnv: "RAZORPAY_PLAN_STARTER",
+    annualPlanEnv: "RAZORPAY_PLAN_STARTER_ANNUAL_USD",
     popular: false,
     description: "For professionals who need consistent posts without living in LinkedIn.",
     limits: { posts: 1, comments: 5, invites: 5, likes: 15 },
@@ -52,7 +56,9 @@ export const PRICING = [
     monthlyInr: "₹1,999",
     monthlyUsd: "$19",
     annualUsd: "$190",
-    planEnv: "RAZORPAY_PLAN_PRO",
+    planEnv: "RAZORPAY_PLAN_PRO_MONTHLY_USD",
+    legacyPlanEnv: "RAZORPAY_PLAN_PRO",
+    annualPlanEnv: "RAZORPAY_PLAN_PRO_ANNUAL_USD",
     popular: true,
     description: "For founders, CEOs, and consultants turning LinkedIn into a daily growth channel.",
     limits: { posts: 2, comments: 15, invites: 15, likes: 40 },
@@ -70,7 +76,9 @@ export const PRICING = [
     monthlyInr: "₹3,999",
     monthlyUsd: "$39",
     annualUsd: "$390",
-    planEnv: "RAZORPAY_PLAN_SCALE",
+    planEnv: "RAZORPAY_PLAN_SCALE_MONTHLY_USD",
+    legacyPlanEnv: "RAZORPAY_PLAN_SCALE",
+    annualPlanEnv: "RAZORPAY_PLAN_SCALE_ANNUAL_USD",
     popular: false,
     description: "For operators and agencies running a tighter executive presence workflow.",
     limits: { posts: 3, comments: 30, invites: 25, likes: 70 },

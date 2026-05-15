@@ -97,6 +97,7 @@
     --color-emerald-400: oklch(76.5% 0.177 163.223);
     --color-emerald-600: oklch(59.6% 0.145 163.225);
     --color-emerald-700: oklch(50.8% 0.118 165.612);
+    --color-emerald-800: oklch(43.2% 0.095 166.913);
     --color-cyan-100: oklch(95.6% 0.045 203.388);
     --color-cyan-200: oklch(91.7% 0.08 205.041);
     --color-slate-300: oklch(86.9% 0.022 252.894);
@@ -586,6 +587,9 @@
   .h-\[var\(--radix-select-trigger-height\)\] {
     height: var(--radix-select-trigger-height);
   }
+  .h-auto {
+    height: auto;
+  }
   .h-full {
     height: 100%;
   }
@@ -959,6 +963,9 @@
   }
   .border-emerald-100 {
     border-color: var(--color-emerald-100);
+  }
+  .border-emerald-200 {
+    border-color: var(--color-emerald-200);
   }
   .border-input {
     border-color: var(--input);
@@ -1439,6 +1446,9 @@
   .text-emerald-700 {
     color: var(--color-emerald-700);
   }
+  .text-emerald-800 {
+    color: var(--color-emerald-800);
+  }
   .text-foreground {
     color: var(--foreground);
   }
@@ -1499,8 +1509,15 @@
   .opacity-70 {
     opacity: 70%;
   }
+  .opacity-80 {
+    opacity: 80%;
+  }
   .shadow-2xl {
     --tw-shadow: 0 25px 50px -12px var(--tw-shadow-color, rgb(0 0 0 / 0.25));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+  .shadow-\[0_14px_38px_rgba\(10\,102\,194\,0\.16\)\] {
+    --tw-shadow: 0 14px 38px var(--tw-shadow-color, rgba(10,102,194,0.16));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
   .shadow-\[0_18px_60px_rgba\(10\,102\,194\,0\.22\)\] {
@@ -2465,6 +2482,16 @@
       flex-direction: column;
     }
   }
+  .md\:flex-row {
+    @media (width >= 48rem) {
+      flex-direction: row;
+    }
+  }
+  .md\:items-end {
+    @media (width >= 48rem) {
+      align-items: flex-end;
+    }
+  }
   .md\:text-sm {
     @media (width >= 48rem) {
       font-size: var(--text-sm);
@@ -2594,6 +2621,12 @@
   .lg\:pb-24 {
     @media (width >= 64rem) {
       padding-bottom: calc(var(--spacing) * 24);
+    }
+  }
+  .lg\:text-6xl {
+    @media (width >= 64rem) {
+      font-size: var(--text-6xl);
+      line-height: var(--tw-leading, var(--text-6xl--line-height));
     }
   }
   .lg\:text-7xl {

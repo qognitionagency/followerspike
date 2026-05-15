@@ -23,7 +23,7 @@ const pricingFaqs = [
   {
     question: "How does annual billing work?",
     answer:
-      "Annual pricing shows 2 months free. Checkout currently starts on the monthly Razorpay plan; annual checkout should be wired once annual Razorpay plan IDs are added.",
+      "Annual pricing shows 2 months free and routes to the annual Razorpay subscription plan when the annual USD plan IDs are configured.",
   },
   {
     question: "Can I review content first?",
@@ -33,7 +33,7 @@ const pricingFaqs = [
   {
     question: "Can I cancel or pause?",
     answer:
-      "You can pause automation from the app. Billing cancellation should follow the active Razorpay subscription flow for your account.",
+      "You can pause automation from the app at any time. Subscription cancellation follows the active Razorpay billing flow for your account.",
   },
   {
     question: "Is FollowerSpike affiliated with LinkedIn?",

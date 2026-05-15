@@ -20,6 +20,8 @@ const webhookSchema = z.object({
               .object({
                 user_id: z.string().uuid().optional(),
                 tier: z.enum(["starter", "pro", "scale"]).optional(),
+                billing_cycle: z.enum(["monthly", "annual"]).optional(),
+                currency: z.string().optional(),
               })
               .optional(),
           })
@@ -75,6 +77,8 @@ export async function POST(request: Request) {
       razorpay_subscription_id: subscription.id,
       razorpay_plan_id: subscription.plan_id,
       tier,
+      billing_cycle: subscription.notes.billing_cycle ?? "monthly",
+      currency: subscription.notes.currency ?? "USD",
       status: toStatus(subscription.status),
       current_period_start: toTimestamp(subscription.current_start),
       current_period_end: toTimestamp(subscription.current_end),

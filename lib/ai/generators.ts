@@ -6,7 +6,7 @@ import {
   GENERATE_POST_PROMPT,
   SCORE_RELEVANCE_PROMPT,
 } from "@/lib/ai/prompts";
-import { generateJson } from "@/lib/ai/client";
+import { generateJson, type JsonSchema } from "@/lib/ai/client";
 import type { AuditResult, JsonObject } from "@/lib/types";
 
 export const linkedinUrlSchema = z
@@ -71,6 +71,74 @@ const relevanceScoreSchema = z.object({
   score: z.number().min(0).max(10),
   reason: z.string().min(1),
 });
+
+const stringArraySchema = {
+  type: "array",
+  items: { type: "string" },
+} satisfies JsonSchema;
+
+const auditResponseSchema = {
+  type: "object",
+  properties: {
+    score: { type: "number", minimum: 0, maximum: 100 },
+    isEmptyProfile: { type: "boolean" },
+    summary: { type: "string" },
+    headlineSuggestion: { type: "string" },
+    aboutSuggestion: { type: "string" },
+    photoBannerChecklist: stringArraySchema,
+    keywordGaps: stringArraySchema,
+    contentPlan: stringArraySchema,
+    riskFlags: stringArraySchema,
+  },
+  required: [
+    "score",
+    "isEmptyProfile",
+    "summary",
+    "headlineSuggestion",
+    "aboutSuggestion",
+    "photoBannerChecklist",
+    "keywordGaps",
+    "contentPlan",
+    "riskFlags",
+  ],
+  propertyOrdering: [
+    "score",
+    "isEmptyProfile",
+    "summary",
+    "headlineSuggestion",
+    "aboutSuggestion",
+    "photoBannerChecklist",
+    "keywordGaps",
+    "contentPlan",
+    "riskFlags",
+  ],
+} satisfies JsonSchema;
+
+const generatedPostResponseSchema = {
+  type: "object",
+  properties: {
+    content: { type: "string" },
+    rationale: { type: "string" },
+  },
+  required: ["content", "rationale"],
+} satisfies JsonSchema;
+
+const generatedCommentResponseSchema = {
+  type: "object",
+  properties: {
+    comment: { type: "string" },
+  },
+  required: ["comment"],
+} satisfies JsonSchema;
+
+const relevanceResponseSchema = {
+  type: "object",
+  properties: {
+    score: { type: "number", minimum: 0, maximum: 10 },
+    reason: { type: "string" },
+  },
+  required: ["score", "reason"],
+} satisfies JsonSchema;
 
 function isAuditResult(value: unknown): value is AuditResult {
   return auditResultSchema.safeParse(value).success;
@@ -147,7 +215,8 @@ export async function auditProfile(profile: ProfileData): Promise<AuditResult> {
       { role: "user", content: JSON.stringify(profile) },
     ],
     fallback,
-    isAuditResult
+    isAuditResult,
+    auditResponseSchema
   );
 }
 
@@ -174,7 +243,11 @@ export async function analyzeBrandTone(profile: ProfileData): Promise<BrandVoice
       example_opener: "Most founders do not have a content problem. They have a consistency problem.",
       audience_perception: "practical founder building a sharper professional presence",
     },
-    (value): value is BrandVoice => typeof value === "object" && value !== null
+    (value): value is BrandVoice => typeof value === "object" && value !== null,
+    {
+      type: "object",
+      additionalProperties: true,
+    }
   );
 }
 
@@ -189,7 +262,8 @@ export async function generatePost(userContext: JsonObject, topicSeed: string): 
         "Most founders do not need more content ideas. They need a repeatable way to show up when the calendar gets loud.\n\nOne useful post. One thoughtful comment. One relevant connection.\n\nDone daily, that compounds faster than another weekend spent rewriting a content strategy.\n\nWhat part of LinkedIn do you avoid the most?",
       rationale: "Fallback post used because live AI was unavailable.",
     },
-    isGeneratedPost
+    isGeneratedPost,
+    generatedPostResponseSchema
   );
 }
 
@@ -203,7 +277,8 @@ export async function generateComment(userContext: JsonObject, targetPost: strin
       comment:
         "This is the part most teams underestimate: consistency only works when the message is specific enough to attract the right people.",
     },
-    isGeneratedComment
+    isGeneratedComment,
+    generatedCommentResponseSchema
   );
 }
 
@@ -214,6 +289,7 @@ export async function scoreRelevance(userContext: JsonObject, targetPost: string
       { role: "user", content: JSON.stringify({ user: userContext, targetPost }) },
     ],
     { score: 7, reason: "Fallback score used because AI scoring was unavailable." },
-    isRelevanceScore
+    isRelevanceScore,
+    relevanceResponseSchema
   );
 }

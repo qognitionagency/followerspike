@@ -8,6 +8,7 @@ import { createRazorpaySubscription } from "@/lib/billing/razorpay";
 import { requireAppSession } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { cn } from "@/lib/utils";
 
 const modeSchema = z.object({
   approvalMode: z.enum(["review", "auto", "off"]),
@@ -20,6 +21,7 @@ const consentSchema = z.object({
 
 const checkoutSchema = z.object({
   tier: z.enum(["starter", "pro", "scale"]),
+  billingCycle: z.enum(["monthly", "annual"]).default("monthly"),
 });
 
 async function updateApprovalMode(formData: FormData) {
@@ -88,10 +90,15 @@ async function deleteAccount() {
 async function startCheckout(formData: FormData) {
   "use server";
   const session = await requireAppSession();
-  const parsed = checkoutSchema.safeParse({ tier: formData.get("tier") });
+  const parsed = checkoutSchema.safeParse({
+    tier: formData.get("tier"),
+    billingCycle: formData.get("billingCycle") || "monthly",
+  });
   if (!parsed.success) return;
   const subscription = await createRazorpaySubscription({
     tier: parsed.data.tier,
+    billingCycle: parsed.data.billingCycle,
+    currency: "USD",
     customerEmail: session.email,
     customerName: session.profile.full_name,
     userId: session.userId,
@@ -99,8 +106,15 @@ async function startCheckout(formData: FormData) {
   redirect(subscription.short_url || `/app/settings?checkout=${subscription.id}`);
 }
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams = {},
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   const session = await requireAppSession();
+  const selectedTier = typeof searchParams.plan === "string" ? searchParams.plan : typeof searchParams.tier === "string" ? searchParams.tier : "";
+  const selectedBilling = searchParams.billing === "annual" ? "annual" : "monthly";
+  const checkoutSuccess = searchParams.checkout === "success";
 
   return (
     <div className="space-y-6">
@@ -110,6 +124,11 @@ export default async function SettingsPage() {
         <p className="mt-2 text-sm leading-6 text-[#666]">
           FollowerSpike can be aggressive in outcomes, but execution stays consent-based and pauseable.
         </p>
+        {checkoutSuccess ? (
+          <div className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
+            Razorpay returned successfully. Your subscription will sync as soon as the signed webhook arrives.
+          </div>
+        ) : null}
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -167,16 +186,55 @@ export default async function SettingsPage() {
       </div>
 
       <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-black text-[#191919]">Upgrade with Razorpay</h2>
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div>
+            <p className="text-sm font-black uppercase tracking-wide text-[#0A66C2]">International checkout</p>
+            <h2 className="mt-2 text-xl font-black text-[#191919]">Upgrade with Razorpay subscriptions</h2>
+            <p className="mt-2 text-sm leading-6 text-[#666]">
+              USD plans use Razorpay subscription plan IDs from your environment. Monthly and annual billing both route
+              through hosted Razorpay checkout.
+            </p>
+          </div>
+          <div className="rounded-full bg-[#EEF3F8] px-4 py-2 text-sm font-black text-[#0A66C2]">
+            {selectedBilling === "annual" ? "Annual selected" : "Monthly selected"}
+          </div>
+        </div>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           {PRICING.map((plan) => (
-            <form key={plan.tier} action={startCheckout} className="rounded-xl border border-[#D6D6D6] p-4">
+            <form
+              key={plan.tier}
+              action={startCheckout}
+              className={cn(
+                "rounded-xl border border-[#D6D6D6] p-4",
+                selectedTier === plan.tier && "border-[#0A66C2] shadow-[0_14px_38px_rgba(10,102,194,0.16)]"
+              )}
+            >
               <input type="hidden" name="tier" value={plan.tier} />
               <p className="font-black text-[#191919]">{plan.name}</p>
-              <p className="mt-2 text-2xl font-black text-[#0A66C2]">{plan.monthlyUsd}/mo</p>
-              <Button className="mt-4 h-10 w-full rounded-full bg-[#EEF3F8] font-bold text-[#0A66C2] hover:bg-[#DDECF7]">
-                Choose {plan.name}
-              </Button>
+              <div className="mt-4 grid gap-3">
+                {[
+                  ["monthly", plan.monthlyUsd, "/mo", "Monthly"],
+                  ["annual", plan.annualUsd, "/yr", "Annual"],
+                ].map(([billingCycle, price, suffix, label]) => (
+                  <Button
+                    key={billingCycle}
+                    name="billingCycle"
+                    value={billingCycle}
+                    className={cn(
+                      "h-auto justify-between rounded-xl border px-4 py-3 text-left font-black",
+                      billingCycle === selectedBilling
+                        ? "border-[#0A66C2] bg-[#0A66C2] text-white hover:bg-[#004182]"
+                        : "border-[#D6D6D6] bg-[#EEF3F8] text-[#0A66C2] hover:bg-[#DDECF7]"
+                    )}
+                  >
+                    <span>{label}</span>
+                    <span>
+                      {price}
+                      <span className="text-xs opacity-80">{suffix}</span>
+                    </span>
+                  </Button>
+                ))}
+              </div>
             </form>
           ))}
         </div>

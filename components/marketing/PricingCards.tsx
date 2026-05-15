@@ -1,9 +1,9 @@
 "use client";
 
 import { CheckCircle2, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
-import { PRICING } from "@/lib/constants";
-import { SignupButton } from "@/components/marketing/SignupButton";
+import { PRICING, ROUTES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 function annualMonthlyEquivalent(annualUsd: string) {
@@ -83,16 +83,17 @@ export function PricingCards() {
               ))}
             </ul>
 
-            <SignupButton
+            <Link
+              href={`${ROUTES.signup}?source=pricing&plan=${plan.tier}&billing=${billingCycle}`}
               className={cn(
-                "mt-8 h-12 w-full rounded-full font-semibold",
+                "mt-8 inline-flex h-12 w-full items-center justify-center rounded-full font-semibold",
                 plan.popular
                   ? "bg-[#0A66C2] text-white hover:bg-[#004182]"
                   : "bg-[#EEF3F8] text-[#0A66C2] hover:bg-[#DDECF7]"
               )}
             >
               Start 14-Day Trial
-            </SignupButton>
+            </Link>
           </div>
         ))}
       </div>

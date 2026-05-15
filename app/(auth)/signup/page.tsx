@@ -10,18 +10,30 @@ type AuthPageProps = {
   searchParams?: Record<string, string | string[] | undefined>;
 };
 
-function utmQuery(searchParams: Record<string, string | string[] | undefined>): string {
+function signupContextQuery(searchParams: Record<string, string | string[] | undefined>): string {
   const params = new URLSearchParams();
-  for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "source"]) {
+  for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "source", "plan", "billing"]) {
     const value = searchParams[key];
     if (typeof value === "string") params.set(key, value);
   }
   return params.toString();
 }
 
+function nextPath(searchParams: Record<string, string | string[] | undefined>): string {
+  const plan = typeof searchParams.plan === "string" ? searchParams.plan : "";
+  const billing = searchParams.billing === "annual" ? "annual" : "monthly";
+  if (["starter", "pro", "scale"].includes(plan)) {
+    return `/app/settings?plan=${plan}&billing=${billing}`;
+  }
+
+  const context = signupContextQuery(searchParams);
+  return `${ROUTES.app}${context ? `?${context}` : ""}`;
+}
+
 export default function SignupPage({ searchParams = {} }: AuthPageProps) {
-  const utm = utmQuery(searchParams);
-  const next = `${ROUTES.app}${utm ? `?${utm}` : ""}`;
+  const next = nextPath(searchParams);
+  const selectedPlan = typeof searchParams.plan === "string" ? searchParams.plan : "";
+  const selectedBilling = searchParams.billing === "annual" ? "annual" : "monthly";
 
   const signup = async (formData: FormData) => {
     "use server";
@@ -65,6 +77,11 @@ export default function SignupPage({ searchParams = {} }: AuthPageProps) {
         </Link>
         <h1 className="mt-8 text-3xl font-black">Start your 14-day trial.</h1>
         <p className="mt-2 text-sm text-[#666]">Build the queue first. Enable live execution only when you are ready.</p>
+        {selectedPlan ? (
+          <div className="mt-5 rounded-lg border border-[#BFD7F0] bg-[#EEF3F8] p-3 text-sm font-bold text-[#0A66C2]">
+            Selected: {selectedPlan} plan, {selectedBilling} billing. Checkout opens after sign-up.
+          </div>
+        ) : null}
         <form action={signup} className="mt-6 space-y-4">
           <input type="hidden" name="next" value={next} />
           <Input name="email" type="email" placeholder="founder@company.com" required className="h-12 bg-white" />

@@ -33,6 +33,8 @@ export type Subscription = {
   id: string;
   user_id: string;
   tier: SubscriptionTier;
+  billing_cycle?: "monthly" | "annual";
+  currency?: "USD";
   status: "active" | "past_due" | "canceled" | "paused" | "trialing";
   current_period_end: string | null;
   trial_ends_at: string | null;
