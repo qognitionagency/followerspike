@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
+import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { SignupButton } from "@/components/marketing/SignupButton";
 import { ROUTES, TRUST_DISCLAIMER } from "@/lib/constants";
 import { buildSeoPages } from "@/lib/seo";
@@ -26,7 +28,9 @@ export function generateMetadata({ params }: PageProps): Metadata {
   }
 
   return {
-    title: page.meta_title,
+    title: {
+      absolute: page.meta_title,
+    },
     description: page.meta_description,
   };
 }
@@ -38,12 +42,10 @@ export default function SeoLandingPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F2EE] text-[#191919]">
-      <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
-        <Link href={ROUTES.home} className="text-sm font-bold text-[#0A66C2]">
-          FollowerSpike
-        </Link>
-        <section className="mt-10 rounded-xl border border-[#D6D6D6] bg-white p-8 shadow-sm">
+    <div className="min-h-screen bg-[#f7f4ee] text-[#191919]">
+      <MarketingHeader />
+      <main className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
+        <section className="rounded-2xl border border-black/10 bg-white p-8 shadow-sm">
           <p className="text-sm font-black uppercase tracking-wide text-[#0A66C2]">{page.keyword}</p>
           <h1 className="mt-3 text-5xl font-black tracking-tight text-[#191919]">{page.h1}</h1>
           <div className="mt-5 text-lg leading-8 text-[#555]" dangerouslySetInnerHTML={{ __html: page.intro_html }} />
@@ -63,29 +65,68 @@ export default function SeoLandingPage({ params }: PageProps) {
 
         <section className="mt-6 grid gap-4 md:grid-cols-2">
           {page.features_json.map((feature) => (
-            <div key={feature} className="flex gap-3 rounded-xl border border-[#D6D6D6] bg-white p-5 shadow-sm">
+            <div key={feature} className="flex gap-3 rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
               <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#0A66C2]" />
               <span className="font-semibold text-[#333]">{feature}</span>
             </div>
           ))}
         </section>
 
-        <section className="mt-6 rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
+        <section className="mt-6 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="rounded-2xl border border-black/10 bg-[#111827] p-6 text-white">
+            <ShieldCheck className="h-7 w-7 text-cyan-200" />
+            <h2 className="mt-4 text-2xl font-black">Review-first growth workflow</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              FollowerSpike is built for people who need consistent LinkedIn visibility without giving up control of
+              voice, targets, or automation risk.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              ["Draft", "Posts shaped by profile, niche, and approved voice notes."],
+              ["Review", "Approve, edit, skip, or regenerate before live execution."],
+              ["Control", "Caps, pause behavior, consent logs, and privacy controls."],
+            ].map(([title, body]) => (
+              <div key={title} className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
+                <h2 className="font-black text-[#111827]">{title}</h2>
+                <p className="mt-2 text-sm leading-6 text-[#555]">{body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-6 rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
           <p className="text-lg font-bold text-[#191919]">&ldquo;{page.testimonial_json.quote}&rdquo;</p>
           <p className="mt-2 text-sm font-semibold text-[#666]">{page.testimonial_json.author}</p>
         </section>
 
         <section className="mt-6 space-y-3">
           {page.faq_json.map((faq) => (
-            <div key={faq.question} className="rounded-xl border border-[#D6D6D6] bg-white p-5 shadow-sm">
+            <div key={faq.question} className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
               <h2 className="font-black text-[#191919]">{faq.question}</h2>
               <p className="mt-2 text-sm leading-6 text-[#555]">{faq.answer}</p>
             </div>
           ))}
         </section>
 
+        <section className="mt-6 rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+          <p className="text-sm font-black uppercase tracking-[0.22em] text-[#0A66C2]">Related guides</p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            {[
+              ["LinkedIn autopilot", "/linkedin-autopilot"],
+              ["LinkedIn ghostwriter", "/linkedin-ghostwriter"],
+              ["Pricing", ROUTES.pricing],
+            ].map(([label, href]) => (
+              <Link key={href} href={href} className="rounded-xl border border-black/10 bg-[#f7f4ee] p-4 text-sm font-black text-[#111827] hover:text-[#0A66C2]">
+                {label}
+              </Link>
+            ))}
+          </div>
+        </section>
+
         <p className="mt-8 text-center text-sm leading-6 text-[#666]">{TRUST_DISCLAIMER}</p>
       </main>
+      <MarketingFooter />
     </div>
   );
 }

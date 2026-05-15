@@ -61,3 +61,13 @@ body {
 ::selection {
   background: rgba(10, 102, 194, 0.18);
 }
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
+}

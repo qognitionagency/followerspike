@@ -5,6 +5,9 @@ import { optionalEnv } from '@/lib/env'
 const PUBLIC_PATHS = [
   '/',
   '/pricing',
+  '/linkedin-autopilot',
+  '/linkedin-profile-audit',
+  '/linkedin-ghostwriter',
   '/login',
   '/signup',
   '/callback',
@@ -14,6 +17,9 @@ const PUBLIC_PATHS = [
   '/terms',
   '/dpa',
   '/subprocessors',
+  '/robots.txt',
+  '/sitemap.xml',
+  '/llms.txt',
 ];
 
 const PUBLIC_PREFIXES = [

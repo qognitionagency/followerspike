@@ -1,14 +1,17 @@
 import Link from "next/link";
-import { BRAND, ROUTES, TRUST_DISCLAIMER } from "@/lib/constants";
+import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { MarketingHeader } from "@/components/marketing/MarketingHeader";
+import { TRUST_DISCLAIMER } from "@/lib/constants";
 
 type LegalPageProps = {
   eyebrow: string;
   title: string;
   description: string;
   sections: Array<{ title: string; body: string }>;
+  relatedLinks?: Array<{ label: string; href: string }>;
 };
 
-export function LegalPage({ eyebrow, title, description, sections }: LegalPageProps) {
+export function LegalPage({ eyebrow, title, description, sections, relatedLinks = [] }: LegalPageProps) {
   const updatedAt = new Intl.DateTimeFormat("en", {
     dateStyle: "long",
     timeZone: "UTC",
@@ -16,16 +19,7 @@ export function LegalPage({ eyebrow, title, description, sections }: LegalPagePr
 
   return (
     <div className="min-h-screen bg-[#F4F2EE] text-[#191919]">
-      <header className="border-b border-[#D6D6D6] bg-white">
-        <div className="mx-auto flex h-16 max-w-5xl items-center px-4 sm:px-6 lg:px-8">
-          <Link href={ROUTES.home} className="font-black text-[#0A66C2]">
-            {BRAND.name}
-          </Link>
-          <Link href={ROUTES.signup} className="ml-auto text-sm font-bold text-[#0A66C2]">
-            Start Trial
-          </Link>
-        </div>
-      </header>
+      <MarketingHeader />
       <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
         <p className="text-sm font-black uppercase tracking-wide text-[#0A66C2]">{eyebrow}</p>
         <h1 className="mt-3 text-5xl font-black tracking-tight">{title}</h1>
@@ -39,8 +33,25 @@ export function LegalPage({ eyebrow, title, description, sections }: LegalPagePr
             </section>
           ))}
         </div>
+        {relatedLinks.length > 0 ? (
+          <section className="mt-8 rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-black text-[#191919]">Related guides</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              {relatedLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="rounded-xl border border-[#D6D6D6] bg-[#F4F2EE] p-4 text-sm font-black text-[#191919] hover:text-[#0A66C2]"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
         <p className="mt-8 text-sm leading-6 text-[#666]">{TRUST_DISCLAIMER}</p>
       </main>
+      <MarketingFooter />
     </div>
   );
 }

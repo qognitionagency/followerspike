@@ -30,6 +30,11 @@ export default function TrustPage() {
           body: "FollowerSpike does not claim LinkedIn endorsement or certification. If a legitimate certification is obtained later, the claim can be added with proof and legal approval.",
         },
       ]}
+      relatedLinks={[
+        { label: "LinkedIn autopilot", href: "/linkedin-autopilot" },
+        { label: "LinkedIn ghostwriter", href: "/linkedin-ghostwriter" },
+        { label: "LinkedIn profile audit", href: "/linkedin-profile-audit" },
+      ]}
     />
   );
 }

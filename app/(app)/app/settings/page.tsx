@@ -173,7 +173,7 @@ export default async function SettingsPage() {
             <form key={plan.tier} action={startCheckout} className="rounded-xl border border-[#D6D6D6] p-4">
               <input type="hidden" name="tier" value={plan.tier} />
               <p className="font-black text-[#191919]">{plan.name}</p>
-              <p className="mt-2 text-2xl font-black text-[#0A66C2]">{plan.monthlyInr}</p>
+              <p className="mt-2 text-2xl font-black text-[#0A66C2]">{plan.monthlyUsd}/mo</p>
               <Button className="mt-4 h-10 w-full rounded-full bg-[#EEF3F8] font-bold text-[#0A66C2] hover:bg-[#DDECF7]">
                 Choose {plan.name}
               </Button>
