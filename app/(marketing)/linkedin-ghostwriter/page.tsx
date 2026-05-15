@@ -16,7 +16,7 @@ export default function LinkedInGhostwriterPage() {
       bullets={[
         "AI-assisted drafts that learn from your positioning, offers, and approved voice notes.",
         "Review, edit, skip, or regenerate before anything is used.",
-        "Comments and connection workflows that most ghostwriting retainers do not include.",
+        "Comments, connection requests, and follow-up DMs that most ghostwriting retainers do not include.",
       ]}
       sections={[
         {
@@ -25,7 +25,7 @@ export default function LinkedInGhostwriterPage() {
         },
         {
           title: "More than posts",
-          body: "FollowerSpike pairs content with relevant comments and connection workflows so growth is not just publishing.",
+          body: "FollowerSpike pairs content with relevant comments, connection requests, and accepted-connection follow-ups so growth is not just publishing.",
         },
         {
           title: "Control stays with you",

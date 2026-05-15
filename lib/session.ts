@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { normalizeSubscriptionTier } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import type { AppSession, Subscription, UserProfile } from "@/lib/types";
 
@@ -44,6 +45,7 @@ export async function getAppSession(): Promise<AppSession | null> {
     ...FREE_SUBSCRIPTION,
     user_id: user.id,
   };
+  subscription.tier = normalizeSubscriptionTier(subscription.tier);
 
   return {
     userId: user.id,
@@ -65,9 +67,9 @@ export async function requireAppSession(): Promise<AppSession> {
 export function canUseTier(current: AppSession["subscriptionTier"], required: AppSession["subscriptionTier"]): boolean {
   const rank: Record<AppSession["subscriptionTier"], number> = {
     free: 0,
-    starter: 1,
-    pro: 2,
-    scale: 3,
+    essentials: 1,
+    growth: 2,
+    pro: 3,
   };
   return rank[current] >= rank[required];
 }

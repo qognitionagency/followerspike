@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyRazorpayWebhookSignature } from "@/lib/billing/razorpay";
-import type { SubscriptionTier } from "@/lib/constants";
+import { normalizeSubscriptionTier } from "@/lib/constants";
 
 const webhookSchema = z.object({
   event: z.string(),
@@ -19,7 +19,7 @@ const webhookSchema = z.object({
             notes: z
               .object({
                 user_id: z.string().uuid().optional(),
-                tier: z.enum(["starter", "pro", "scale"]).optional(),
+                tier: z.enum(["essentials", "growth", "pro", "starter", "scale"]).optional(),
                 billing_cycle: z.enum(["monthly", "annual"]).optional(),
                 currency: z.string().optional(),
               })
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true, ignored: true });
   }
 
-  const tier = subscription.notes.tier as SubscriptionTier;
+  const tier = normalizeSubscriptionTier(subscription.notes.tier);
   const supabase = createAdminClient();
   const { error } = await supabase.from("subscriptions").upsert(
     {

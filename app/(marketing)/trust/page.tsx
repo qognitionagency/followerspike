@@ -10,8 +10,8 @@ export default function TrustPage() {
   return (
     <LegalPage
       eyebrow="Trust Center"
-      title="Aggressive growth needs sober controls."
-      description="FollowerSpike is built for conversion, but the safety model is deliberately conservative: consent, review, rate limits, encrypted sessions, audit logs, and pause controls."
+      title="LinkedIn growth works better with clear controls."
+      description="FollowerSpike is built for daily account growth, but the safety model is deliberately conservative: consent, review, rate limits, encrypted sessions, audit logs, and pause controls."
       sections={[
         {
           title: "Account-Safety Controls",
@@ -31,9 +31,9 @@ export default function TrustPage() {
         },
       ]}
       relatedLinks={[
-        { label: "LinkedIn autopilot", href: "/linkedin-autopilot" },
-        { label: "LinkedIn ghostwriter", href: "/linkedin-ghostwriter" },
-        { label: "LinkedIn profile audit", href: "/linkedin-profile-audit" },
+        { label: "LinkedIn autopilot", href: "/features/linkedin-autopilot" },
+        { label: "Safety controls", href: "/features/safety-controls" },
+        { label: "Free profile audit", href: "/free-tools/linkedin-profile-audit" },
       ]}
     />
   );

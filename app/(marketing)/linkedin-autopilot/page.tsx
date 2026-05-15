@@ -4,7 +4,7 @@ import { PillarPage } from "@/components/marketing/PillarPage";
 export const metadata: Metadata = {
   title: "LinkedIn Autopilot for Founders and Experts",
   description:
-    "Learn how FollowerSpike turns LinkedIn into a review-first autopilot for posts, comments, connections, and daily expert visibility.",
+    "Learn how FollowerSpike turns LinkedIn into a review-first autopilot for posts, likes, comments, connection requests, follow-up DMs, and daily expert visibility.",
 };
 
 export default function LinkedInAutopilotPage() {
@@ -12,11 +12,11 @@ export default function LinkedInAutopilotPage() {
     <PillarPage
       eyebrow="LinkedIn autopilot"
       title="A safer LinkedIn autopilot for people with real reputations."
-      description="FollowerSpike turns LinkedIn growth into a daily workflow: draft useful posts, find relevant conversations, queue target connections, and review everything before it goes live."
+      description="FollowerSpike turns LinkedIn growth into a daily workflow: draft useful posts, find relevant conversations, queue target connections, prepare accepted-connection follow-ups, and review everything before it goes live."
       bullets={[
         "Daily posts shaped by your profile, ICP, offers, and approved voice notes.",
         "Relevance-scored comments so engagement stays useful instead of random.",
-        "Connection workflows, timing windows, caps, pause controls, and activity logs.",
+        "Connection requests, follow-up DMs, timing windows, caps, pause controls, and activity logs.",
       ]}
       sections={[
         {
@@ -41,7 +41,7 @@ export default function LinkedInAutopilotPage() {
         {
           question: "Who is this for?",
           answer:
-            "It is for founders, CEOs, consultants, agencies, and professionals who need consistent expert visibility without spending every day inside LinkedIn.",
+            "It is for founders, SMB owners, coaches, consultants, creators, and personal brands who need consistent expert visibility without spending every day inside LinkedIn.",
         },
       ]}
     />

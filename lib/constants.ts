@@ -1,8 +1,8 @@
 export const BRAND = {
   name: "FollowerSpike",
   promise:
-    "Review-first LinkedIn growth software for relevant posts, comments, and connection workflows.",
-  socialProof: "1,200+ founders",
+    "AI LinkedIn growth autopilot for posts, comments, connections, and follow-up DMs.",
+  socialProof: "Built for founders, SMB owners, coaches, consultants, and personal brands",
   trialDays: 14,
   consentVersion: "2026-05-15",
 } as const;
@@ -23,71 +23,78 @@ export const ROUTES = {
   subprocessors: "/subprocessors",
 } as const;
 
-export type SubscriptionTier = "free" | "starter" | "pro" | "scale";
+export type SubscriptionTier = "free" | "essentials" | "growth" | "pro";
 export type BillingCycle = "monthly" | "annual";
 export type BillingCurrency = "USD";
 export type ApprovalMode = "review" | "auto" | "off";
-export type AutomationAction = "post" | "comment" | "invite" | "like" | "withdraw" | "profile_scrape";
+export type AutomationAction = "post" | "comment" | "invite" | "like" | "dm" | "reply" | "withdraw" | "profile_scrape";
+
+export function normalizeSubscriptionTier(tier: unknown): SubscriptionTier {
+  if (tier === "essentials" || tier === "growth" || tier === "pro" || tier === "free") return tier;
+  if (tier === "starter") return "essentials";
+  if (tier === "scale") return "pro";
+  return "free";
+}
 
 export const PRICING = [
   {
-    tier: "starter",
-    name: "Starter",
+    tier: "essentials",
+    name: "Essentials",
     monthlyInr: "₹799",
     monthlyUsd: "$9",
     annualUsd: "$90",
-    planEnv: "RAZORPAY_PLAN_STARTER_MONTHLY_USD",
+    planEnv: "RAZORPAY_PLAN_ESSENTIALS_MONTHLY_USD",
     legacyPlanEnv: "RAZORPAY_PLAN_STARTER",
-    annualPlanEnv: "RAZORPAY_PLAN_STARTER_ANNUAL_USD",
+    annualPlanEnv: "RAZORPAY_PLAN_ESSENTIALS_ANNUAL_USD",
     popular: false,
-    description: "For professionals who need consistent posts without living in LinkedIn.",
-    limits: { posts: 1, comments: 5, invites: 5, likes: 15 },
+    description: "For solo professionals who want strong LinkedIn posts and a manual growth queue.",
+    limits: { posts: 1, comments: 3, invites: 3, likes: 10 },
     features: [
       "1 AI post per day",
-      "5 relevance-scored comments per day",
-      "Profile audit and rebuild plan",
-      "Approval queue",
-      "Email digest",
+      "Post ideas and voice training",
+      "Manual review queue",
+      "Free profile audit",
+      "Email reminders",
+    ],
+  },
+  {
+    tier: "growth",
+    name: "Growth",
+    monthlyInr: "₹1,999",
+    monthlyUsd: "$29",
+    annualUsd: "$290",
+    planEnv: "RAZORPAY_PLAN_GROWTH_MONTHLY_USD",
+    legacyPlanEnv: "RAZORPAY_PLAN_PRO",
+    annualPlanEnv: "RAZORPAY_PLAN_GROWTH_ANNUAL_USD",
+    popular: true,
+    description: "For founders and SMB owners who want a review-first daily growth queue.",
+    limits: { posts: 2, comments: 12, invites: 12, likes: 35 },
+    features: [
+      "2 AI posts per day",
+      "Suggested likes and comments",
+      "Target leader discovery",
+      "Suggested connection requests",
+      "Review-first growth queue",
     ],
   },
   {
     tier: "pro",
     name: "Pro",
-    monthlyInr: "₹1,999",
-    monthlyUsd: "$19",
-    annualUsd: "$190",
-    planEnv: "RAZORPAY_PLAN_PRO_MONTHLY_USD",
-    legacyPlanEnv: "RAZORPAY_PLAN_PRO",
-    annualPlanEnv: "RAZORPAY_PLAN_PRO_ANNUAL_USD",
-    popular: true,
-    description: "For founders, CEOs, and consultants turning LinkedIn into a daily growth channel.",
-    limits: { posts: 2, comments: 15, invites: 15, likes: 40 },
-    features: [
-      "Founder voice learning",
-      "15 human-review comments per day",
-      "Target leader tracking",
-      "Risk-managed autopilot",
-      "Priority support",
-    ],
-  },
-  {
-    tier: "scale",
-    name: "Scale",
     monthlyInr: "₹3,999",
-    monthlyUsd: "$39",
-    annualUsd: "$390",
-    planEnv: "RAZORPAY_PLAN_SCALE_MONTHLY_USD",
+    monthlyUsd: "$49",
+    annualUsd: "$490",
+    planEnv: "RAZORPAY_PLAN_PRO_MONTHLY_USD",
     legacyPlanEnv: "RAZORPAY_PLAN_SCALE",
-    annualPlanEnv: "RAZORPAY_PLAN_SCALE_ANNUAL_USD",
+    annualPlanEnv: "RAZORPAY_PLAN_PRO_ANNUAL_USD",
     popular: false,
-    description: "For operators and agencies running a tighter executive presence workflow.",
-    limits: { posts: 3, comments: 30, invites: 25, likes: 70 },
+    description: "For busy personal brands who want conservative autopilot execution.",
+    limits: { posts: 3, comments: 25, invites: 20, likes: 60 },
     features: [
-      "Scale-level daily limits",
-      "Advanced target lists",
-      "Autopilot safety center",
-      "WhatsApp-ready digest hooks",
-      "Exportable activity logs",
+      "Full autopilot mode",
+      "Accepted-connection follow-up DMs",
+      "Reply drafts",
+      "Higher daily limits",
+      "Priority support",
     ],
   },
 ] as const;
@@ -158,6 +165,7 @@ export const ROLES = [
   "Sales Director",
   "Business Development Manager",
   "Consultant",
+  "Small Business Owner",
   "Agency Owner",
   "Freelancer",
   "Executive Coach",

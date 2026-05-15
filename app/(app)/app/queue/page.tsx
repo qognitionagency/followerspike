@@ -154,10 +154,10 @@ export default async function QueuePage() {
   return (
     <div className="space-y-6">
       <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
-        <p className="text-sm font-black uppercase tracking-wide text-[#0A66C2]">Human-review autopilot</p>
-        <h1 className="mt-2 text-3xl font-black text-[#191919]">Approve the queue in 30 seconds.</h1>
+        <p className="text-sm font-black uppercase text-[#0A66C2]">Daily growth queue</p>
+        <h1 className="mt-2 text-3xl font-black text-[#191919]">Approve posts, engagement, and connections.</h1>
         <p className="mt-2 text-sm leading-6 text-[#666]">
-          First-week Review mode builds trust before live execution. Auto mode can still pause when the safety layer says no.
+          Review mode builds trust before live execution. Autopilot can still pause when daily limits, timing windows, or account checks say no.
         </p>
       </section>
 
@@ -167,7 +167,7 @@ export default async function QueuePage() {
             <article key={`${item.type}-${item.id}`} className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-wide text-[#0A66C2]">{item.type}</p>
+                  <p className="text-xs font-black uppercase text-[#0A66C2]">{item.type}</p>
                   <h2 className="text-xl font-black text-[#191919]">{item.title}</h2>
                 </div>
                 <div className="flex items-center gap-2">
@@ -202,7 +202,9 @@ export default async function QueuePage() {
         ) : (
           <div className="rounded-xl border border-[#D6D6D6] bg-white p-10 text-center shadow-sm">
             <h2 className="text-2xl font-black text-[#191919]">Queue is clear.</h2>
-            <p className="mt-2 text-sm text-[#666]">Generated posts, comments, and invites will appear here for approval.</p>
+            <p className="mt-2 text-sm text-[#666]">
+              Generated posts, relevant comments, likes, connection requests, and follow-up DMs will appear here for approval.
+            </p>
           </div>
         )}
       </section>

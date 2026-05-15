@@ -22,7 +22,7 @@ function signupContextQuery(searchParams: Record<string, string | string[] | und
 function nextPath(searchParams: Record<string, string | string[] | undefined>): string {
   const plan = typeof searchParams.plan === "string" ? searchParams.plan : "";
   const billing = searchParams.billing === "annual" ? "annual" : "monthly";
-  if (["starter", "pro", "scale"].includes(plan)) {
+  if (["essentials", "growth", "pro"].includes(plan)) {
     return `/app/settings?plan=${plan}&billing=${billing}`;
   }
 
@@ -76,7 +76,7 @@ export default function SignupPage({ searchParams = {} }: AuthPageProps) {
           {BRAND.name}
         </Link>
         <h1 className="mt-8 text-3xl font-black">Start your 14-day trial.</h1>
-        <p className="mt-2 text-sm text-[#666]">Build the queue first. Enable live execution only when you are ready.</p>
+        <p className="mt-2 text-sm text-[#666]">Build your daily growth queue first. Turn on autopilot when you are ready.</p>
         {selectedPlan ? (
           <div className="mt-5 rounded-lg border border-[#BFD7F0] bg-[#EEF3F8] p-3 text-sm font-bold text-[#0A66C2]">
             Selected: {selectedPlan} plan, {selectedBilling} billing. Checkout opens after sign-up.

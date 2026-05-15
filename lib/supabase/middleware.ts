@@ -24,7 +24,15 @@ const PUBLIC_PATHS = [
 
 const PUBLIC_PREFIXES = [
   '/tools',
+  '/features',
+  '/free-tools',
+  '/blog',
+  '/roles',
+  '/industries',
+  '/icp',
+  '/compare',
   '/api/auth',
+  '/api/free-tools',
   '/api/webhooks/razorpay',
   '/api/cron/dispatch',
 ];

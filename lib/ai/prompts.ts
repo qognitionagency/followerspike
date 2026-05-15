@@ -27,7 +27,7 @@ Only scores 7 or higher should be acted on.
 export const AUDIT_PROFILE_PROMPT = `
 Audit a LinkedIn profile for a founder, CEO, consultant, or executive.
 If the profile is empty, private, or has no headline, about, photo, experience, education, and posts, do not fail.
-Instead, produce a foundation rebuild plan with a starter headline, about section, image checklist, keyword gaps, and 7-day content plan.
+Instead, produce a foundation rebuild plan with a starting headline, about section, image checklist, keyword gaps, and 7-day content plan.
 Return strict JSON:
 {
   "score": 0-100,

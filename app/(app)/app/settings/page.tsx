@@ -20,7 +20,7 @@ const consentSchema = z.object({
 });
 
 const checkoutSchema = z.object({
-  tier: z.enum(["starter", "pro", "scale"]),
+  tier: z.enum(["essentials", "growth", "pro"]),
   billingCycle: z.enum(["monthly", "annual"]).default("monthly"),
 });
 
@@ -29,6 +29,7 @@ async function updateApprovalMode(formData: FormData) {
   const session = await requireAppSession();
   const parsed = modeSchema.safeParse({ approvalMode: formData.get("approvalMode") });
   if (!parsed.success) return;
+  if (parsed.data.approvalMode === "auto" && session.subscriptionTier !== "pro") return;
   const supabase = await createClient();
   await supabase.from("users").update({ approval_mode: parsed.data.approvalMode }).eq("id", session.userId);
   revalidatePath("/app/settings");
@@ -40,6 +41,7 @@ async function updateAutopilotConsent(formData: FormData) {
   const parsed = consentSchema.safeParse({ enabled: formData.get("enabled"), risk: formData.get("risk") || undefined });
   if (!parsed.success) return;
   if (parsed.data.enabled === "true" && parsed.data.risk !== "accepted") return;
+  if (parsed.data.enabled === "true" && session.subscriptionTier !== "pro") return;
 
   const supabase = await createClient();
   const enabled = parsed.data.enabled === "true";
@@ -115,14 +117,15 @@ export default async function SettingsPage({
   const selectedTier = typeof searchParams.plan === "string" ? searchParams.plan : typeof searchParams.tier === "string" ? searchParams.tier : "";
   const selectedBilling = searchParams.billing === "annual" ? "annual" : "monthly";
   const checkoutSuccess = searchParams.checkout === "success";
+  const canUseAutopilot = session.subscriptionTier === "pro";
 
   return (
     <div className="space-y-6">
       <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
-        <p className="text-sm font-black uppercase tracking-wide text-[#0A66C2]">Settings</p>
-        <h1 className="mt-2 text-3xl font-black text-[#191919]">Control risk before growth.</h1>
+        <p className="text-sm font-black uppercase text-[#0A66C2]">Settings</p>
+        <h1 className="mt-2 text-3xl font-black text-[#191919]">Control your growth autopilot.</h1>
         <p className="mt-2 text-sm leading-6 text-[#666]">
-          FollowerSpike can be aggressive in outcomes, but execution stays consent-based and pauseable.
+          Keep the product simple: review the daily queue, connect LinkedIn when ready, and pause autopilot at any time.
         </p>
         {checkoutSuccess ? (
           <div className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
@@ -136,12 +139,24 @@ export default async function SettingsPage({
           <h2 className="text-xl font-black text-[#191919]">Approval mode</h2>
           <form action={updateApprovalMode} className="mt-5 grid gap-3">
             {[
-              ["review", "Review", "Every post, comment, and invite waits in the queue."],
-              ["auto", "Auto", "Eligible actions can execute when worker safety checks pass."],
-              ["off", "Off", "Automation pauses and only drafts are created."],
+              ["review", "Review", "Every post, comment, connection request, and follow-up waits in the queue."],
+              ["auto", "Auto", canUseAutopilot ? "Eligible actions can execute when FollowerSpike safety checks pass." : "Pro unlocks live autopilot after consent."],
+              ["off", "Off", "Autopilot pauses and only drafts are created."],
             ].map(([value, label, help]) => (
-              <label key={value} className="flex cursor-pointer gap-3 rounded-lg border border-[#D6D6D6] p-4">
-                <input name="approvalMode" type="radio" value={value} defaultChecked={session.profile.approval_mode === value} />
+              <label
+                key={value}
+                className={cn(
+                  "flex cursor-pointer gap-3 rounded-lg border border-[#D6D6D6] p-4",
+                  value === "auto" && !canUseAutopilot && "cursor-not-allowed bg-[#F8FAFC] opacity-70"
+                )}
+              >
+                <input
+                  name="approvalMode"
+                  type="radio"
+                  value={value}
+                  defaultChecked={session.profile.approval_mode === value}
+                  disabled={value === "auto" && !canUseAutopilot}
+                />
                 <span>
                   <span className="block font-black text-[#191919]">{label}</span>
                   <span className="block text-sm text-[#666]">{help}</span>
@@ -153,21 +168,26 @@ export default async function SettingsPage({
         </section>
 
         <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-black text-[#191919]">Live execution consent</h2>
+          <h2 className="text-xl font-black text-[#191919]">Autopilot consent</h2>
           <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
             <div className="mb-2 flex items-center gap-2 font-black">
               <AlertTriangle className="h-4 w-4" />
-              Platform risk acknowledgement
+              Account control acknowledgement
             </div>
-            Live automation can carry LinkedIn account risk. FollowerSpike uses safety controls designed to reduce
-            risk, but it cannot guarantee platform outcomes.
+            Pro autopilot can run LinkedIn actions for you only after consent. It uses review mode, conservative limits,
+            timing windows, logs, and pause controls, but cannot guarantee platform outcomes.
           </div>
+          {!canUseAutopilot ? (
+            <div className="mt-4 rounded-lg border border-[#D6D6D6] bg-[#F8FAFC] p-4 text-sm font-semibold text-[#555]">
+              Your current plan can build the queue for review. Upgrade to Pro to enable live autopilot execution.
+            </div>
+          ) : null}
           <form action={updateAutopilotConsent} className="mt-5 space-y-4">
             <label className="flex items-start gap-3 text-sm font-semibold text-[#333]">
-              <input type="checkbox" name="risk" value="accepted" required />
-              I understand and accept the platform risk of enabling live execution.
+              <input type="checkbox" name="risk" value="accepted" required disabled={!canUseAutopilot} />
+              I understand FollowerSpike will run approved LinkedIn growth actions for me and can be paused anytime.
             </label>
-            <Button name="enabled" value="true" className="h-11 w-full rounded-full bg-[#0A66C2] font-bold text-white hover:bg-[#004182]">
+            <Button name="enabled" value="true" disabled={!canUseAutopilot} className="h-11 w-full rounded-full bg-[#0A66C2] font-bold text-white hover:bg-[#004182]">
               <PlayCircle className="h-4 w-4" />
               Enable Autopilot
             </Button>
@@ -188,11 +208,11 @@ export default async function SettingsPage({
       <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <p className="text-sm font-black uppercase tracking-wide text-[#0A66C2]">International checkout</p>
-            <h2 className="mt-2 text-xl font-black text-[#191919]">Upgrade with Razorpay subscriptions</h2>
+            <p className="text-sm font-black uppercase text-[#0A66C2]">Plan and billing</p>
+            <h2 className="mt-2 text-xl font-black text-[#191919]">Essentials, Growth, or Pro autopilot</h2>
             <p className="mt-2 text-sm leading-6 text-[#666]">
-              USD plans use Razorpay subscription plan IDs from your environment. Monthly and annual billing both route
-              through hosted Razorpay checkout.
+              Essentials gives you AI posts and a manual queue. Growth adds the daily growth queue. Pro unlocks conservative
+              autopilot, follow-up DMs, and higher limits.
             </p>
           </div>
           <div className="rounded-full bg-[#EEF3F8] px-4 py-2 text-sm font-black text-[#0A66C2]">

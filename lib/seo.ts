@@ -38,12 +38,12 @@ function page(seed: {
   const contextParts = [seed.industry, seed.role, seed.city ? `in ${seed.city}` : ""].filter(Boolean).join(" ");
   const context = contextParts || audience;
   const introByType: Record<string, string> = {
-    industry: `<p>${seed.keyword} is about turning subject-matter expertise into a consistent LinkedIn operating rhythm. FollowerSpike helps ${seed.industry} teams draft posts, review comments, and build targeted connection workflows without handing over every word to an agency.</p>`,
-    city: `<p>${seed.keyword} need a practical way to stay visible in a local or regional network. FollowerSpike gives professionals in ${seed.city} a review-first LinkedIn workflow for posts, comments, and connections.</p>`,
-    role: `<p>${seed.keyword} should protect voice and reputation while making consistency easier. FollowerSpike helps ${seed.role}s turn positioning, target lists, and daily review queues into a repeatable LinkedIn growth system.</p>`,
-    industry_city: `<p>${seed.h1} starts with relevance: the right niche, the right market, and a daily cadence that does not feel random. FollowerSpike helps ${context} create posts, comments, and connection workflows with review controls.</p>`,
-    role_city: `<p>${seed.h1} need both local relevance and a clear expert point of view. FollowerSpike helps ${context} keep a steady LinkedIn presence with AI-assisted drafts, relevance scoring, and approval workflows.</p>`,
-    comparison: `<p>${seed.keyword} comes down to control, consistency, and cost. FollowerSpike is built as a review-first LinkedIn growth workflow for people who want software leverage without pretending platform risk does not exist.</p>`,
+    industry: `<p>${seed.keyword} is about turning subject-matter expertise into a daily LinkedIn growth loop. FollowerSpike helps ${seed.industry} teams create posts, review comments, queue relevant engagement, and connect with the right people without handing every word or action to an agency.</p>`,
+    city: `<p>${seed.keyword} need a practical way to stay visible in a local or regional network. FollowerSpike gives professionals in ${seed.city} a review-first workflow for posts, likes, comments, connection requests, and accepted-connection follow-ups.</p>`,
+    role: `<p>${seed.keyword} should protect voice and reputation while making consistency easier. FollowerSpike helps ${seed.role}s turn positioning, seed leaders, target lists, and daily review queues into a repeatable LinkedIn growth system.</p>`,
+    industry_city: `<p>${seed.h1} starts with relevance: the right niche, the right market, and a daily cadence that does not feel random. FollowerSpike helps ${context} create posts, engage with industry conversations, send connection requests, and prepare follow-ups with review controls.</p>`,
+    role_city: `<p>${seed.h1} need both local relevance and a clear expert point of view. FollowerSpike helps ${context} keep a steady LinkedIn presence with AI-assisted drafts, relevance scoring, connection queues, and approval workflows.</p>`,
+    comparison: `<p>${seed.keyword} comes down to control, consistency, and cost. FollowerSpike is built as a review-first LinkedIn growth assistant for people who want software leverage without pretending platform risk does not exist.</p>`,
   };
 
   return {
@@ -54,15 +54,15 @@ function page(seed: {
     role: seed.role,
     keyword: seed.keyword,
     meta_title: `${seed.keyword} | FollowerSpike`,
-    meta_description: `Use FollowerSpike to turn LinkedIn into a daily growth channel with posts, comments, and connections built for ${seed.keyword}.`,
+    meta_description: `Use FollowerSpike to turn LinkedIn into a daily growth channel with posts, comments, connections, and follow-ups built for ${seed.keyword}.`,
     h1: seed.h1,
     intro_html:
       introByType[seed.templateType] ||
       `<p>FollowerSpike gives ${audience} a risk-managed LinkedIn autopilot: brand-tone learning, review-first queues, relevance scoring, and account-safety controls.</p>`,
     features_json: [
       "Daily posts in your voice",
-      "Relevance-scored comments",
-      "Founder-safe approval workflow",
+      "Relevance-scored likes and comments",
+      "Review-first approval workflow",
       "Profile audit lead magnet",
       "GDPR-ready privacy controls",
     ],

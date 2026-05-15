@@ -9,7 +9,7 @@ import { ROUTES, TRUST_DISCLAIMER } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "FollowerSpike pricing for founders, CEOs, consultants, and executives who want LinkedIn consistency without hiring a ghostwriter.",
+    "FollowerSpike pricing for founders, SMB owners, coaches, consultants, and personal brands who want LinkedIn posts, engagement, connections, and follow-up DMs on autopilot.",
 };
 
 const trustItems = [
@@ -20,11 +20,11 @@ const trustItems = [
 ];
 
 const includedFeatures = [
-  "AI-assisted LinkedIn profile audit",
-  "Daily post and comment review queue",
-  "Relevance scoring for target conversations",
+  "AI posts in your voice",
+  "Daily likes, comments, and connection queue",
+  "Relevance scoring for industry conversations",
   "USD monthly and annual checkout",
-  "Free audit email delivery",
+  "Accepted-connection follow-up DMs",
   "Trust, security, robots, sitemap, and llms.txt pages",
 ];
 
@@ -37,12 +37,12 @@ const pricingFaqs = [
   {
     question: "Can I review content first?",
     answer:
-      "Yes. Review mode is designed for posts, comments, and connection actions before live execution.",
+      "Yes. Review mode is designed for posts, likes, comments, connection requests, and accepted-connection follow-up DMs before live execution.",
   },
   {
     question: "Can I cancel or pause?",
     answer:
-      "You can pause automation from the app at any time. Subscription cancellation follows the active Razorpay billing flow for your account.",
+      "You can pause autopilot from the app at any time. Subscription cancellation follows the active Razorpay billing flow for your account.",
   },
   {
     question: "Is FollowerSpike affiliated with LinkedIn?",
@@ -64,26 +64,26 @@ export default function PricingPage() {
         <div className="mx-auto mb-12 max-w-4xl text-center">
           <p className="text-sm font-black uppercase text-[#0A66C2]">Pricing</p>
           <h1 className="mt-3 text-5xl font-black text-[#191919] sm:text-6xl">
-            A LinkedIn growth system that pays for its own attention.
+            LinkedIn growth autopilot priced for founders and personal brands.
           </h1>
           <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-[#555]">
-            Start with Review mode, prove the voice, then turn on risk-managed autopilot when you are comfortable.
+            Start with AI posts, upgrade to a daily growth queue, then let Pro run conservative autopilot when you are ready.
           </p>
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
-              href={ROUTES.audit}
+              href="/free-tools/linkedin-profile-audit"
               className="inline-flex h-12 items-center justify-center rounded-full bg-[#111827] px-7 text-base font-black text-white hover:bg-[#0A66C2]"
             >
               Get Free Audit
             </Link>
             <Link
-              href="/tools/followerspike-vs-hiring-a-linkedin-agency"
+              href="/compare/linkedin-agency-vs-followerspike"
               className="inline-flex h-12 items-center justify-center rounded-full border border-black/10 bg-white px-7 text-base font-black text-[#111827] hover:text-[#0A66C2]"
             >
               Compare With Agencies
             </Link>
           </div>
-          <p className="mt-3 text-sm font-semibold text-[#6b7280]">Monthly or annual USD billing. No commitment. Cancel anytime.</p>
+          <p className="mt-3 text-sm font-semibold text-[#6b7280]">Essentials $9. Growth $29. Pro $49. Monthly or annual USD billing.</p>
         </div>
 
         <div className="mb-8 grid gap-3 rounded-2xl border border-black/10 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
@@ -99,10 +99,10 @@ export default function PricingPage() {
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
               <p className="text-sm font-black uppercase text-[#0A66C2]">Every plan includes</p>
-              <h2 className="mt-2 text-3xl font-black text-[#191919]">The full growth workflow, not just a writer.</h2>
+              <h2 className="mt-2 text-3xl font-black text-[#191919]">From content to account growth.</h2>
             </div>
             <Link
-              href={ROUTES.audit}
+              href="/free-tools/linkedin-profile-audit"
               className="inline-flex h-11 items-center justify-center rounded-full bg-[#111827] px-5 text-sm font-black text-white hover:bg-[#0A66C2]"
             >
               Try the Free Audit
@@ -122,11 +122,11 @@ export default function PricingPage() {
 
         <section className="mt-14 grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           <div className="rounded-2xl border border-black/10 bg-[#111827] p-6 text-white">
-            <p className="text-sm font-black uppercase text-cyan-200">Automation risk</p>
-            <h2 className="mt-3 text-3xl font-black">What autopilot does and does not do.</h2>
+            <p className="text-sm font-black uppercase text-cyan-200">Autopilot boundaries</p>
+            <h2 className="mt-3 text-3xl font-black">What FollowerSpike runs for you.</h2>
             <p className="mt-4 leading-7 text-slate-300">
-              FollowerSpike helps draft, score, queue, and review LinkedIn growth actions. It does not claim LinkedIn
-              endorsement, bypass challenges, or guarantee account outcomes.
+              FollowerSpike can draft posts, queue likes and comments, suggest connection requests, and follow up with
+              accepted connections. It does not claim LinkedIn endorsement, bypass challenges, or guarantee account outcomes.
             </p>
             <Link
               href={ROUTES.trust}
@@ -170,8 +170,8 @@ export default function PricingPage() {
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {[
               ["LinkedIn autopilot", "/linkedin-autopilot"],
-              ["LinkedIn profile audit", "/linkedin-profile-audit"],
-              ["LinkedIn ghostwriter", "/linkedin-ghostwriter"],
+              ["Free LinkedIn tools", "/free-tools"],
+              ["Ghostwriter comparison", "/compare/ghostwriter-vs-linkedin-autopilot"],
             ].map(([label, href]) => (
               <Link
                 key={href}

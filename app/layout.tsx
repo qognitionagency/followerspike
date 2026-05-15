@@ -11,11 +11,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL || "http://localhost:3000"),
   title: {
-    default: "FollowerSpike | LinkedIn Growth Software for Founders",
+    default: "FollowerSpike | LinkedIn Growth Autopilot for Founders",
     template: "%s | FollowerSpike",
   },
   description:
-    "Review-first LinkedIn growth software for relevant posts, comments, connection workflows, profile audits, and safety controls.",
+    "AI LinkedIn growth autopilot for posts, relevant engagement, connection requests, follow-up DMs, profile audits, and safety controls.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

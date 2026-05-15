@@ -23,7 +23,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
   if (!page) {
     return {
       title: "LinkedIn Growth Tool",
-      description: "FollowerSpike helps professionals build a consistent LinkedIn presence.",
+      description: "FollowerSpike helps professionals grow on LinkedIn with posts, engagement, connection requests, follow-ups, and review-first controls.",
     };
   }
 
@@ -75,17 +75,17 @@ export default function SeoLandingPage({ params }: PageProps) {
         <section className="mt-6 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="rounded-2xl border border-black/10 bg-[#111827] p-6 text-white">
             <ShieldCheck className="h-7 w-7 text-cyan-200" />
-            <h2 className="mt-4 text-2xl font-black">Review-first growth workflow</h2>
+            <h2 className="mt-4 text-2xl font-black">Review-first growth autopilot</h2>
             <p className="mt-3 text-sm leading-6 text-slate-300">
-              FollowerSpike is built for people who need consistent LinkedIn visibility without giving up control of
-              voice, targets, or automation risk.
+              FollowerSpike is built for people who need consistent LinkedIn growth without giving up control of voice,
+              target audiences, daily limits, or automation risk.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             {[
-              ["Draft", "Posts shaped by profile, niche, and approved voice notes."],
-              ["Review", "Approve, edit, skip, or regenerate before live execution."],
-              ["Control", "Caps, pause behavior, consent logs, and privacy controls."],
+              ["Post", "Daily posts shaped by profile, niche, and approved voice notes."],
+              ["Engage", "Review likes, comments, connection requests, and accepted-connection follow-ups."],
+              ["Control", "Consent, caps, pause behavior, logs, and privacy controls."],
             ].map(([title, body]) => (
               <div key={title} className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
                 <h2 className="font-black text-[#111827]">{title}</h2>
@@ -113,8 +113,8 @@ export default function SeoLandingPage({ params }: PageProps) {
           <p className="text-sm font-black uppercase text-[#0A66C2]">Related guides</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {[
-              ["LinkedIn autopilot", "/linkedin-autopilot"],
-              ["LinkedIn ghostwriter", "/linkedin-ghostwriter"],
+              ["LinkedIn autopilot", "/features/linkedin-autopilot"],
+              ["Free tools", "/free-tools"],
               ["Pricing", ROUTES.pricing],
             ].map(([label, href]) => (
               <Link key={href} href={href} className="rounded-xl border border-black/10 bg-[#f7f4ee] p-4 text-sm font-black text-[#111827] hover:text-[#0A66C2]">

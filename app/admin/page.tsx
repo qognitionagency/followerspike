@@ -75,7 +75,7 @@ export default async function AdminPage() {
   return (
     <main className="min-h-screen bg-[#F4F2EE] p-8 text-[#191919]">
       <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
-        <p className="text-sm font-black uppercase tracking-wide text-[#0A66C2]">Admin</p>
+        <p className="text-sm font-black uppercase text-[#0A66C2]">Admin</p>
         <h1 className="mt-2 text-3xl font-black">FollowerSpike control room</h1>
         <p className="mt-2 text-sm text-[#666]">Emergency controls for automation operations.</p>
       </section>

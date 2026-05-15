@@ -66,12 +66,13 @@ export default async function TargetsPage() {
         <div className="flex items-center gap-3">
           <Target className="h-6 w-6 text-[#0A66C2]" />
           <div>
-            <p className="text-sm font-black uppercase tracking-wide text-[#0A66C2]">Target leaders</p>
-            <h1 className="text-3xl font-black text-[#191919]">Tell FollowerSpike who matters.</h1>
+            <p className="text-sm font-black uppercase text-[#0A66C2]">Audience and leaders</p>
+            <h1 className="text-3xl font-black text-[#191919]">Tell FollowerSpike who to grow around.</h1>
           </div>
         </div>
         <p className="mt-3 text-sm leading-6 text-[#666]">
-          Comments only queue when the relevance score is 7/10 or higher. Irrelevant posts are skipped instead of forced.
+          Add seed leaders, buyers, peers, and role models. FollowerSpike uses them to find relevant posts to engage with
+          and people worth connecting to.
         </p>
         <form action={addTarget} className="mt-6 space-y-4">
           <Input name="profileUrl" type="url" placeholder="https://www.linkedin.com/in/leader" required className="h-12 bg-white" />
@@ -79,13 +80,13 @@ export default async function TargetsPage() {
           <Input name="headline" placeholder="Founder, investor, operator..." className="h-12 bg-white" />
           <Button className="h-12 w-full rounded-full bg-[#0A66C2] font-black text-white hover:bg-[#004182]">
             <Plus className="h-4 w-4" />
-            Add Target
+            Add Person
           </Button>
         </form>
       </section>
 
       <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-black text-[#191919]">Active targets</h2>
+        <h2 className="text-2xl font-black text-[#191919]">Active audience signals</h2>
         <div className="mt-5 divide-y divide-[#E2E2E2]">
           {targets.length > 0 ? (
             targets.map((target) => (
@@ -102,7 +103,7 @@ export default async function TargetsPage() {
               </div>
             ))
           ) : (
-            <p className="py-8 text-center text-sm text-[#666]">No targets yet. Add 5-15 leaders to begin the engagement loop.</p>
+            <p className="py-8 text-center text-sm text-[#666]">No audience signals yet. Add 5-15 leaders to begin the engagement loop.</p>
           )}
         </div>
       </section>

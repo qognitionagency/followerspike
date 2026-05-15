@@ -5,6 +5,7 @@ export type SafetyReason =
   | "global_paused"
   | "user_paused"
   | "autopilot_disabled"
+  | "requires_pro"
   | "missing_consent"
   | "first_week_review"
   | "outside_action_window"
@@ -115,6 +116,9 @@ export function evaluateSafety(input: SafetyInput): SafetyDecision {
   }
   if (!input.autopilotEnabled) {
     return { ...base, reason: "autopilot_disabled" };
+  }
+  if (input.tier !== "pro") {
+    return { ...base, reason: "requires_pro" };
   }
   if (!input.autopilotAcceptedAt || !input.riskAcknowledgedAt) {
     return { ...base, reason: "missing_consent" };

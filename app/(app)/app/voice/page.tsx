@@ -68,7 +68,7 @@ export default async function VoicePage({
   return (
     <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
       <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
-        <p className="text-sm font-black uppercase tracking-wide text-[#0A66C2]">Brand tone learning</p>
+        <p className="text-sm font-black uppercase text-[#0A66C2]">Brand tone learning</p>
         <h1 className="mt-2 text-3xl font-black text-[#191919]">Teach FollowerSpike how you sound.</h1>
         <p className="mt-2 text-sm leading-6 text-[#666]">
           No voice prompt needed. Start with your public profile and positioning; the AI turns it into a reusable
@@ -114,7 +114,7 @@ export default async function VoicePage({
           {Object.keys(brandVoice).length > 0 ? (
             Object.entries(brandVoice).slice(0, 8).map(([key, value]) => (
               <div key={key} className="rounded-lg border border-[#E2E2E2] bg-[#F8FAFC] p-4">
-                <p className="text-xs font-black uppercase tracking-wide text-[#0A66C2]">{key.replace(/_/g, " ")}</p>
+                <p className="text-xs font-black uppercase text-[#0A66C2]">{key.replace(/_/g, " ")}</p>
                 <p className="mt-2 text-sm leading-6 text-[#333]">
                   {typeof value === "string" ? value : JSON.stringify(value)}
                 </p>

@@ -1,8 +1,8 @@
 # FollowerSpike
 
-FollowerSpike is a LinkedIn autopilot SaaS for founders, CEOs, consultants, and executives.
+FollowerSpike is a LinkedIn growth autopilot SaaS for founders, SMB owners, coaches, consultants, creators, and personal brands.
 
-One-liner: "Your LinkedIn presence on autopilot — relevant posts, comments, and connections, daily."
+One-liner: "Grow your LinkedIn account on autopilot: posts, likes, comments, connections, and follow-up DMs handled daily."
 
 ## Stack
 
@@ -13,6 +13,7 @@ One-liner: "Your LinkedIn presence on autopilot — relevant posts, comments, an
 - Upstash QStash cron dispatch
 - Transactional audit lead email
 - Separate Playwright worker service for live execution
+- Static marketing content layer for feature pages, free tools, blog posts, roles, industries, ICP pages, and comparisons
 
 ## Local Setup
 
@@ -27,7 +28,7 @@ One-liner: "Your LinkedIn presence on autopilot — relevant posts, comments, an
 - AI: set the provider API key and model values from `.env.example`. Keep the fallback provider configured before enabling production generation.
 - Email: set the transactional email API key and a verified sender. Free audit emails use an idempotency key per audit lead so duplicate form retries do not double-send.
 - Razorpay: create USD monthly and annual subscription plans in Razorpay, then set the six `RAZORPAY_PLAN_*_USD` values. Razorpay supports international subscription currencies, while settlement handling depends on your Razorpay account configuration.
-- Database: apply the Supabase migration in `supabase/migrations` before testing audit leads, profile audits, or subscription webhooks in production.
+- Database: apply the Supabase migrations in `supabase/migrations` before testing audit leads, free tool leads, profile audits, or subscription webhooks in production.
 
 ## Safety Positioning
 
