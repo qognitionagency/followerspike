@@ -5,7 +5,7 @@ const siteUrl = process.env.APP_URL || "http://localhost:3000";
 export function GET() {
   const body = `# ${BRAND.name}
 
-${BRAND.name} is a LinkedIn growth autopilot for founders, CEOs, consultants, agencies, and professionals who want a consistent expert presence without manually writing and engaging every day.
+${BRAND.name} is LinkedIn growth software for founders, CEOs, consultants, agencies, and professionals who want a consistent expert presence without manually writing and engaging every day.
 
 ## Core Product
 - AI-assisted LinkedIn posts in the user's voice

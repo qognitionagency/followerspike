@@ -19,6 +19,15 @@ const trustItems = [
   { icon: ShieldCheck, label: "GDPR-ready controls" },
 ];
 
+const includedFeatures = [
+  "AI-assisted LinkedIn profile audit",
+  "Daily post and comment review queue",
+  "Relevance scoring for target conversations",
+  "USD monthly and annual checkout",
+  "Free audit email delivery",
+  "Trust, security, robots, sitemap, and llms.txt pages",
+];
+
 const pricingFaqs = [
   {
     question: "How does annual billing work?",
@@ -52,10 +61,12 @@ export default function PricingPage() {
       <MarketingHeader />
 
       <main className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mx-auto mb-12 max-w-3xl text-center">
-          <p className="text-sm font-black uppercase tracking-wide text-[#0A66C2]">Simple pricing</p>
-          <h1 className="mt-3 text-5xl font-black tracking-tight text-[#191919]">Founder presence for less than a ghostwriter call.</h1>
-          <p className="mt-5 text-lg leading-8 text-[#555]">
+        <div className="mx-auto mb-12 max-w-4xl text-center">
+          <p className="text-sm font-black uppercase text-[#0A66C2]">Pricing</p>
+          <h1 className="mt-3 text-5xl font-black text-[#191919] sm:text-6xl">
+            A LinkedIn growth system that pays for its own attention.
+          </h1>
+          <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-[#555]">
             Start with Review mode, prove the voice, then turn on risk-managed autopilot when you are comfortable.
           </p>
           <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
@@ -72,6 +83,7 @@ export default function PricingPage() {
               Compare With Agencies
             </Link>
           </div>
+          <p className="mt-3 text-sm font-semibold text-[#6b7280]">Monthly or annual USD billing. No commitment. Cancel anytime.</p>
         </div>
 
         <div className="mb-8 grid gap-3 rounded-2xl border border-black/10 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
@@ -83,12 +95,35 @@ export default function PricingPage() {
           ))}
         </div>
 
+        <section className="mb-8 rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+          <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+            <div>
+              <p className="text-sm font-black uppercase text-[#0A66C2]">Every plan includes</p>
+              <h2 className="mt-2 text-3xl font-black text-[#191919]">The full growth workflow, not just a writer.</h2>
+            </div>
+            <Link
+              href={ROUTES.audit}
+              className="inline-flex h-11 items-center justify-center rounded-full bg-[#111827] px-5 text-sm font-black text-white hover:bg-[#0A66C2]"
+            >
+              Try the Free Audit
+            </Link>
+          </div>
+          <div className="mt-6 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {includedFeatures.map((feature) => (
+              <div key={feature} className="flex items-start gap-3 rounded-xl border border-black/10 bg-[#f7f4ee] p-4 text-sm font-bold leading-6 text-[#374151]">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                {feature}
+              </div>
+            ))}
+          </div>
+        </section>
+
         <PricingCards />
 
         <section className="mt-14 grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           <div className="rounded-2xl border border-black/10 bg-[#111827] p-6 text-white">
-            <p className="text-sm font-black uppercase tracking-[0.22em] text-cyan-200">Automation risk</p>
-            <h2 className="mt-3 text-3xl font-black tracking-tight">What autopilot does and does not do.</h2>
+            <p className="text-sm font-black uppercase text-cyan-200">Automation risk</p>
+            <h2 className="mt-3 text-3xl font-black">What autopilot does and does not do.</h2>
             <p className="mt-4 leading-7 text-slate-300">
               FollowerSpike helps draft, score, queue, and review LinkedIn growth actions. It does not claim LinkedIn
               endorsement, bypass challenges, or guarantee account outcomes.
@@ -117,8 +152,8 @@ export default function PricingPage() {
 
         <section className="mt-14">
           <div className="max-w-3xl">
-            <p className="text-sm font-black uppercase tracking-[0.22em] text-[#0A66C2]">Pricing FAQ</p>
-            <h2 className="mt-3 text-4xl font-black tracking-tight text-[#191919]">Clear answers before checkout.</h2>
+            <p className="text-sm font-black uppercase text-[#0A66C2]">Pricing FAQ</p>
+            <h2 className="mt-3 text-4xl font-black text-[#191919]">Clear answers before checkout.</h2>
           </div>
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             {pricingFaqs.map((faq) => (
@@ -131,7 +166,7 @@ export default function PricingPage() {
         </section>
 
         <section className="mt-14 rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
-          <p className="text-sm font-black uppercase tracking-[0.22em] text-[#0A66C2]">High-intent guides</p>
+          <p className="text-sm font-black uppercase text-[#0A66C2]">High-intent guides</p>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {[
               ["LinkedIn autopilot", "/linkedin-autopilot"],

@@ -39,8 +39,8 @@ const auditFormSchema = z.object({
 });
 
 const auditSignals = [
-  { icon: BrainCircuit, label: "Gemini Pro audit" },
-  { icon: MailCheck, label: "Resend delivery" },
+  { icon: BrainCircuit, label: "AI-assisted audit" },
+  { icon: MailCheck, label: "Email delivery" },
   { icon: ShieldCheck, label: "Consent-first lead capture" },
 ];
 
@@ -132,10 +132,10 @@ export default async function LinkedInAuditPage({
   const delivery = typeof params.delivery === "string" ? params.delivery : "sent";
   const deliveryCopy =
     delivery === "failed"
-      ? "The audit was generated, but email delivery failed. Check Resend configuration before launch."
+      ? "The audit was generated, but email delivery failed. Check email configuration before launch."
       : delivery === "local"
-        ? "The audit was generated. Resend is not configured in this environment, so no email was sent locally."
-        : "Your full report is on its way through Resend.";
+        ? "The audit was generated. Email delivery is not configured in this environment, so no email was sent locally."
+        : "Your full report is on its way by email.";
 
   return (
     <div className="min-h-screen bg-[#f7f4ee] text-[#191919]">
@@ -145,14 +145,14 @@ export default async function LinkedInAuditPage({
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-[#BFD7F0] bg-white px-3 py-1 text-sm font-bold text-[#0A66C2]">
               <Sparkles className="h-4 w-4" />
-              Free Resend audit
+              Free LinkedIn audit
             </div>
-            <h1 className="mt-5 max-w-3xl text-5xl font-black tracking-tight text-[#191919] lg:text-6xl">
+            <h1 className="mt-5 max-w-3xl text-5xl font-black text-[#191919] lg:text-6xl">
               Turn one LinkedIn URL into a founder positioning plan.
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-[#555]">
-              Gemini Pro analyzes the profile signal, FollowerSpike converts it into practical recommendations, and
-              Resend delivers the full report to the lead inbox.
+              FollowerSpike analyzes the profile signal, converts it into practical recommendations, and emails the
+              full report to the lead inbox.
             </p>
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               {auditSignals.map((signal) => {
@@ -183,7 +183,7 @@ export default async function LinkedInAuditPage({
             {submitted ? (
               <div className="space-y-5">
                 <div className="rounded-xl bg-[#EEF3F8] p-5">
-                  <p className="text-sm font-black uppercase tracking-wide text-[#0A66C2]">Audit generated</p>
+                  <p className="text-sm font-black uppercase text-[#0A66C2]">Audit generated</p>
                   <h2 className="mt-2 text-4xl font-black text-[#191919]">{score}/100</h2>
                   <p className="mt-2 text-sm leading-6 text-[#555]">
                     {deliveryCopy}{" "}
@@ -235,7 +235,7 @@ export default async function LinkedInAuditPage({
                 </Button>
                 <div className="flex flex-wrap items-center gap-2 text-xs text-[#666]">
                   <Mail className="h-4 w-4" />
-                  Full report sent by Resend.
+                  Full report sent by email.
                   <LockKeyhole className="ml-2 h-4 w-4" />
                   GDPR-ready lead capture.
                 </div>

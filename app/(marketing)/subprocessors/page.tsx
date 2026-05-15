@@ -26,8 +26,8 @@ export default function SubprocessorsPage() {
           body: "Subscription checkout, billing events, and payment metadata.",
         },
         {
-          title: "Google Gemini, DeepSeek, Upstash, Resend",
-          body: "AI generation and fallback, cron dispatch, queue delivery, and transactional email.",
+          title: "AI, queue, and email providers",
+          body: "AI generation, fallback processing, cron dispatch, queue delivery, and transactional email.",
         },
       ]}
     />

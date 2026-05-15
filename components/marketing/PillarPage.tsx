@@ -21,8 +21,8 @@ export function PillarPage({ eyebrow, title, description, bullets, sections, faq
       <main>
         <section className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8 lg:py-24">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.22em] text-[#0A66C2]">{eyebrow}</p>
-            <h1 className="mt-4 text-5xl font-black leading-tight tracking-tight text-[#111827] sm:text-6xl">{title}</h1>
+            <p className="text-sm font-black uppercase text-[#0A66C2]">{eyebrow}</p>
+            <h1 className="mt-4 text-5xl font-black leading-tight text-[#111827] sm:text-6xl">{title}</h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[#4b5563]">{description}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <SignupButton className="h-12 rounded-full bg-[#111827] px-7 text-base font-black text-white hover:bg-[#0A66C2]">
@@ -63,8 +63,8 @@ export function PillarPage({ eyebrow, title, description, bullets, sections, faq
         </section>
 
         <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
-          <p className="text-sm font-black uppercase tracking-[0.22em] text-[#0A66C2]">FAQ</p>
-          <h2 className="mt-3 text-4xl font-black tracking-tight text-[#111827]">Clear answers for buyers.</h2>
+          <p className="text-sm font-black uppercase text-[#0A66C2]">FAQ</p>
+          <h2 className="mt-3 text-4xl font-black text-[#111827]">Clear answers for buyers.</h2>
           <div className="mt-8 grid gap-4">
             {faq.map((item) => (
               <div key={item.question} className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">

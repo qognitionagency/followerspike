@@ -26,7 +26,7 @@ export function MarketingHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-black/10 bg-[#f7f4ee]/90 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-        <Link href={ROUTES.home} className="flex items-center gap-2 font-black tracking-tight text-[#121212]">
+        <Link href={ROUTES.home} className="flex items-center gap-2 font-black text-[#121212]">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#111827] text-white">
             <TrendingUp className="h-4 w-4" />
           </span>
@@ -73,7 +73,7 @@ export function MarketingHeader() {
                   {BRAND.name}
                 </Link>
                 <p className="mt-3 max-w-sm text-sm leading-6 text-[#4b5563]">
-                  LinkedIn growth autopilot for people whose reputation matters.
+                  LinkedIn growth software for people whose reputation matters.
                 </p>
               </div>
 

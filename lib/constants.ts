@@ -1,7 +1,7 @@
 export const BRAND = {
   name: "FollowerSpike",
   promise:
-    "Your LinkedIn presence on autopilot — relevant posts, comments, and connections, daily.",
+    "Review-first LinkedIn growth software for relevant posts, comments, and connection workflows.",
   socialProof: "1,200+ founders",
   trialDays: 14,
   consentVersion: "2026-05-15",

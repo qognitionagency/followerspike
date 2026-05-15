@@ -17,8 +17,8 @@ export function planIdForCheckout(params: {
   billingCycle: BillingCycle;
   currency: BillingCurrency;
 }): string {
-  const plan = PRICING.find((price) => price.tier === tier);
-  if (!plan || tier === "free") {
+  const plan = PRICING.find((price) => price.tier === params.tier);
+  if (!plan || params.tier === "free") {
     throw new Error("A paid tier is required for Razorpay checkout");
   }
 

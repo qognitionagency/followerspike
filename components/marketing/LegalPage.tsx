@@ -21,8 +21,8 @@ export function LegalPage({ eyebrow, title, description, sections, relatedLinks 
     <div className="min-h-screen bg-[#F4F2EE] text-[#191919]">
       <MarketingHeader />
       <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
-        <p className="text-sm font-black uppercase tracking-wide text-[#0A66C2]">{eyebrow}</p>
-        <h1 className="mt-3 text-5xl font-black tracking-tight">{title}</h1>
+        <p className="text-sm font-black uppercase text-[#0A66C2]">{eyebrow}</p>
+        <h1 className="mt-3 text-5xl font-black">{title}</h1>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-[#555]">{description}</p>
         <p className="mt-4 text-sm font-semibold text-[#666]">Last updated: {updatedAt}</p>
         <div className="mt-10 space-y-4">

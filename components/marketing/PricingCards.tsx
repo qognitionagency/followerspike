@@ -51,7 +51,7 @@ export function PricingCards() {
             )}
           >
             {plan.popular ? (
-              <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-[#0A66C2] px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+              <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-[#0A66C2] px-3 py-1 text-xs font-bold uppercase text-white">
                 <Sparkles className="h-3.5 w-3.5" />
                 Most Popular
               </div>
@@ -64,7 +64,7 @@ export function PricingCards() {
 
             <div className="mt-7">
               <div className="flex items-end gap-2">
-                <span className="text-4xl font-black tracking-tight text-[#191919]">
+                <span className="text-4xl font-black text-[#191919]">
                   {isAnnual ? plan.annualUsd : plan.monthlyUsd}
                 </span>
                 <span className="pb-1 text-sm text-[#666]">{isAnnual ? "/year" : "/mo"}</span>

@@ -46,8 +46,8 @@ export default function SeoLandingPage({ params }: PageProps) {
       <MarketingHeader />
       <main className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
         <section className="rounded-2xl border border-black/10 bg-white p-8 shadow-sm">
-          <p className="text-sm font-black uppercase tracking-wide text-[#0A66C2]">{page.keyword}</p>
-          <h1 className="mt-3 text-5xl font-black tracking-tight text-[#191919]">{page.h1}</h1>
+          <p className="text-sm font-black uppercase text-[#0A66C2]">{page.keyword}</p>
+          <h1 className="mt-3 text-5xl font-black text-[#191919]">{page.h1}</h1>
           <div className="mt-5 text-lg leading-8 text-[#555]" dangerouslySetInnerHTML={{ __html: page.intro_html }} />
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <SignupButton className="h-12 rounded-full bg-[#0A66C2] px-7 text-base font-black text-white hover:bg-[#004182]">
@@ -110,7 +110,7 @@ export default function SeoLandingPage({ params }: PageProps) {
         </section>
 
         <section className="mt-6 rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
-          <p className="text-sm font-black uppercase tracking-[0.22em] text-[#0A66C2]">Related guides</p>
+          <p className="text-sm font-black uppercase text-[#0A66C2]">Related guides</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {[
               ["LinkedIn autopilot", "/linkedin-autopilot"],

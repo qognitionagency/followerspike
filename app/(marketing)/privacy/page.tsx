@@ -23,7 +23,7 @@ export default function PrivacyPage() {
         },
         {
           title: "AI Processing",
-          body: "Profile context and content prompts may be sent to Gemini or DeepSeek to generate audits, posts, comments, and relevance scores.",
+          body: "Profile context and content prompts may be sent to trusted AI processing providers to generate audits, posts, comments, and relevance scores.",
         },
         {
           title: "Retention",

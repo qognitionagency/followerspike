@@ -46,7 +46,7 @@ export function MarketingFooter() {
             {BRAND.name}
           </Link>
           <p className="mt-4 max-w-sm text-sm leading-6 text-[#4b5563]">
-            LinkedIn growth autopilot for people whose reputation matters: posts, comments, connections, review workflows,
+            LinkedIn growth software for people whose reputation matters: posts, comments, connections, review workflows,
             and safety controls.
           </p>
           <div className="mt-5 flex gap-3 text-[#0a66c2]">
