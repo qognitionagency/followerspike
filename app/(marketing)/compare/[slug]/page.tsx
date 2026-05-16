@@ -7,6 +7,8 @@ import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { comparisonPages, getComparisonPage } from "@/lib/marketing/content";
 import { ROUTES } from "@/lib/constants";
 
+const siteUrl = process.env.APP_URL || "http://localhost:3000";
+
 type PageProps = {
   params: { slug: string };
 };
@@ -25,12 +27,39 @@ export function generateMetadata({ params }: PageProps): Metadata {
   };
 }
 
+function CompareJsonLd({ slug }: { slug: string }) {
+  const page = getComparisonPage(slug);
+  if (!page) return null;
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+        { "@type": "ListItem", position: 2, name: "Comparisons", item: `${siteUrl}/compare/${page.slug}` },
+      ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: page.faq.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: { "@type": "Answer", text: faq.answer },
+      })),
+    },
+  ];
+
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />;
+}
+
 export default function ComparePage({ params }: PageProps) {
   const page = getComparisonPage(params.slug);
   if (!page) notFound();
 
   return (
     <div className="min-h-screen bg-[#f4f2ee] text-[#111827]">
+      <CompareJsonLd slug={page.slug} />
       <MarketingHeader />
       <main className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <section className="mx-auto max-w-4xl text-center">

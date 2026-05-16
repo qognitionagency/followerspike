@@ -37,7 +37,7 @@ export function PillarPage({ eyebrow, title, description, bullets, sections, faq
               </Link>
             </div>
           </div>
-          <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+          <div className="rounded-lg border border-black/10 bg-white p-6 shadow-sm">
             <ShieldCheck className="h-7 w-7 text-[#0A66C2]" />
             <h2 className="mt-4 text-2xl font-black text-[#111827]">What FollowerSpike gives you</h2>
             <div className="mt-6 grid gap-3">
@@ -54,7 +54,7 @@ export function PillarPage({ eyebrow, title, description, bullets, sections, faq
         <section className="bg-white py-16">
           <div className="mx-auto grid max-w-7xl gap-5 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
             {sections.map((section) => (
-              <div key={section.title} className="rounded-2xl border border-black/10 bg-[#f7f4ee] p-6">
+              <div key={section.title} className="rounded-lg border border-black/10 bg-[#f7f4ee] p-6">
                 <h2 className="text-xl font-black text-[#111827]">{section.title}</h2>
                 <p className="mt-3 text-sm leading-6 text-[#4b5563]">{section.body}</p>
               </div>
@@ -67,7 +67,7 @@ export function PillarPage({ eyebrow, title, description, bullets, sections, faq
           <h2 className="mt-3 text-4xl font-black text-[#111827]">Clear answers for buyers.</h2>
           <div className="mt-8 grid gap-4">
             {faq.map((item) => (
-              <div key={item.question} className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+              <div key={item.question} className="rounded-lg border border-black/10 bg-white p-6 shadow-sm">
                 <h3 className="font-black text-[#111827]">{item.question}</h3>
                 <p className="mt-3 leading-7 text-[#4b5563]">{item.answer}</p>
               </div>

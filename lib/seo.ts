@@ -12,7 +12,7 @@ export type SeoPageSeed = {
   h1: string;
   intro_html: string;
   features_json: string[];
-  testimonial_json: { quote: string; author: string };
+  workflow_example_json: { title: string; body: string };
   faq_json: Array<{ question: string; answer: string }>;
   published: boolean;
 };
@@ -66,9 +66,9 @@ function page(seed: {
       "Profile audit lead magnet",
       "GDPR-ready privacy controls",
     ],
-    testimonial_json: {
-      quote: "I finally had a LinkedIn rhythm without hiring a ghostwriter.",
-      author: "Founder customer",
+    workflow_example_json: {
+      title: "Example daily workflow",
+      body: `Review one useful post, a short list of relevant conversations, right-fit connection requests, and accepted-connection follow-ups for ${audience}. Nothing runs without the user-approved mode and safety checks.`,
     },
     faq_json: [
       {

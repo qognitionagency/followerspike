@@ -5,6 +5,8 @@ import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { freeTools } from "@/lib/marketing/content";
 
+const siteUrl = process.env.APP_URL || "http://localhost:3000";
+
 export const metadata: Metadata = {
   title: "Free LinkedIn Tools",
   description:
@@ -13,8 +15,22 @@ export const metadata: Metadata = {
 };
 
 export default function FreeToolsHubPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Free LinkedIn tools",
+    description: metadata.description,
+    itemListElement: freeTools.map((tool, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: tool.name,
+      url: `${siteUrl}/free-tools/${tool.slug}`,
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-[#f4f2ee] text-[#111827]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <MarketingHeader />
       <main className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <section className="mx-auto max-w-4xl text-center">

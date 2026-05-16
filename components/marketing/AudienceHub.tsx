@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { AudiencePage } from "@/lib/marketing/content";
 
+const siteUrl = process.env.APP_URL || "http://localhost:3000";
+
 export function AudienceHub({ eyebrow, title, description, pages, basePath }: {
   eyebrow: string;
   title: string;
@@ -9,8 +11,22 @@ export function AudienceHub({ eyebrow, title, description, pages, basePath }: {
   pages: AudiencePage[];
   basePath: string;
 }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: title,
+    description,
+    itemListElement: pages.map((page, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: page.title,
+      url: `${siteUrl}${basePath}/${page.slug}`,
+    })),
+  };
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <section className="mx-auto max-w-4xl text-center">
         <p className="text-sm font-black uppercase text-[#0a66c2]">{eyebrow}</p>
         <h1 className="mt-3 text-5xl font-black text-[#111827] sm:text-6xl">{title}</h1>

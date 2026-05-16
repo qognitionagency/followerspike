@@ -86,7 +86,7 @@ export default function PricingPage() {
           <p className="mt-3 text-sm font-semibold text-[#6b7280]">Essentials $9. Growth $29. Pro $49. Monthly or annual USD billing.</p>
         </div>
 
-        <div className="mb-8 grid gap-3 rounded-2xl border border-black/10 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-8 grid gap-3 rounded-lg border border-black/10 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
           {trustItems.map((item) => (
             <div key={item.label} className="flex items-center gap-3 rounded-xl bg-[#f7f4ee] p-3 text-sm font-black text-[#111827]">
               <item.icon className="h-5 w-5 text-[#0A66C2]" />
@@ -95,7 +95,7 @@ export default function PricingPage() {
           ))}
         </div>
 
-        <section className="mb-8 rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+        <section className="mb-8 rounded-lg border border-black/10 bg-white p-6 shadow-sm">
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
               <p className="text-sm font-black uppercase text-[#0A66C2]">Every plan includes</p>
@@ -121,7 +121,7 @@ export default function PricingPage() {
         <PricingCards />
 
         <section className="mt-14 grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="rounded-2xl border border-black/10 bg-[#111827] p-6 text-white">
+          <div className="rounded-lg border border-black/10 bg-[#111827] p-6 text-white">
             <p className="text-sm font-black uppercase text-cyan-200">Autopilot boundaries</p>
             <h2 className="mt-3 text-3xl font-black">What FollowerSpike runs for you.</h2>
             <p className="mt-4 leading-7 text-slate-300">
@@ -142,7 +142,7 @@ export default function PricingPage() {
               "Pause controls and consent history",
               "No LinkedIn affiliation or certification claim",
             ].map((item) => (
-              <div key={item} className="flex gap-3 rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
+              <div key={item} className="flex gap-3 rounded-lg border border-black/10 bg-white p-5 shadow-sm">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
                 <p className="text-sm font-bold leading-6 text-[#4b5563]">{item}</p>
               </div>
@@ -157,7 +157,7 @@ export default function PricingPage() {
           </div>
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             {pricingFaqs.map((faq) => (
-              <div key={faq.question} className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+              <div key={faq.question} className="rounded-lg border border-black/10 bg-white p-6 shadow-sm">
                 <h3 className="font-black text-[#111827]">{faq.question}</h3>
                 <p className="mt-3 text-sm leading-6 text-[#555]">{faq.answer}</p>
               </div>
@@ -165,7 +165,7 @@ export default function PricingPage() {
           </div>
         </section>
 
-        <section className="mt-14 rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+        <section className="mt-14 rounded-lg border border-black/10 bg-white p-6 shadow-sm">
           <p className="text-sm font-black uppercase text-[#0A66C2]">High-intent guides</p>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {[

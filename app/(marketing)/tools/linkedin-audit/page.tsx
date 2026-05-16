@@ -158,7 +158,7 @@ export default async function LinkedInAuditPage({
               {auditSignals.map((signal) => {
                 const Icon = signal.icon;
                 return (
-                  <div key={signal.label} className="rounded-2xl border border-black/10 bg-white p-4 shadow-sm">
+                  <div key={signal.label} className="rounded-lg border border-black/10 bg-white p-4 shadow-sm">
                     <Icon className="h-5 w-5 text-[#0A66C2]" />
                     <p className="mt-3 text-sm font-black text-[#111827]">{signal.label}</p>
                   </div>
@@ -179,7 +179,7 @@ export default async function LinkedInAuditPage({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+          <div className="rounded-lg border border-black/10 bg-white p-6 shadow-sm">
             {submitted ? (
               <div className="space-y-5">
                 <div className="rounded-xl bg-[#EEF3F8] p-5">
@@ -251,7 +251,7 @@ export default async function LinkedInAuditPage({
               ["Rewrite", "Headline and about section suggestions without invented claims or fake proof."],
               ["Activation", "A 7-day content plan that can feed the first FollowerSpike queue."],
             ].map(([title, body]) => (
-              <div key={title} className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
+              <div key={title} className="rounded-lg border border-black/10 bg-white p-5 shadow-sm">
                 <p className="text-lg font-black text-[#111827]">{title}</p>
                 <p className="mt-2 text-sm leading-6 text-[#555]">{body}</p>
               </div>
