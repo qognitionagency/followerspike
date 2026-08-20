@@ -28,14 +28,22 @@ async function resolveUserProfile(clerkUserId: string): Promise<UserProfile | nu
   }
 
   const clerkUser = await currentUser();
-  const email = clerkUser?.primaryEmailAddress?.emailAddress ?? clerkUser?.emailAddresses?.[0]?.emailAddress ?? null;
+  const primary =
+    clerkUser?.emailAddresses?.find((address) => address.id === clerkUser?.primaryEmailAddressId) ??
+    clerkUser?.emailAddresses?.[0];
+  const email = primary?.emailAddress ?? null;
   const fullName = [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ") || null;
 
-  // on conflict covers the race where two requests provision the same user at once.
-  // A row may already exist without a Clerk id — an admin seeded by email, or a
-  // record that predates Clerk. Claim it instead of creating a duplicate, which
-  // would silently strip that person of their data and their admin flag.
-  if (email) {
+  // Claiming an existing row treats the email as proof of identity, and a seeded
+  // row can carry is_admin — so an unverified address must never claim one, or
+  // signing up as the seeded admin's address would hand over the account. Only a
+  // Clerk-verified email is trusted here; anything else provisions a fresh row.
+  const emailVerified = primary?.verification?.status === "verified";
+
+  if (email && emailVerified) {
+    // A row may already exist without a Clerk id — an admin seeded by email, or a
+    // record that predates Clerk. Claim it instead of creating a duplicate, which
+    // would silently strip that person of their data and their admin flag.
     const claimed = await sql`
       update users
       set clerk_user_id = ${clerkUserId},
@@ -48,6 +56,8 @@ async function resolveUserProfile(clerkUserId: string): Promise<UserProfile | nu
       return claimed[0] as UserProfile;
     }
   }
+
+  // on conflict covers the race where two requests provision the same user at once.
 
   const created = await sql`
     insert into users (clerk_user_id, email, full_name)

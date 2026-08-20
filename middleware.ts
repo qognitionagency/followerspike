@@ -33,7 +33,6 @@ const isPublicRoute = createRouteMatcher([
   "/compare(.*)",
   "/api/free-tools(.*)",
   "/api/webhooks(.*)",
-  "/api/cron(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
@@ -56,7 +55,9 @@ export default clerkMiddleware(async (auth, request) => {
   // resolve one, which is what every protected route did in production while
   // working locally. This also preserves the original destination.
   const loginUrl = new URL("/login", request.url);
-  loginUrl.searchParams.set("redirect_url", request.url);
+  // A path, not an absolute URL: this value is echoed back as a redirect target
+  // after sign-in, so keeping it relative means it can never point off-site.
+  loginUrl.searchParams.set("redirect_url", `${request.nextUrl.pathname}${request.nextUrl.search}`);
   return NextResponse.redirect(loginUrl);
 });
 

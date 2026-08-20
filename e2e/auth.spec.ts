@@ -31,3 +31,18 @@ test("protected API routes reject anonymous callers with 401", async ({ request 
     expect(res.status(), `${path} should be unauthorized`).toBe(401);
   }
 });
+
+test("login redirect target stays relative (no open redirect from middleware)", async ({ request }) => {
+  const res = await request.get("/app/settings", { maxRedirects: 0, failOnStatusCode: false });
+  const location = res.headers()["location"] ?? "";
+  const target = new URL(location, "https://example.test").searchParams.get("redirect_url");
+
+  expect(target, "middleware should echo a path").toBe("/app/settings");
+  expect(target?.startsWith("http"), "must never be absolute").toBe(false);
+});
+
+test("deleted cron endpoint is gone, not silently public", async ({ request }) => {
+  const res = await request.post("/api/cron/dispatch", { data: {}, failOnStatusCode: false, maxRedirects: 0 });
+  // 404 (removed) or 401 (protected) are both fine; 200 would mean it runs unauthenticated.
+  expect([401, 404]).toContain(res.status());
+});
