@@ -5,6 +5,7 @@ import { BlueskyNotFoundError } from "@/lib/platforms/bluesky";
 import { rankBlueskyProfile } from "@/lib/rank/bluesky";
 import { rankLinkedInProfile } from "@/lib/rank/linkedin";
 import { splitIntoThread, PLATFORM_LIMIT, type ThreadPlatform } from "@/lib/compose/thread";
+import { recordRankSnapshot } from "@/lib/rank/store";
 import type { RankResult } from "@/lib/rank/types";
 
 export const freeToolRequestSchema = z.object({
@@ -307,14 +308,23 @@ export async function runFreeTool(slug: string, input: FreeToolRequest): Promise
 
   // Scored from text the member pastes; needs no API access and no key.
   if (slug === "spike-rank-linkedin") {
-    return rankToToolResult(rankLinkedInProfile(input.primaryText), tool.cta);
+    const rank = rankLinkedInProfile(input.primaryText);
+    const result = rankToToolResult(rank, tool.cta);
+    const snapshotId = await recordRankSnapshot(rank);
+    if (snapshotId) result.snapshotId = snapshotId;
+    return result;
   }
 
   // Bluesky reads are public and free, so this tool runs live and ungated.
   if (slug === "spike-rank-bluesky") {
     try {
       const rank = await rankBlueskyProfile(input.primaryText);
-      return rankToToolResult(rank, tool.cta);
+      const result = rankToToolResult(rank, tool.cta);
+      // Recorded here rather than in the route because this is the only place the
+      // full RankResult exists; it is best-effort and never blocks the response.
+      const snapshotId = await recordRankSnapshot(rank);
+      if (snapshotId) result.snapshotId = snapshotId;
+      return result;
     } catch (error) {
       if (error instanceof BlueskyNotFoundError) {
         return {

@@ -70,6 +70,8 @@ export type FreeToolResult = {
   sections: FreeToolSection[];
   cta: string;
   leadId?: string;
+  /** Set for Spike Rank tools; identifies the stored history row for this run. */
+  snapshotId?: string;
 };
 
 export type BlogPost = {

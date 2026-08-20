@@ -7,11 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed:seo": "tsx scripts/seed-seo-pages.ts"
+    "seed:seo": "tsx scripts/seed-seo-pages.ts",
+    "rank:smoke": "tsx scripts/rank-smoke.ts"
   },
   "dependencies": {
     "@google/genai": "^2.3.0",
     "@hookform/resolvers": "^5.2.2",
+    "@neondatabase/serverless": "^1.1.0",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-progress": "^1.1.0",

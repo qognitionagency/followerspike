@@ -3,6 +3,7 @@
  *   npx tsx scripts/rank-smoke.ts bsky.app
  */
 import { rankBlueskyProfile } from "@/lib/rank/bluesky";
+import { getRankTrend, recordRankSnapshot } from "@/lib/rank/store";
 
 async function main() {
   const handle = process.argv[2] ?? "bsky.app";
@@ -20,6 +21,18 @@ async function main() {
 
   console.log("\nTop fixes:");
   rank.topFixes.forEach((fix, index) => console.log(`  ${index + 1}. ${fix.label} (${fix.effort}) — ${fix.fix}`));
+
+  // Exercises the history layer too. No-ops without SUPABASE_SERVICE_ROLE_KEY.
+  const snapshotId = await recordRankSnapshot(rank);
+  console.log("\nSnapshot:", snapshotId ?? "not stored (no SUPABASE_SERVICE_ROLE_KEY)");
+
+  const trend = await getRankTrend("bluesky", rank.handle);
+  if (trend.snapshots.length) {
+    console.log(`Trend: ${trend.snapshots.length} snapshot(s), score delta ${trend.scoreDelta ?? "n/a"}`);
+    for (const snap of trend.snapshots) {
+      console.log(`   ${snap.createdAt} — ${snap.score}/100 (${snap.followersCount ?? "?"} followers)`);
+    }
+  }
 }
 
 main().catch((error) => {

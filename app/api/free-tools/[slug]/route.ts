@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getFreeTool } from "@/lib/marketing/content";
 import { freeToolRequestSchema, runFreeTool } from "@/lib/marketing/free-tools";
-import { optionalEnv } from "@/lib/env";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { databaseConfigured, db } from "@/lib/db";
+import { linkSnapshotToLead } from "@/lib/rank/store";
 
 type RouteContext = {
   params: {
@@ -86,34 +86,42 @@ export async function POST(request: Request, context: RouteContext) {
 
   const result = await runFreeTool(tool.slug, parsed.data);
 
-  if (parsed.data.email && optionalEnv("SUPABASE_SERVICE_ROLE_KEY")) {
+  if (parsed.data.email && databaseConfigured()) {
     try {
-      const supabase = createAdminClient();
-      const { data } = await supabase
-        .from("free_tool_leads")
-        .insert({
-          email: parsed.data.email,
-          tool_slug: tool.slug,
-          input_summary: {
-            primaryText: parsed.data.primaryText.slice(0, 500),
-            context: parsed.data.context?.slice(0, 500) ?? null,
-          },
-          result_summary: {
-            title: result.title,
-            score: result.score ?? null,
-            summary: result.summary.slice(0, 500),
-          },
-          utm_source: parsed.data.utm_source,
-          utm_medium: parsed.data.utm_medium,
-          utm_campaign: parsed.data.utm_campaign,
-          utm_term: parsed.data.utm_term,
-          utm_content: parsed.data.utm_content,
-        })
-        .select("id")
-        .single();
+      const sql = db();
+      const inputSummary = {
+        primaryText: parsed.data.primaryText.slice(0, 500),
+        context: parsed.data.context?.slice(0, 500) ?? null,
+      };
+      const resultSummary = {
+        title: result.title,
+        score: result.score ?? null,
+        summary: result.summary.slice(0, 500),
+      };
 
-      if (data?.id) {
-        result.leadId = data.id;
+      const rows = await sql`
+        insert into free_tool_leads
+          (email, tool_slug, input_summary, result_summary, utm_source, utm_medium, utm_campaign, utm_term, utm_content)
+        values (
+          ${parsed.data.email},
+          ${tool.slug},
+          ${JSON.stringify(inputSummary)}::jsonb,
+          ${JSON.stringify(resultSummary)}::jsonb,
+          ${parsed.data.utm_source ?? null},
+          ${parsed.data.utm_medium ?? null},
+          ${parsed.data.utm_campaign ?? null},
+          ${parsed.data.utm_term ?? null},
+          ${parsed.data.utm_content ?? null}
+        )
+        returning id
+      `;
+
+      const leadId = rows[0]?.id as string | undefined;
+      if (leadId) {
+        result.leadId = leadId;
+        if (result.snapshotId) {
+          await linkSnapshotToLead(result.snapshotId, leadId);
+        }
       }
     } catch {
       // Public tools should still return the instant result when lead capture is unavailable locally.

@@ -28,7 +28,8 @@ One-liner: "Grow your LinkedIn account on autopilot: posts, likes, comments, con
 - AI: set the provider API key and model values from `.env.example`. Keep the fallback provider configured before enabling production generation.
 - Email: set the transactional email API key and a verified sender. Free audit emails use an idempotency key per audit lead so duplicate form retries do not double-send.
 - Razorpay: create USD monthly and annual subscription plans in Razorpay, then set the six `RAZORPAY_PLAN_*_USD` values. Razorpay supports international subscription currencies, while settlement handling depends on your Razorpay account configuration.
-- Database: apply the Supabase migrations in `supabase/migrations` before testing audit leads, free tool leads, profile audits, or subscription webhooks in production.
+- Database: the project is migrating from Supabase Postgres to Neon. Set `DATABASE_URL` to the pooled Neon connection string and apply the SQL in `supabase/migrations` with `psql "$DATABASE_URL" -f <file>`. The migrations are plain Postgres and are not Supabase-specific despite the directory name. Note only 5 of the 13 tables the code uses have migrations checked in; the other 8 (`users`, `posts`, `connections`, `comments`, `automation_log`, `target_leaders`, `system_settings`, `user_daily_usage`) still live only in the Supabase project and must be dumped before the cutover can finish.
+- Spike Rank: the Bluesky ranker reads Bluesky's public AppView and needs no credentials, so it works with no setup. Rank history lands in `spike_rank_snapshots` on Neon and requires `DATABASE_URL`; without it a rank still returns but nothing is recorded. Smoke-test it with `npm run rank:smoke -- yourname.bsky.social`.
 
 ## Safety Positioning
 
