@@ -25,23 +25,23 @@ const siteUrl = process.env.APP_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "FollowerSpike | LinkedIn Growth Autopilot",
+    absolute: "FollowerSpike | Post to X, LinkedIn, and Bluesky in Your Own Voice",
   },
   description:
-    "FollowerSpike helps founders, coaches, consultants, and SMB owners grow on LinkedIn with AI posts, engagement queues, connection requests, follow-up DMs, and pauseable autopilot controls.",
+    "One composer for X, LinkedIn, and Bluesky, AI that writes in your own voice, a 0-100 score for every profile, and automations that turn reach into email subscribers.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "FollowerSpike | LinkedIn Growth Autopilot",
+    title: "FollowerSpike | Post to X, LinkedIn, and Bluesky in Your Own Voice",
     description:
-      "A clean LinkedIn growth autopilot for daily posts, engagement, connections, follow-ups, review controls, and Pro autopilot.",
+      "Write once, publish native to all three platforms, and turn the reach into email subscribers.",
     url: siteUrl,
     siteName: BRAND.name,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "FollowerSpike | LinkedIn Growth Autopilot",
-    description: "Grow on LinkedIn with one simple daily queue.",
+    title: "FollowerSpike | Post to X, LinkedIn, and Bluesky in Your Own Voice",
+    description: "Post to X, LinkedIn, and Bluesky from one editor, in your own voice.",
   },
   robots: {
     index: true,
