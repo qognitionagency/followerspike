@@ -4,6 +4,7 @@ import { getFreeTool, type FreeToolResult, type FreeToolSection } from "@/lib/ma
 import { BlueskyNotFoundError } from "@/lib/platforms/bluesky";
 import { rankBlueskyProfile } from "@/lib/rank/bluesky";
 import { rankLinkedInProfile } from "@/lib/rank/linkedin";
+import { splitIntoThread, PLATFORM_LIMIT, type ThreadPlatform } from "@/lib/compose/thread";
 import type { RankResult } from "@/lib/rank/types";
 
 export const freeToolRequestSchema = z.object({
@@ -281,6 +282,27 @@ export async function runFreeTool(slug: string, input: FreeToolRequest): Promise
   const tool = getFreeTool(slug);
   if (!tool) {
     throw new Error("Unknown free tool");
+  }
+
+  // Threading is a character-count constraint, not a judgement call, so this
+  // runs deterministically with no model and no key.
+  if (slug === "thread-splitter") {
+    const platform: ThreadPlatform = /bluesky/i.test(input.context ?? "") ? "bluesky" : "x";
+    const posts = splitIntoThread(input.primaryText, { platform, numbered: true });
+    const label = platform === "x" ? "X" : "Bluesky";
+
+    return {
+      title: `Your thread is ${posts.length} posts.`,
+      summary: `Split for ${label} at ${PLATFORM_LIMIT[platform]} characters, breaking on sentence boundaries and never inside a link.`,
+      sections: [
+        {
+          title: `Thread for ${label}`,
+          body: "Copy these in order, or schedule the whole thread at once in FollowerSpike.",
+          items: posts.map((post, index) => `${index + 1}. ${post}`),
+        },
+      ],
+      cta: tool.cta,
+    };
   }
 
   // Scored from text the member pastes; needs no API access and no key.
