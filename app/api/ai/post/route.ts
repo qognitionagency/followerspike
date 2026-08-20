@@ -22,23 +22,25 @@ export async function POST(request: Request) {
     );
 
     const sql = db();
-    const rows = await sql`
-      insert into posts (user_id, content, topic_seed, status, source_prompt)
-      values (
-        ${session.userId},
-        ${generated.content},
-        ${body.topicSeed},
-        ${"pending_approval"},
-        ${generated.rationale}
-      )
-      returning id, content, status
+    // v2 splits a post into a container plus one row of content per platform.
+    // A generated draft starts as 'draft'; the queue promotes it to 'scheduled'.
+    const posts = await sql`
+      insert into posts (user_id, status, created_via)
+      values (${session.userId}, ${"draft"}, ${"ai"})
+      returning id, status
     `;
 
-    if (!rows.length) {
+    const post = posts[0] as { id: string; status: string } | undefined;
+    if (!post) {
       return NextResponse.json({ error: "Could not save generated post" }, { status: 500 });
     }
 
-    return NextResponse.json(rows[0]);
+    await sql`
+      insert into post_variants (post_id, platform, content)
+      values (${post.id}, ${"linkedin"}, ${generated.content})
+    `;
+
+    return NextResponse.json({ id: post.id, status: post.status, content: generated.content });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.flatten() }, { status: 400 });

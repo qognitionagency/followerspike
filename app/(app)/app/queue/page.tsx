@@ -29,11 +29,13 @@ async function updateQueueItem(formData: FormData) {
   // Only posts remain queueable; comments and connections went with the retired
   // LinkedIn automation product.
   if (parsed.data.type === "post") {
+    // v2's status vocabulary has no pending_approval/skipped: approving schedules
+    // the post, skipping cancels it.
     await sql`
       update posts set
-        status = ${parsed.data.action === "skip" ? "skipped" : "scheduled"},
-        approved_by_user = ${parsed.data.action === "approve"},
-        scheduled_at = ${parsed.data.action === "approve" ? scheduledAt : null}
+        status = ${parsed.data.action === "skip" ? "cancelled" : "scheduled"},
+        scheduled_at = ${parsed.data.action === "approve" ? scheduledAt : null},
+        updated_at = now()
       where id = ${parsed.data.id} and user_id = ${session.userId}
     `;
   }
@@ -72,11 +74,12 @@ export default async function QueuePage() {
   const sql = db();
 
   const postsData = await sql`
-    select id, content, status, scheduled_at
-    from posts
-    where user_id = ${session.userId}
-      and status in ('draft', 'pending_approval', 'scheduled')
-    order by created_at desc
+    select p.id, v.content, p.status, p.scheduled_at
+    from posts p
+    left join post_variants v on v.post_id = p.id and v.thread_order = 0
+    where p.user_id = ${session.userId}
+      and p.status in ('draft', 'scheduled')
+    order by p.created_at desc
   `;
 
   const posts = postsData as unknown as PostRow[];

@@ -39,7 +39,7 @@ export function normalizeSubscriptionTier(tier: unknown): SubscriptionTier {
 }
 
 // Paid tiers only. The free tier is handled by absence of a subscription row —
-// see FREE_TIER_LIMITS below. `limits` are per-day caps consumed by lib/automation/safety.ts.
+// see FREE_TIER_LIMITS below. `limits` are the per-day caps shown on the pricing page.
 export const PRICING = [
   {
     tier: "starter",

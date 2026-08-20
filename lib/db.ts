@@ -11,8 +11,7 @@ import { optionalEnv } from "@/lib/env";
 
 /**
  * One result row. The driver cannot know a statement's shape, so columns are
- * `any` and callers narrow at the point of use — the same contract the Supabase
- * client offered before the move to Neon.
+ * `any` and callers narrow at the point of use.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type QueryRow = Record<string, any>;

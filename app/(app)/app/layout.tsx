@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ClerkProvider } from "@clerk/nextjs";
 import { BarChart3, ListChecks, MessageSquareText, Settings, TrendingUp } from "lucide-react";
 import { requireAppSession } from "@/lib/session";
 import { BRAND } from "@/lib/constants";
@@ -14,6 +15,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const session = await requireAppSession();
 
   return (
+    <ClerkProvider>
     <div className="min-h-screen bg-[#F4F2EE] text-[#191919] md:flex">
       <aside className="hidden w-72 shrink-0 border-r border-[#D6D6D6] bg-white md:flex md:flex-col">
         <div className="flex h-16 items-center gap-2 border-b border-[#D6D6D6] px-6">
@@ -61,5 +63,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </nav>
       </div>
     </div>
+    </ClerkProvider>
   );
 }

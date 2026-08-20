@@ -8,7 +8,10 @@ import { getAppSession } from "@/lib/session";
 
 const pauseSchema = z.object({
   paused: z.enum(["true", "false"]),
-  reason: z.string().max(240).optional(),
+  // Nullable, not just optional: the Resume form carries no reason field, so the
+  // value arrives as null. `.optional()` alone rejects null, which made the
+  // parse fail and the Resume button silently do nothing.
+  reason: z.string().max(240).nullable().optional(),
 });
 
 async function setGlobalPause(formData: FormData) {
@@ -29,11 +32,11 @@ async function setGlobalPause(formData: FormData) {
 
   const sql = db();
   await sql`
-    insert into system_settings (key, value, updated_by)
-    values (${"automation_global_paused"}, ${JSON.stringify(value)}::jsonb, ${session.userId})
+    insert into system_settings (key, value)
+    values (${"automation_global_paused"}, ${JSON.stringify(value)}::jsonb)
     on conflict (key) do update set
       value = excluded.value,
-      updated_by = excluded.updated_by
+      updated_at = now()
   `;
 
   revalidatePath("/admin");

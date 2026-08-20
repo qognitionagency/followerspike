@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Clerk replaced Supabase Auth. These assert the boundary still holds: signed-out
- * visitors cannot reach the app, and the hosted sign-in UI actually mounts.
+ * The auth boundary: signed-out visitors cannot reach the app, and the hosted
+ * Clerk sign-in UI actually mounts.
  */
 const PROTECTED = ["/app", "/app/queue", "/app/settings", "/app/voice", "/admin"];
 

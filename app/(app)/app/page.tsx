@@ -13,10 +13,10 @@ import { requireAppSession } from "@/lib/session";
 import { db } from "@/lib/db";
 
 type UsageRow = {
-  posts_today: number;
-  comments_today: number;
-  invites_today: number;
-  likes_today: number;
+  posts: number;
+  comments: number;
+  invites: number;
+  likes: number;
 };
 
 type LogRow = {
@@ -24,7 +24,7 @@ type LogRow = {
   action: string;
   outcome: string;
   reason: string | null;
-  target_name: string | null;
+  recipient_handle: string | null;
   created_at: string;
 };
 
@@ -84,27 +84,28 @@ export default async function AppDashboardPage() {
   const [usageData, logsData, postsData] = await Promise.all([
     sql`select * from user_daily_usage where user_id = ${session.userId} limit 1`,
     sql`
-      select id, action, outcome, reason, target_name, created_at
+      select id, action, outcome, reason, recipient_handle, created_at
       from automation_log
       where user_id = ${session.userId}
       order by created_at desc
       limit 5
     `,
     sql`
-      select id, content, status, scheduled_at
-      from posts
-      where user_id = ${session.userId}
-        and status in ('draft', 'pending_approval', 'scheduled')
-      order by created_at desc
+      select p.id, v.content, p.status, p.scheduled_at
+      from posts p
+      left join post_variants v on v.post_id = p.id and v.thread_order = 0
+      where p.user_id = ${session.userId}
+        and p.status in ('draft', 'scheduled')
+      order by p.created_at desc
       limit 1
     `,
   ]);
 
   const usage = (usageData[0] as UsageRow | undefined) ?? {
-    posts_today: 0,
-    comments_today: 0,
-    invites_today: 0,
-    likes_today: 0,
+    posts: 0,
+    comments: 0,
+    invites: 0,
+    likes: 0,
   };
   const logs = logsData as unknown as LogRow[];
   const todayPost = postsData[0] as PostRow | undefined;
@@ -113,10 +114,10 @@ export default async function AppDashboardPage() {
   const autopilotActive = session.subscriptionTier === "pro" && session.profile.autopilot_enabled && !session.profile.autopilot_paused;
 
   const stats = [
-    { label: "Posts", value: `${usage.posts_today}/${session.profile.daily_post_limit}`, icon: Sparkles },
-    { label: "Comments", value: `${usage.comments_today}/${session.profile.daily_comment_limit}`, icon: MessageSquareText },
-    { label: "Connections", value: `${usage.invites_today}/${session.profile.daily_invite_limit}`, icon: UserPlus },
-    { label: "Likes", value: `${usage.likes_today}/${session.profile.daily_like_limit}`, icon: CheckCircle2 },
+    { label: "Posts", value: `${usage.posts}/${session.profile.daily_post_limit}`, icon: Sparkles },
+    { label: "Comments", value: `${usage.comments}/${session.profile.daily_comment_limit}`, icon: MessageSquareText },
+    { label: "Connections", value: `${usage.invites}/${session.profile.daily_invite_limit}`, icon: UserPlus },
+    { label: "Likes", value: `${usage.likes}/${session.profile.daily_like_limit}`, icon: CheckCircle2 },
   ];
 
   return (
@@ -260,7 +261,7 @@ export default async function AppDashboardPage() {
               <div key={log.id} className="flex flex-col gap-2 py-3 text-sm sm:flex-row sm:items-center">
                 <span className="w-fit rounded-full bg-[#EEF3F8] px-2 py-1 font-black uppercase text-[#0A66C2]">{log.outcome}</span>
                 <span className="font-semibold text-[#333]">{log.action}</span>
-                <span className="text-[#666]">{log.target_name || log.reason || "No target"}</span>
+                <span className="text-[#666]">{log.recipient_handle || log.reason || "No target"}</span>
                 <span className="text-xs text-[#888] sm:ml-auto">{new Date(log.created_at).toLocaleString()}</span>
               </div>
             ))

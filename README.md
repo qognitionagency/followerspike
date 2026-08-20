@@ -28,7 +28,7 @@ One-liner: "Grow your LinkedIn account on autopilot: posts, likes, comments, con
 - AI: set the provider API key and model values from `.env.example`. Keep the fallback provider configured before enabling production generation.
 - Email: set the transactional email API key and a verified sender. Free audit emails use an idempotency key per audit lead so duplicate form retries do not double-send.
 - Razorpay: create USD monthly and annual subscription plans in Razorpay, then set the six `RAZORPAY_PLAN_*_USD` values. Razorpay supports international subscription currencies, while settlement handling depends on your Razorpay account configuration.
-- Database: Neon serverless Postgres is the only datastore. Set `DATABASE_URL` to the pooled connection string and apply `db/migrations/*.sql` in filename order with `psql "$DATABASE_URL" -f <file>`. Supabase has been removed entirely.
+- Database: Neon serverless Postgres is the only datastore. Set `DATABASE_URL` to the pooled connection string and apply `db/migrations/*.sql` in filename order with `psql "$DATABASE_URL" -f <file>`.
 - Auth: Clerk. Set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`. `users.clerk_user_id` joins the Clerk identity to the local `users` row, which is provisioned on first sign-in by `lib/session.ts`; every other table keys off the local uuid.
 - Spike Rank: the Bluesky ranker reads Bluesky's public AppView and needs no credentials. Rank history is stored in `profile_scores`; without `DATABASE_URL` a rank still returns but nothing is recorded. Smoke-test with `npm run rank:smoke -- yourname.bsky.social`.
 - Tests: `npm run test:e2e` runs the Playwright suite against a production build — public pages, nav links, auth boundaries, and the free-tool funnel.

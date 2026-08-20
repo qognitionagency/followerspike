@@ -325,7 +325,7 @@ create table if not exists system_settings (
 --
 -- No row level security. Neon exposes no PostgREST endpoint and no anon key, so
 -- the application server holding DATABASE_URL is the only client that can reach
--- these tables, and auth.uid() does not exist outside Supabase. Every query is
+-- these tables. Every query is
 -- therefore scoped by user in application code — see lib/session.ts, which
 -- resolves the Clerk session to a users row before anything is read.
 -- ---------------------------------------------------------------------------

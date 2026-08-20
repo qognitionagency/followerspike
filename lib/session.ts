@@ -32,6 +32,23 @@ async function resolveUserProfile(clerkUserId: string): Promise<UserProfile | nu
   const fullName = [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ") || null;
 
   // on conflict covers the race where two requests provision the same user at once.
+  // A row may already exist without a Clerk id — an admin seeded by email, or a
+  // record that predates Clerk. Claim it instead of creating a duplicate, which
+  // would silently strip that person of their data and their admin flag.
+  if (email) {
+    const claimed = await sql`
+      update users
+      set clerk_user_id = ${clerkUserId},
+          full_name = coalesce(full_name, ${fullName}),
+          updated_at = now()
+      where lower(email) = lower(${email}) and clerk_user_id is null
+      returning *
+    `;
+    if (claimed.length) {
+      return claimed[0] as UserProfile;
+    }
+  }
+
   const created = await sql`
     insert into users (clerk_user_id, email, full_name)
     values (${clerkUserId}, ${email}, ${fullName})

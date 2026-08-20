@@ -16,7 +16,22 @@ export default defineConfig({
     baseURL,
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "setup clerk", testMatch: /global\.setup\.ts/ },
+    { name: "setup auth", testMatch: /auth\.setup\.ts/, dependencies: ["setup clerk"] },
+    {
+      name: "signed-out",
+      testIgnore: [/\.setup\.ts/, /app-authenticated\.spec\.ts/, /admin\.spec\.ts/],
+      use: { ...devices["Desktop Chrome"] },
+      dependencies: ["setup clerk"],
+    },
+    {
+      name: "signed-in",
+      testMatch: [/app-authenticated\.spec\.ts/, /admin\.spec\.ts/],
+      use: { ...devices["Desktop Chrome"] },
+      dependencies: ["setup auth"],
+    },
+  ],
   webServer: {
     // Built output rather than dev: this is the code that actually ships.
     command: `npm run start -- --port ${PORT}`,

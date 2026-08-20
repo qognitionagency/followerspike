@@ -22,9 +22,9 @@ async function main() {
   console.log("\nTop fixes:");
   rank.topFixes.forEach((fix, index) => console.log(`  ${index + 1}. ${fix.label} (${fix.effort}) — ${fix.fix}`));
 
-  // Exercises the history layer too. No-ops without SUPABASE_SERVICE_ROLE_KEY.
+  // Exercises the history layer too. No-ops without DATABASE_URL.
   const snapshotId = await recordRankSnapshot(rank);
-  console.log("\nSnapshot:", snapshotId ?? "not stored (no SUPABASE_SERVICE_ROLE_KEY)");
+  console.log("\nSnapshot:", snapshotId ?? "not stored (no DATABASE_URL)");
 
   const trend = await getRankTrend("bluesky", rank.handle);
   if (trend.snapshots.length) {

@@ -1,4 +1,3 @@
-import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
@@ -24,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={inter.variable} suppressHydrationWarning>
-        <ClerkProvider>{children}</ClerkProvider>
+        {children}
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-NZJYJ25CW4" strategy="afterInteractive" />
         <Script
           id="google-analytics"
