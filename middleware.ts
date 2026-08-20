@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 /**
@@ -36,9 +37,27 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
-    await auth.protect();
+  if (isPublicRoute(request)) {
+    return;
   }
+
+  const { userId } = await auth();
+  if (userId) {
+    return;
+  }
+
+  // An API caller wants a status code, not a login page.
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Redirecting explicitly rather than calling auth.protect(): protect() infers
+  // the sign-in URL from Clerk configuration and answers 404 when it cannot
+  // resolve one, which is what every protected route did in production while
+  // working locally. This also preserves the original destination.
+  const loginUrl = new URL("/login", request.url);
+  loginUrl.searchParams.set("redirect_url", request.url);
+  return NextResponse.redirect(loginUrl);
 });
 
 export const config = {

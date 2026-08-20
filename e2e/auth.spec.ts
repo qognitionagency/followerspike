@@ -24,9 +24,10 @@ test("signup page mounts the Clerk widget", async ({ page }) => {
   await expect(page.locator(".cl-rootBox, .cl-signUp-root, form").first()).toBeVisible();
 });
 
-test("protected API routes reject anonymous callers", async ({ request }) => {
+test("protected API routes reject anonymous callers with 401", async ({ request }) => {
   for (const path of ["/api/privacy/export", "/api/ai/post"]) {
-    const res = await request.post(path, { data: {}, failOnStatusCode: false });
-    expect(res.status(), `${path} should not be open`).not.toBe(200);
+    // An API caller should get a status code, never a redirect into HTML.
+    const res = await request.post(path, { data: {}, failOnStatusCode: false, maxRedirects: 0 });
+    expect(res.status(), `${path} should be unauthorized`).toBe(401);
   }
 });
