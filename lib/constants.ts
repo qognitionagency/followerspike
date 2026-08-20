@@ -1,8 +1,8 @@
 export const BRAND = {
   name: "FollowerSpike",
   promise:
-    "AI LinkedIn growth autopilot for posts, comments, connections, and follow-up DMs.",
-  socialProof: "Built for founders, SMB owners, coaches, consultants, and personal brands",
+    "Post to X, LinkedIn, and Bluesky in your own voice — and turn the reach into subscribers.",
+  socialProof: "Built for solo founders, indie hackers, and one-person agencies",
   trialDays: 14,
   consentVersion: "2026-05-15",
 } as const;
@@ -23,81 +23,93 @@ export const ROUTES = {
   subprocessors: "/subprocessors",
 } as const;
 
-export type SubscriptionTier = "free" | "essentials" | "growth" | "pro";
+export type SubscriptionTier = "free" | "starter" | "pro" | "agency";
 export type BillingCycle = "monthly" | "annual";
 export type BillingCurrency = "USD";
 export type ApprovalMode = "review" | "auto" | "off";
 export type AutomationAction = "post" | "comment" | "invite" | "like" | "dm" | "reply" | "withdraw" | "profile_scrape";
 
 export function normalizeSubscriptionTier(tier: unknown): SubscriptionTier {
-  if (tier === "essentials" || tier === "growth" || tier === "pro" || tier === "free") return tier;
-  if (tier === "starter") return "essentials";
+  if (tier === "free" || tier === "starter" || tier === "pro" || tier === "agency") return tier;
+  // Legacy tiers from the LinkedIn-autopilot pricing ladder. Existing subscribers
+  // keep the nearest equivalent seat rather than being silently upgraded.
+  if (tier === "essentials") return "starter";
+  if (tier === "growth") return "pro";
   if (tier === "scale") return "pro";
   return "free";
 }
 
+// Paid tiers only. The free tier is handled by absence of a subscription row —
+// see FREE_TIER_LIMITS below. `limits` are per-day caps consumed by lib/automation/safety.ts.
 export const PRICING = [
   {
-    tier: "essentials",
-    name: "Essentials",
-    monthlyInr: "₹799",
-    monthlyUsd: "$9",
-    annualUsd: "$90",
-    planEnv: "RAZORPAY_PLAN_ESSENTIALS_MONTHLY_USD",
-    legacyPlanEnv: "RAZORPAY_PLAN_STARTER",
-    annualPlanEnv: "RAZORPAY_PLAN_ESSENTIALS_ANNUAL_USD",
+    tier: "starter",
+    name: "Starter",
+    monthlyInr: "₹1,599",
+    monthlyUsd: "$19",
+    annualUsd: "$190",
+    planEnv: "RAZORPAY_PLAN_STARTER_MONTHLY_USD",
+    legacyPlanEnv: "RAZORPAY_PLAN_ESSENTIALS_MONTHLY_USD",
+    annualPlanEnv: "RAZORPAY_PLAN_STARTER_ANNUAL_USD",
     popular: false,
-    description: "For solo professionals who want strong LinkedIn posts and a manual growth queue.",
-    limits: { posts: 1, comments: 3, invites: 3, likes: 10 },
+    description: "For the founder who wants to post consistently on all three channels without thinking about it.",
+    limits: { posts: 2, comments: 5, invites: 0, likes: 0 },
     features: [
-      "1 AI post per day",
-      "Post ideas and voice training",
-      "Manual review queue",
-      "Free profile audit",
-      "Email reminders",
-    ],
-  },
-  {
-    tier: "growth",
-    name: "Growth",
-    monthlyInr: "₹1,999",
-    monthlyUsd: "$29",
-    annualUsd: "$290",
-    planEnv: "RAZORPAY_PLAN_GROWTH_MONTHLY_USD",
-    legacyPlanEnv: "RAZORPAY_PLAN_PRO",
-    annualPlanEnv: "RAZORPAY_PLAN_GROWTH_ANNUAL_USD",
-    popular: true,
-    description: "For founders and SMB owners who want a review-first daily growth queue.",
-    limits: { posts: 2, comments: 12, invites: 12, likes: 35 },
-    features: [
-      "2 AI posts per day",
-      "Suggested likes and comments",
-      "Target leader discovery",
-      "Suggested connection requests",
-      "Review-first growth queue",
+      "3 connected accounts — one per platform",
+      "30 scheduled posts per month",
+      "Unlimited AI rewriting, no credits",
+      "Voice Interview — build your voice with no posts to import",
+      "Weekly Spike Rank audit with full report",
     ],
   },
   {
     tier: "pro",
     name: "Pro",
-    monthlyInr: "₹3,999",
-    monthlyUsd: "$49",
-    annualUsd: "$490",
+    monthlyInr: "₹3,299",
+    monthlyUsd: "$39",
+    annualUsd: "$390",
     planEnv: "RAZORPAY_PLAN_PRO_MONTHLY_USD",
-    legacyPlanEnv: "RAZORPAY_PLAN_SCALE",
+    legacyPlanEnv: "RAZORPAY_PLAN_GROWTH_MONTHLY_USD",
     annualPlanEnv: "RAZORPAY_PLAN_PRO_ANNUAL_USD",
-    popular: false,
-    description: "For busy personal brands who want conservative autopilot execution.",
-    limits: { posts: 3, comments: 25, invites: 20, likes: 60 },
+    popular: true,
+    description: "For founders turning reach into subscribers, with automation and voice cloning.",
+    limits: { posts: 10, comments: 25, invites: 0, likes: 0 },
     features: [
-      "Full autopilot mode",
-      "Accepted-connection follow-up DMs",
-      "Reply drafts",
-      "Higher daily limits",
+      "6 connected accounts, unlimited scheduling",
+      "Voice Cloner trained on your best posts",
+      "Growth Plans that write straight into your queue",
+      "Auto-Plug, First Comment, Evergreen, and Cross-post Relay",
+      "Keyword Auto-DM on X and Bluesky, with hard caps",
+    ],
+  },
+  {
+    tier: "agency",
+    name: "Agency",
+    monthlyInr: "₹6,599",
+    monthlyUsd: "$79",
+    annualUsd: "$790",
+    planEnv: "RAZORPAY_PLAN_AGENCY_MONTHLY_USD",
+    legacyPlanEnv: "RAZORPAY_PLAN_PRO_MONTHLY_USD",
+    annualPlanEnv: "RAZORPAY_PLAN_AGENCY_ANNUAL_USD",
+    popular: false,
+    description: "For ghostwriters and one-person agencies running several founder accounts.",
+    limits: { posts: 30, comments: 60, invites: 0, likes: 0 },
+    features: [
+      "15 connected accounts across client workspaces",
+      "A separate saved voice per client",
+      "White-label Spike Rank reports",
+      "Team approval workflow before anything publishes",
       "Priority support",
     ],
   },
 ] as const;
+
+export const FREE_TIER_LIMITS = {
+  connectedAccounts: 1,
+  scheduledPostsTotal: 3,
+  aiRewritesPerMonth: 5,
+  auditsPerMonth: 1,
+} as const;
 
 export const INDUSTRIES = [
   "SaaS",
@@ -180,4 +192,4 @@ export const ROLES = [
 ] as const;
 
 export const TRUST_DISCLAIMER =
-  "FollowerSpike is not affiliated with, endorsed by, or certified by LinkedIn. Automation carries platform risk; FollowerSpike is designed with consent, review, rate limits, and pause controls to reduce that risk.";
+  "FollowerSpike is not affiliated with, endorsed by, or certified by X, LinkedIn, or Bluesky. FollowerSpike publishes and reads only through each platform's official API, under permissions you grant and can revoke at any time. Outbound messages require a keyword opt-in from the recipient and are subject to daily caps you control.";

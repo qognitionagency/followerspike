@@ -31,9 +31,9 @@ export default function TrustPage() {
         },
       ]}
       relatedLinks={[
-        { label: "LinkedIn autopilot", href: "/features/linkedin-autopilot" },
+        { label: "Multi-platform composer", href: "/features/multi-platform-composer" },
         { label: "Safety controls", href: "/features/safety-controls" },
-        { label: "Free profile audit", href: "/free-tools/linkedin-profile-audit" },
+        { label: "Free profile audit", href: "/free-tools/spike-rank-linkedin" },
       ]}
     />
   );

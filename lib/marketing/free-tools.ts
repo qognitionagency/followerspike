@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { auditProfile, generateComment, generatePost, linkedinUrlSchema, scoreRelevance } from "@/lib/ai/generators";
-import { getFreeTool, type FreeToolResult } from "@/lib/marketing/content";
+import { getFreeTool, type FreeToolResult, type FreeToolSection } from "@/lib/marketing/content";
+import { BlueskyNotFoundError } from "@/lib/platforms/bluesky";
+import { rankBlueskyProfile } from "@/lib/rank/bluesky";
+import type { RankResult } from "@/lib/rank/types";
 
 export const freeToolRequestSchema = z.object({
   primaryText: z.string().min(2).max(4000),
@@ -229,10 +232,66 @@ function deterministicToolResult(slug: string, input: FreeToolRequest): FreeTool
   };
 }
 
+/** Renders a computed rank into the shape the public tool UI expects. */
+function rankToToolResult(rank: RankResult, cta: string): FreeToolResult {
+  const pillarSection: FreeToolSection = {
+    title: "Where the points went",
+    body: "Each pillar is scored only on what we could actually read from your profile.",
+    items: rank.pillars.map((pillar) => `${pillar.label}: ${pillar.score}/100`),
+  };
+
+  const fixSection: FreeToolSection = {
+    title: rank.topFixes.length ? "Fix these first" : "Nothing urgent",
+    body: rank.topFixes.length
+      ? "Ordered by how many points each one is worth against how long it takes."
+      : "Every check we run came back clean. Keep the cadence going.",
+    items: rank.topFixes.map((fix) => `${fix.label} — ${fix.fix}`),
+  };
+
+  const evidenceSection: FreeToolSection = {
+    title: "What we saw",
+    body: "The observations this score was calculated from.",
+    items: rank.pillars
+      .flatMap((pillar) => pillar.checks)
+      .filter((entry) => entry.status !== "unknown")
+      .map((entry) => `${entry.status === "pass" ? "OK" : entry.status === "warn" ? "Weak" : "Missing"} — ${entry.evidence}`),
+  };
+
+  const failing = rank.topFixes.length;
+
+  return {
+    title: `${rank.handle} scores ${rank.score}/100.`,
+    score: rank.score,
+    summary: failing
+      ? `We found ${failing} ${failing === 1 ? "thing" : "things"} costing you followers. The list below is ordered by what moves the number most for the least work.`
+      : "Your profile passes every check we run. The remaining growth lever is what you post, not how your profile is set up.",
+    sections: [pillarSection, fixSection, evidenceSection],
+    cta,
+  };
+}
+
 export async function runFreeTool(slug: string, input: FreeToolRequest): Promise<FreeToolResult> {
   const tool = getFreeTool(slug);
   if (!tool) {
     throw new Error("Unknown free tool");
+  }
+
+  // Bluesky reads are public and free, so this tool runs live and ungated.
+  if (slug === "spike-rank-bluesky") {
+    try {
+      const rank = await rankBlueskyProfile(input.primaryText);
+      return rankToToolResult(rank, tool.cta);
+    } catch (error) {
+      if (error instanceof BlueskyNotFoundError) {
+        return {
+          title: "We could not find that account.",
+          summary: `No Bluesky profile matched "${input.primaryText}". Check the handle and try again — it usually looks like yourname.bsky.social.`,
+          sections: [],
+          cta: tool.cta,
+        };
+      }
+      throw error;
+    }
   }
 
   try {

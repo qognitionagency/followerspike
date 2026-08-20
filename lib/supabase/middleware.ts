@@ -17,6 +17,7 @@ const PUBLIC_PATHS = [
   '/terms',
   '/dpa',
   '/subprocessors',
+  '/site-map',
   '/robots.txt',
   '/sitemap.xml',
   '/llms.txt',

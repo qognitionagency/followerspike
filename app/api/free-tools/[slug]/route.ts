@@ -21,29 +21,49 @@ const UtmSchema = z.object({
 
 function schemaForTool(slug: string) {
   const base = freeToolRequestSchema.merge(UtmSchema);
-  if (slug === "linkedin-profile-audit") {
+
+  if (slug === "spike-rank-x") {
     return base.extend({
-      primaryText: z.string().url().refine(
-        (url) => {
-          try {
-            return /(^|\.)linkedin\.com$/i.test(new URL(url).hostname.replace(/^www\./, ""));
-          } catch {
-            return false;
-          }
-        },
-        {
-          message: "Enter a valid LinkedIn profile URL",
-        },
-      ),
+      primaryText: z
+        .string()
+        .trim()
+        .transform((value) => value.replace(/^@/, "").replace(/^(?:https?:\/\/)?(?:www\.)?(?:x|twitter)\.com\//i, ""))
+        .refine((handle) => /^[A-Za-z0-9_]{1,15}$/.test(handle), {
+          message: "Enter an X handle, like @yourhandle",
+        }),
     });
   }
-  if (slug === "linkedin-comment-generator") {
-    return base.extend({ primaryText: z.string().min(20).max(4000) });
+
+  if (slug === "spike-rank-bluesky") {
+    return base.extend({
+      primaryText: z
+        .string()
+        .trim()
+        .transform((value) => value.replace(/^@/, "").replace(/^(?:https?:\/\/)?bsky\.app\/profile\//i, ""))
+        .refine((handle) => /^[a-z0-9][a-z0-9.-]{1,252}[a-z0-9]$/i.test(handle) && handle.includes("."), {
+          message: "Enter a Bluesky handle, like yourname.bsky.social",
+        }),
+    });
   }
-  if (slug === "linkedin-post-generator" || slug === "linkedin-content-calendar") {
-    return base.extend({ primaryText: z.string().min(6).max(1200) });
+
+  if (slug === "spike-rank-linkedin") {
+    return base.extend({
+      primaryText: z
+        .string()
+        .min(120, { message: "Paste more of your profile — at least your headline and About section" })
+        .max(4000),
+    });
   }
-  return base;
+
+  if (slug === "thread-splitter" || slug === "cross-post-rewriter") {
+    return base.extend({ primaryText: z.string().min(40).max(4000) });
+  }
+
+  if (slug === "hook-analyzer") {
+    return base.extend({ primaryText: z.string().min(8).max(400) });
+  }
+
+  return base.extend({ primaryText: z.string().min(6).max(1200) });
 }
 
 export async function POST(request: Request, context: RouteContext) {

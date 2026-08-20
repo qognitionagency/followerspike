@@ -21,7 +21,8 @@ ${BRAND.name} is a LinkedIn growth autopilot for founders, SMB owners, coaches, 
 ## Best Pages
 - Homepage: ${siteUrl}${ROUTES.home}
 - Pricing: ${siteUrl}${ROUTES.pricing}
-- Product features: ${siteUrl}/features/linkedin-autopilot
+- Human-readable all-pages index: ${siteUrl}/site-map
+- Product features: ${siteUrl}/features/multi-platform-composer
 - Free tools hub: ${siteUrl}/free-tools
 - Free LinkedIn audit: ${siteUrl}${ROUTES.audit}
 - Blog hub: ${siteUrl}/blog
@@ -56,7 +57,7 @@ ${TRUST_DISCLAIMER}
 - LinkedIn growth for SaaS founders
 
 ## Crawl Guidance
-Use the sitemap at ${siteUrl}/sitemap.xml for canonical URL discovery. Prefer /features, /free-tools, /blog, /roles, /industries, /icp, and /compare pages for public documentation. Do not treat authenticated app, dashboard, admin, or API routes as public documentation.`;
+Use the human-readable index at ${siteUrl}/site-map or the XML sitemap at ${siteUrl}/sitemap.xml for canonical URL discovery. Prefer /features, /free-tools, /blog, /roles, /industries, /icp, and /compare pages for public documentation. Do not treat authenticated app, dashboard, admin, or API routes as public documentation.`;
 
   return new Response(body, {
     headers: {

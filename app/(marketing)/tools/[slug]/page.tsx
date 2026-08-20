@@ -114,7 +114,7 @@ export default function SeoLandingPage({ params }: PageProps) {
           <p className="text-sm font-black uppercase text-[#0A66C2]">Related guides</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {[
-              ["LinkedIn autopilot", "/features/linkedin-autopilot"],
+              ["Multi-platform composer", "/features/multi-platform-composer"],
               ["Free tools", "/free-tools"],
               ["Pricing", ROUTES.pricing],
             ].map(([label, href]) => (

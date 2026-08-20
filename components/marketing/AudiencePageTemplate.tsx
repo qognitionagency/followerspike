@@ -40,7 +40,7 @@ export function AudiencePageTemplate({ page }: { page: AudiencePage }) {
               Start for free
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/free-tools/linkedin-icp-builder" className="inline-flex h-12 items-center justify-center rounded-md border border-[#d8d2c4] bg-white px-7 text-base font-black text-[#111827] hover:text-[#0a66c2]">
+            <Link href="/free-tools/founder-voice-finder" className="inline-flex h-12 items-center justify-center rounded-md border border-[#d8d2c4] bg-white px-7 text-base font-black text-[#111827] hover:text-[#0a66c2]">
               Build ICP
             </Link>
           </div>

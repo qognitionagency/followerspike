@@ -103,7 +103,7 @@ export default function ComparePage({ params }: PageProps) {
             Start with the free audit or open pricing to compare Essentials, Growth, and Pro.
           </p>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-            <Link href="/free-tools/linkedin-profile-audit" className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-white px-5 text-sm font-black text-[#111827]">
+            <Link href="/free-tools/spike-rank-linkedin" className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-white px-5 text-sm font-black text-[#111827]">
               Run free audit
               <ArrowRight className="h-4 w-4" />
             </Link>

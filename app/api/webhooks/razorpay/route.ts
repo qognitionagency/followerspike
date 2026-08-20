@@ -19,7 +19,9 @@ const webhookSchema = z.object({
             notes: z
               .object({
                 user_id: z.string().uuid().optional(),
-                tier: z.enum(["essentials", "growth", "pro", "starter", "scale"]).optional(),
+                // Legacy values stay accepted so subscriptions created under the old
+                // pricing ladder keep resolving; normalizeSubscriptionTier maps them.
+                tier: z.enum(["starter", "pro", "agency", "essentials", "growth", "scale"]).optional(),
                 billing_cycle: z.enum(["monthly", "annual"]).optional(),
                 currency: z.string().optional(),
               })

@@ -22,7 +22,7 @@ function signupContextQuery(searchParams: Record<string, string | string[] | und
 function nextPath(searchParams: Record<string, string | string[] | undefined>): string {
   const plan = typeof searchParams.plan === "string" ? searchParams.plan : "";
   const billing = searchParams.billing === "annual" ? "annual" : "monthly";
-  if (["essentials", "growth", "pro"].includes(plan)) {
+  if (["starter", "pro", "agency"].includes(plan)) {
     return `/app/settings?plan=${plan}&billing=${billing}`;
   }
 

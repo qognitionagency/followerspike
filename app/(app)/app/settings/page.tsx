@@ -20,7 +20,7 @@ const consentSchema = z.object({
 });
 
 const checkoutSchema = z.object({
-  tier: z.enum(["essentials", "growth", "pro"]),
+  tier: z.enum(["starter", "pro", "agency"]),
   billingCycle: z.enum(["monthly", "annual"]).default("monthly"),
 });
 
