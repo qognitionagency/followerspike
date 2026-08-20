@@ -3,6 +3,7 @@ import { auditProfile, generateComment, generatePost, linkedinUrlSchema, scoreRe
 import { getFreeTool, type FreeToolResult, type FreeToolSection } from "@/lib/marketing/content";
 import { BlueskyNotFoundError } from "@/lib/platforms/bluesky";
 import { rankBlueskyProfile } from "@/lib/rank/bluesky";
+import { rankLinkedInProfile } from "@/lib/rank/linkedin";
 import type { RankResult } from "@/lib/rank/types";
 
 export const freeToolRequestSchema = z.object({
@@ -237,7 +238,13 @@ function rankToToolResult(rank: RankResult, cta: string): FreeToolResult {
   const pillarSection: FreeToolSection = {
     title: "Where the points went",
     body: "Each pillar is scored only on what we could actually read from your profile.",
-    items: rank.pillars.map((pillar) => `${pillar.label}: ${pillar.score}/100`),
+    // A pillar with nothing but "unknown" checks was excluded from the score.
+    // Showing it as 0/100 would read as a failure, which it is not.
+    items: rank.pillars.map((pillar) =>
+      pillar.checks.every((entry) => entry.status === "unknown")
+        ? `${pillar.label}: not measured`
+        : `${pillar.label}: ${pillar.score}/100`,
+    ),
   };
 
   const fixSection: FreeToolSection = {
@@ -274,6 +281,11 @@ export async function runFreeTool(slug: string, input: FreeToolRequest): Promise
   const tool = getFreeTool(slug);
   if (!tool) {
     throw new Error("Unknown free tool");
+  }
+
+  // Scored from text the member pastes; needs no API access and no key.
+  if (slug === "spike-rank-linkedin") {
+    return rankToToolResult(rankLinkedInProfile(input.primaryText), tool.cta);
   }
 
   // Bluesky reads are public and free, so this tool runs live and ungated.
