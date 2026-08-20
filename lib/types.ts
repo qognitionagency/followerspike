@@ -26,6 +26,7 @@ export type UserProfile = {
   consent_version: string | null;
   consecutive_error_count: number;
   onboarded_at: string | null;
+  is_admin: boolean;
   created_at: string;
 };
 

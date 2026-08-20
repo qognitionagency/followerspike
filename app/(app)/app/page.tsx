@@ -10,7 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import { requireAppSession } from "@/lib/session";
-import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db";
 
 type UsageRow = {
   posts_today: number;
@@ -77,50 +77,39 @@ const growthSteps = [
 
 export default async function AppDashboardPage() {
   const session = await requireAppSession();
-  const supabase = await createClient();
+  const sql = db();
 
-  const [{ data: usageData }, { data: logsData }, { data: postsData }, { data: commentsData }, { data: connectionsData }] =
-    await Promise.all([
-      supabase.from("user_daily_usage").select("*").eq("user_id", session.userId).maybeSingle(),
-      supabase
-        .from("automation_log")
-        .select("id, action, outcome, reason, target_name, created_at")
-        .eq("user_id", session.userId)
-        .order("created_at", { ascending: false })
-        .limit(5),
-      supabase
-        .from("posts")
-        .select("id, content, status, scheduled_at")
-        .eq("user_id", session.userId)
-        .in("status", ["draft", "pending_approval", "scheduled"])
-        .order("created_at", { ascending: false })
-        .limit(1),
-      supabase
-        .from("comments")
-        .select("id, generated_comment, target_author_name, target_post_snippet, relevance_score, status")
-        .eq("user_id", session.userId)
-        .in("status", ["pending_approval", "scheduled"])
-        .order("created_at", { ascending: false })
-        .limit(3),
-      supabase
-        .from("connections")
-        .select("id, target_name, target_profile_url, personalized_note, status")
-        .eq("user_id", session.userId)
-        .in("status", ["queued", "pending_approval"])
-        .order("created_at", { ascending: false })
-        .limit(3),
-    ]);
+  // comments and connections belonged to the retired LinkedIn automation product
+  // and no longer exist; the dashboard now reports on posts only.
+  const [usageData, logsData, postsData] = await Promise.all([
+    sql`select * from user_daily_usage where user_id = ${session.userId} limit 1`,
+    sql`
+      select id, action, outcome, reason, target_name, created_at
+      from automation_log
+      where user_id = ${session.userId}
+      order by created_at desc
+      limit 5
+    `,
+    sql`
+      select id, content, status, scheduled_at
+      from posts
+      where user_id = ${session.userId}
+        and status in ('draft', 'pending_approval', 'scheduled')
+      order by created_at desc
+      limit 1
+    `,
+  ]);
 
-  const usage = (usageData as UsageRow | null) ?? {
+  const usage = (usageData[0] as UsageRow | undefined) ?? {
     posts_today: 0,
     comments_today: 0,
     invites_today: 0,
     likes_today: 0,
   };
-  const logs = (logsData as LogRow[] | null) ?? [];
-  const todayPost = ((postsData as PostRow[] | null) ?? [])[0];
-  const comments = (commentsData as CommentRow[] | null) ?? [];
-  const connections = (connectionsData as ConnectionRow[] | null) ?? [];
+  const logs = logsData as unknown as LogRow[];
+  const todayPost = postsData[0] as PostRow | undefined;
+  const comments: CommentRow[] = [];
+  const connections: ConnectionRow[] = [];
   const autopilotActive = session.subscriptionTier === "pro" && session.profile.autopilot_enabled && !session.profile.autopilot_paused;
 
   const stats = [

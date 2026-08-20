@@ -14,8 +14,12 @@ export default function SubprocessorsPage() {
       description="This list reflects the planned production architecture and should be kept current as vendors change."
       sections={[
         {
-          title: "Supabase",
-          body: "Authentication, Postgres, RLS-protected application data, and storage.",
+          title: "Neon",
+          body: "Serverless Postgres holding all application data.",
+        },
+        {
+          title: "Clerk",
+          body: "Authentication, session management, and the hosted sign-in and sign-up flows.",
         },
         {
           title: "Vercel",

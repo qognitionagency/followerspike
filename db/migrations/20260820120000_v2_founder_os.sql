@@ -18,7 +18,10 @@ create extension if not exists vector;
 -- ---------------------------------------------------------------------------
 
 create table if not exists users (
-  id uuid primary key references auth.users(id) on delete cascade,
+  id uuid primary key default gen_random_uuid(),
+  -- Clerk owns identity. This is the join key back to the Clerk user
+  -- ("user_..."); the uuid above stays the foreign key every other table uses.
+  clerk_user_id text unique,
   email text,
   full_name text,
   timezone text not null default 'UTC',
@@ -318,89 +321,21 @@ create table if not exists system_settings (
 );
 
 -- ---------------------------------------------------------------------------
--- Row level security
+-- Authorization
 --
--- Every user-owned table is readable and writable only by its owner. Server
--- code that needs to cross users (cron dispatch, webhooks, admin) uses the
--- service role, which bypasses RLS.
+-- No row level security. Neon exposes no PostgREST endpoint and no anon key, so
+-- the application server holding DATABASE_URL is the only client that can reach
+-- these tables, and auth.uid() does not exist outside Supabase. Every query is
+-- therefore scoped by user in application code — see lib/session.ts, which
+-- resolves the Clerk session to a users row before anything is read.
 -- ---------------------------------------------------------------------------
 
-alter table users enable row level security;
-alter table social_accounts enable row level security;
-alter table posts enable row level security;
-alter table post_variants enable row level security;
-alter table evergreen_items enable row level security;
-alter table voice_profiles enable row level security;
-alter table voice_interviews enable row level security;
-alter table voice_calibrations enable row level security;
-alter table voice_embeddings enable row level security;
-alter table profile_scores enable row level security;
-alter table growth_plans enable row level security;
-alter table growth_plan_items enable row level security;
-alter table automations enable row level security;
-alter table automation_log enable row level security;
-alter table leads enable row level security;
-alter table user_daily_usage enable row level security;
-alter table ai_generations enable row level security;
-alter table system_settings enable row level security;
-
-do $$
-declare
-  t text;
-begin
-  foreach t in array array[
-    'social_accounts','posts','evergreen_items','voice_profiles','voice_interviews',
-    'voice_embeddings','profile_scores','growth_plans','automations','automation_log',
-    'leads','user_daily_usage','ai_generations'
-  ]
-  loop
-    execute format(
-      'create policy %I on %I for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid())',
-      t || '_owner', t
-    );
-  end loop;
-end $$;
-
-create policy users_self on users
-  for all to authenticated using (id = auth.uid()) with check (id = auth.uid());
-
--- Child tables are scoped through their parent's owner.
-create policy post_variants_owner on post_variants
-  for all to authenticated
-  using (exists (select 1 from posts p where p.id = post_variants.post_id and p.user_id = auth.uid()))
-  with check (exists (select 1 from posts p where p.id = post_variants.post_id and p.user_id = auth.uid()));
-
-create policy voice_calibrations_owner on voice_calibrations
-  for all to authenticated
-  using (exists (select 1 from voice_profiles v where v.id = voice_calibrations.voice_profile_id and v.user_id = auth.uid()))
-  with check (exists (select 1 from voice_profiles v where v.id = voice_calibrations.voice_profile_id and v.user_id = auth.uid()));
-
-create policy growth_plan_items_owner on growth_plan_items
-  for all to authenticated
-  using (exists (select 1 from growth_plans g where g.id = growth_plan_items.growth_plan_id and g.user_id = auth.uid()))
-  with check (exists (select 1 from growth_plans g where g.id = growth_plan_items.growth_plan_id and g.user_id = auth.uid()));
-
--- system_settings is administrative: service role only, no authenticated policy.
-
 -- ---------------------------------------------------------------------------
--- Provision an application user row whenever an auth user is created.
+-- User provisioning
+--
+-- Previously a trigger on auth.users. Clerk is the source of identity now, so
+-- the users row is created on demand the first time a Clerk session is seen
+-- (lib/session.ts) and kept in sync by the Clerk webhook.
 -- ---------------------------------------------------------------------------
 
-create or replace function handle_new_auth_user()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  insert into public.users (id, email, full_name)
-  values (new.id, new.email, coalesce(new.raw_user_meta_data->>'full_name', null))
-  on conflict (id) do nothing;
-  return new;
-end;
-$$;
-
-drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function handle_new_auth_user();
+create index if not exists users_clerk_user_id_idx on users (clerk_user_id);

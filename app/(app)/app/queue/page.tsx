@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Check, PenLine, RotateCw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { requireAppSession } from "@/lib/session";
-import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db";
 import type { QueueItem } from "@/lib/types";
 
 const queueActionSchema = z.object({
@@ -23,43 +23,19 @@ async function updateQueueItem(formData: FormData) {
 
   if (!parsed.success) return;
 
-  const supabase = await createClient();
-  const now = new Date();
-  const scheduledAt = new Date(now.getTime() + 60 * 60 * 1000).toISOString();
+  const sql = db();
+  const scheduledAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
 
+  // Only posts remain queueable; comments and connections went with the retired
+  // LinkedIn automation product.
   if (parsed.data.type === "post") {
-    await supabase
-      .from("posts")
-      .update({
-        status: parsed.data.action === "skip" ? "skipped" : "scheduled",
-        approved_by_user: parsed.data.action === "approve",
-        scheduled_at: parsed.data.action === "approve" ? scheduledAt : null,
-      })
-      .eq("id", parsed.data.id)
-      .eq("user_id", session.userId);
-  }
-
-  if (parsed.data.type === "comment") {
-    await supabase
-      .from("comments")
-      .update({
-        status: parsed.data.action === "skip" ? "skipped" : "scheduled",
-        approved_by_user: parsed.data.action === "approve",
-        scheduled_at: parsed.data.action === "approve" ? scheduledAt : null,
-      })
-      .eq("id", parsed.data.id)
-      .eq("user_id", session.userId);
-  }
-
-  if (parsed.data.type === "connection") {
-    await supabase
-      .from("connections")
-      .update({
-        status: parsed.data.action === "skip" ? "withdrawn" : "queued",
-        scheduled_at: parsed.data.action === "approve" ? scheduledAt : null,
-      })
-      .eq("id", parsed.data.id)
-      .eq("user_id", session.userId);
+    await sql`
+      update posts set
+        status = ${parsed.data.action === "skip" ? "skipped" : "scheduled"},
+        approved_by_user = ${parsed.data.action === "approve"},
+        scheduled_at = ${parsed.data.action === "approve" ? scheduledAt : null}
+      where id = ${parsed.data.id} and user_id = ${session.userId}
+    `;
   }
 
   revalidatePath("/app/queue");
@@ -93,32 +69,19 @@ type ConnectionRow = {
 
 export default async function QueuePage() {
   const session = await requireAppSession();
-  const supabase = await createClient();
+  const sql = db();
 
-  const [{ data: postsData }, { data: commentsData }, { data: connectionsData }] = await Promise.all([
-    supabase
-      .from("posts")
-      .select("id, content, status, scheduled_at")
-      .eq("user_id", session.userId)
-      .in("status", ["draft", "pending_approval", "scheduled"])
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("comments")
-      .select("id, generated_comment, target_author_name, target_post_snippet, relevance_score, status, scheduled_at")
-      .eq("user_id", session.userId)
-      .in("status", ["pending_approval", "scheduled"])
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("connections")
-      .select("id, target_name, target_profile_url, personalized_note, status, scheduled_at")
-      .eq("user_id", session.userId)
-      .in("status", ["queued", "pending_approval"])
-      .order("created_at", { ascending: false }),
-  ]);
+  const postsData = await sql`
+    select id, content, status, scheduled_at
+    from posts
+    where user_id = ${session.userId}
+      and status in ('draft', 'pending_approval', 'scheduled')
+    order by created_at desc
+  `;
 
-  const posts = (postsData as PostRow[] | null) ?? [];
-  const comments = (commentsData as CommentRow[] | null) ?? [];
-  const connections = (connectionsData as ConnectionRow[] | null) ?? [];
+  const posts = postsData as unknown as PostRow[];
+  const comments: CommentRow[] = [];
+  const connections: ConnectionRow[] = [];
 
   const items: QueueItem[] = [
     ...posts.map((post) => ({

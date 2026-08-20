@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { normalizeSubscriptionTier } from "@/lib/constants";
-import { createClient } from "@/lib/supabase/server";
+import { databaseConfigured, db } from "@/lib/db";
 import type { AppSession, Subscription, UserProfile } from "@/lib/types";
 
 const FREE_SUBSCRIPTION: Omit<Subscription, "user_id"> = {
@@ -11,45 +12,66 @@ const FREE_SUBSCRIPTION: Omit<Subscription, "user_id"> = {
   trial_ends_at: null,
 };
 
+/**
+ * Resolves the Clerk session to our own users row, creating it on first sight.
+ *
+ * Clerk owns identity, but every table keys off the local uuid, so the Clerk id
+ * is only ever a lookup key. Provisioning happens here rather than in a database
+ * trigger because there is no auth schema on Neon to hang a trigger from.
+ */
+async function resolveUserProfile(clerkUserId: string): Promise<UserProfile | null> {
+  const sql = db();
+
+  const existing = await sql`select * from users where clerk_user_id = ${clerkUserId} limit 1`;
+  if (existing.length) {
+    return existing[0] as UserProfile;
+  }
+
+  const clerkUser = await currentUser();
+  const email = clerkUser?.primaryEmailAddress?.emailAddress ?? clerkUser?.emailAddresses?.[0]?.emailAddress ?? null;
+  const fullName = [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ") || null;
+
+  // on conflict covers the race where two requests provision the same user at once.
+  const created = await sql`
+    insert into users (clerk_user_id, email, full_name)
+    values (${clerkUserId}, ${email}, ${fullName})
+    on conflict (clerk_user_id) do update set email = excluded.email
+    returning *
+  `;
+
+  return (created[0] as UserProfile) ?? null;
+}
+
 export async function getAppSession(): Promise<AppSession | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { userId: clerkUserId } = await auth();
 
-  if (!user?.email) {
+  if (!clerkUserId || !databaseConfigured()) {
     return null;
   }
 
-  const { data: profileData } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  if (!profileData) {
+  const profile = await resolveUserProfile(clerkUserId);
+  if (!profile) {
     return null;
   }
 
-  const { data: subscriptionData } = await supabase
-    .from("subscriptions")
-    .select("*")
-    .eq("user_id", user.id)
-    .in("status", ["active", "trialing", "past_due"])
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const sql = db();
+  const rows = await sql`
+    select * from subscriptions
+    where user_id = ${profile.id}
+      and status in ('active', 'trialing', 'past_due')
+    order by created_at desc
+    limit 1
+  `;
 
-  const profile = profileData as UserProfile;
-  const subscription = (subscriptionData as Subscription | null) ?? {
+  const subscription = (rows[0] as Subscription | undefined) ?? {
     ...FREE_SUBSCRIPTION,
-    user_id: user.id,
+    user_id: profile.id,
   };
   subscription.tier = normalizeSubscriptionTier(subscription.tier);
 
   return {
-    userId: user.id,
-    email: user.email,
+    userId: profile.id,
+    email: profile.email ?? "",
     profile,
     subscription,
     subscriptionTier: subscription.tier,

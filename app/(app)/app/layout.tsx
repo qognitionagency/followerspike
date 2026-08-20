@@ -1,14 +1,12 @@
 import Link from "next/link";
-import { BarChart3, ListChecks, MessageSquareText, Send, Settings, Target, TrendingUp } from "lucide-react";
+import { BarChart3, ListChecks, MessageSquareText, Settings, TrendingUp } from "lucide-react";
 import { requireAppSession } from "@/lib/session";
 import { BRAND } from "@/lib/constants";
 
 const navItems = [
   { href: "/app", label: "Dashboard", icon: BarChart3 },
   { href: "/app/voice", label: "Voice", icon: MessageSquareText },
-  { href: "/app/targets", label: "Audience", icon: Target },
   { href: "/app/queue", label: "Queue", icon: ListChecks },
-  { href: "/app/dms", label: "DMs", icon: Send },
   { href: "/app/settings", label: "Settings", icon: Settings },
 ] as const;
 

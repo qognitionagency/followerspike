@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { analyzeBrandTone, linkedinUrlSchema } from "@/lib/ai/generators";
 import { requireAppSession } from "@/lib/session";
-import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db";
 import type { JsonObject } from "@/lib/types";
 
 const voiceSchema = z.object({
@@ -39,18 +39,17 @@ async function saveVoice(formData: FormData) {
     goal: "build founder-led LinkedIn demand",
   });
 
-  const supabase = await createClient();
-  await supabase
-    .from("users")
-    .update({
-      full_name: parsed.data.fullName,
-      linkedin_url: parsed.data.linkedinUrl,
-      niche: parsed.data.niche,
-      icp_description: parsed.data.icpDescription,
-      brand_voice: brandVoice,
-      onboarded_at: new Date().toISOString(),
-    })
-    .eq("id", session.userId);
+  const sql = db();
+  await sql`
+    update users set
+      full_name = ${parsed.data.fullName},
+      linkedin_url = ${parsed.data.linkedinUrl},
+      niche = ${parsed.data.niche},
+      icp_description = ${parsed.data.icpDescription},
+      brand_voice = ${JSON.stringify(brandVoice)}::jsonb,
+      onboarded_at = now()
+    where id = ${session.userId}
+  `;
 
   revalidatePath("/app/voice");
   redirect("/app/voice?saved=1");

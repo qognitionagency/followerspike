@@ -1,60 +1,63 @@
 import { NextResponse } from "next/server";
 import { requireAppSession } from "@/lib/session";
-import { createClient } from "@/lib/supabase/server";
-
-type UserExportRow = Record<string, unknown> & {
-  linkedin_session_encrypted?: string | null;
-};
-
-function stripSensitiveUserFields(user: UserExportRow | null): Record<string, unknown> | null {
-  if (!user) return null;
-  const { linkedin_session_encrypted: _linkedinSessionEncrypted, ...safeUser } = user;
-  return {
-    ...safeUser,
-    linkedin_session_connected: Boolean(_linkedinSessionEncrypted),
-  };
-}
+import { db } from "@/lib/db";
 
 export async function GET() {
   const session = await requireAppSession();
-  const supabase = await createClient();
+  const sql = db();
+  const userId = session.userId;
 
+  // GDPR export: everything this user owns, across the v2 schema. The retired
+  // LinkedIn automation tables (comments, connections, target_leaders) are gone,
+  // and the v2 tables that replaced them are exported in their place.
   const [
-    { data: user },
-    { data: subscriptions },
-    { data: posts },
-    { data: comments },
-    { data: connections },
-    { data: targetLeaders },
-    { data: automationLog },
-    { data: profileAudits },
+    user,
+    subscriptions,
+    posts,
+    postVariants,
+    socialAccounts,
+    profileScores,
+    voiceProfiles,
+    growthPlans,
+    automations,
+    automationLog,
+    profileAudits,
+    leads,
   ] = await Promise.all([
-    supabase.from("users").select("*").eq("id", session.userId).maybeSingle(),
-    supabase.from("subscriptions").select("*").eq("user_id", session.userId),
-    supabase.from("posts").select("*").eq("user_id", session.userId),
-    supabase.from("comments").select("*").eq("user_id", session.userId),
-    supabase.from("connections").select("*").eq("user_id", session.userId),
-    supabase.from("target_leaders").select("*").eq("user_id", session.userId),
-    supabase.from("automation_log").select("*").eq("user_id", session.userId),
-    supabase.from("profile_audits").select("*").eq("user_id", session.userId),
+    sql`select * from users where id = ${userId} limit 1`,
+    sql`select * from subscriptions where user_id = ${userId}`,
+    sql`select * from posts where user_id = ${userId}`,
+    sql`select v.* from post_variants v join posts p on p.id = v.post_id where p.user_id = ${userId}`,
+    sql`select * from social_accounts where user_id = ${userId}`,
+    sql`select * from profile_scores where user_id = ${userId}`,
+    sql`select * from voice_profiles where user_id = ${userId}`,
+    sql`select * from growth_plans where user_id = ${userId}`,
+    sql`select * from automations where user_id = ${userId}`,
+    sql`select * from automation_log where user_id = ${userId}`,
+    sql`select * from profile_audits where user_id = ${userId}`,
+    sql`select * from leads where user_id = ${userId}`,
   ]);
 
   return NextResponse.json(
     {
       exportedAt: new Date().toISOString(),
       product: "FollowerSpike",
-      user: stripSensitiveUserFields(user as UserExportRow | null),
-      subscriptions: subscriptions ?? [],
-      posts: posts ?? [],
-      comments: comments ?? [],
-      connections: connections ?? [],
-      targetLeaders: targetLeaders ?? [],
-      automationLog: automationLog ?? [],
-      profileAudits: profileAudits ?? [],
+      user: user[0] ?? null,
+      subscriptions,
+      posts,
+      postVariants,
+      socialAccounts,
+      profileScores,
+      voiceProfiles,
+      growthPlans,
+      automations,
+      automationLog,
+      profileAudits,
+      leads,
     },
     {
       headers: {
-        "content-disposition": `attachment; filename="followerspike-export-${session.userId}.json"`,
+        "content-disposition": `attachment; filename="followerspike-export-${userId}.json"`,
       },
     }
   );

@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { PRICING, BRAND } from "@/lib/constants";
 import { createRazorpaySubscription } from "@/lib/billing/razorpay";
 import { requireAppSession } from "@/lib/session";
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { auth, clerkClient } from "@clerk/nextjs/server";
+import { db } from "@/lib/db";
 import { cn } from "@/lib/utils";
 
 const modeSchema = z.object({
@@ -30,8 +30,8 @@ async function updateApprovalMode(formData: FormData) {
   const parsed = modeSchema.safeParse({ approvalMode: formData.get("approvalMode") });
   if (!parsed.success) return;
   if (parsed.data.approvalMode === "auto" && session.subscriptionTier !== "pro") return;
-  const supabase = await createClient();
-  await supabase.from("users").update({ approval_mode: parsed.data.approvalMode }).eq("id", session.userId);
+  const sql = db();
+  await sql`update users set approval_mode = ${parsed.data.approvalMode} where id = ${session.userId}`;
   revalidatePath("/app/settings");
 }
 
@@ -43,49 +43,37 @@ async function updateAutopilotConsent(formData: FormData) {
   if (parsed.data.enabled === "true" && parsed.data.risk !== "accepted") return;
   if (parsed.data.enabled === "true" && session.subscriptionTier !== "pro") return;
 
-  const supabase = await createClient();
+  const sql = db();
   const enabled = parsed.data.enabled === "true";
-  await supabase
-    .from("users")
-    .update({
-      autopilot_enabled: enabled,
-      autopilot_paused: !enabled,
-      autopilot_pause_reason: enabled ? null : "user_paused",
-      autopilot_accepted_at: enabled ? new Date().toISOString() : session.profile.autopilot_accepted_at,
-      risk_acknowledged_at: enabled ? new Date().toISOString() : session.profile.risk_acknowledged_at,
-      consent_version: enabled ? BRAND.consentVersion : session.profile.consent_version,
-    })
-    .eq("id", session.userId);
-  revalidatePath("/app/settings");
-}
-
-async function deleteLinkedInSession() {
-  "use server";
-  const session = await requireAppSession();
-  const supabase = await createClient();
-  await supabase
-    .from("users")
-    .update({
-      linkedin_session_encrypted: null,
-      autopilot_enabled: false,
-      autopilot_paused: true,
-      autopilot_pause_reason: "session_deleted",
-    })
-    .eq("id", session.userId);
+  await sql`
+    update users set
+      autopilot_enabled = ${enabled},
+      autopilot_paused = ${!enabled},
+      autopilot_pause_reason = ${enabled ? null : "user_paused"},
+      autopilot_accepted_at = ${enabled ? new Date().toISOString() : session.profile.autopilot_accepted_at},
+      risk_acknowledged_at = ${enabled ? new Date().toISOString() : session.profile.risk_acknowledged_at},
+      consent_version = ${enabled ? BRAND.consentVersion : session.profile.consent_version}
+    where id = ${session.userId}
+  `;
   revalidatePath("/app/settings");
 }
 
 async function deleteAccount() {
   "use server";
   const session = await requireAppSession();
-  const supabase = createAdminClient();
-  await supabase.from("automation_log").insert({
-    user_id: session.userId,
-    action: "profile_scrape",
-    outcome: "success",
-    reason: "account_deletion_requested",
-  });
-  await supabase.auth.admin.deleteUser(session.userId);
+  const sql = db();
+  await sql`
+    insert into automation_log (user_id, action, outcome, reason)
+    values (${session.userId}, ${"profile_scrape"}, ${"success"}, ${"account_deletion_requested"})
+  `;
+
+  const { userId: clerkUserId } = await auth();
+  if (clerkUserId) {
+    const clerk = await clerkClient();
+    await clerk.users.deleteUser(clerkUserId);
+  }
+  // Every user-owned table cascades from users.id.
+  await sql`delete from users where id = ${session.userId}`;
   redirect("/");
 }
 
@@ -263,18 +251,12 @@ export default async function SettingsPage({
       <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
         <h2 className="text-xl font-black text-[#191919]">Privacy controls</h2>
         <p className="mt-2 text-sm leading-6 text-[#666]">
-          Export your data, delete stored LinkedIn session material, or remove the account entirely.
+          Export your data or remove the account entirely.
         </p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <Button asChild className="rounded-full bg-[#EEF3F8] font-bold text-[#0A66C2] hover:bg-[#DDECF7]">
             <a href="/api/privacy/export">Download Data Export</a>
           </Button>
-          <form action={deleteLinkedInSession}>
-            <Button className="w-full rounded-full bg-amber-600 font-bold text-white hover:bg-amber-700">
-              <Trash2 className="h-4 w-4" />
-              Delete LinkedIn Session
-            </Button>
-          </form>
           <form action={deleteAccount}>
             <Button className="w-full rounded-full bg-red-600 font-bold text-white hover:bg-red-700">
               <Trash2 className="h-4 w-4" />

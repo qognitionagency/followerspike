@@ -19,7 +19,7 @@ export default function SecurityPage() {
         },
         {
           title: "Least Privilege",
-          body: "User-facing reads and writes go through Supabase RLS. Subscription, webhook, audit lead, and automation log writes use service-role code paths only.",
+          body: "The database is reachable only by the application server; there is no public data endpoint and no browser-held database key. Every query is scoped to the signed-in user in server code, and Clerk verifies the session before any of it runs.",
         },
         {
           title: "Verified Integrations",

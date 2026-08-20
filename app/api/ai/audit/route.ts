@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auditProfile, linkedinUrlSchema } from "@/lib/ai/generators";
 import { requireAppSession } from "@/lib/session";
-import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db";
 
 const AuditBodySchema = z.object({
   linkedinUrl: linkedinUrlSchema,
@@ -16,21 +16,27 @@ export async function POST(request: Request) {
     const session = await requireAppSession();
     const body = AuditBodySchema.parse((await request.json()) as unknown);
     const audit = await auditProfile(body);
-    const supabase = await createClient();
-
-    await supabase.from("profile_audits").insert({
-      user_id: session.userId,
-      linkedin_url: body.linkedinUrl,
-      score: audit.score,
-      is_empty_profile: audit.isEmptyProfile,
-      summary: audit.summary,
-      headline_suggestion: audit.headlineSuggestion,
-      about_suggestion: audit.aboutSuggestion,
-      photo_banner_checklist: audit.photoBannerChecklist,
-      keyword_gaps: audit.keywordGaps,
-      content_plan: audit.contentPlan,
-      risk_flags: audit.riskFlags,
-    });
+    const sql = db();
+    await sql`
+      insert into profile_audits (
+        user_id, linkedin_url, score, is_empty_profile, summary,
+        headline_suggestion, about_suggestion, photo_banner_checklist,
+        keyword_gaps, content_plan, risk_flags
+      )
+      values (
+        ${session.userId},
+        ${body.linkedinUrl},
+        ${audit.score},
+        ${audit.isEmptyProfile},
+        ${audit.summary},
+        ${audit.headlineSuggestion},
+        ${audit.aboutSuggestion},
+        ${audit.photoBannerChecklist},
+        ${audit.keywordGaps},
+        ${audit.contentPlan},
+        ${audit.riskFlags}
+      )
+    `;
 
     return NextResponse.json(audit);
   } catch (error) {

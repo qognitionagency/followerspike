@@ -12,7 +12,6 @@ export const ROUTES = {
   pricing: "/pricing",
   login: "/login",
   signup: "/signup",
-  callback: "/callback",
   app: "/app",
   audit: "/tools/linkedin-audit",
   trust: "/trust",

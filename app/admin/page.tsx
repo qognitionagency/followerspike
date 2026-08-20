@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { AlertTriangle, PauseCircle, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db";
+import { getAppSession } from "@/lib/session";
 
 const pauseSchema = z.object({
   paused: z.enum(["true", "false"]),
@@ -12,15 +13,8 @@ const pauseSchema = z.object({
 
 async function setGlobalPause(formData: FormData) {
   "use server";
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/app");
-
-  const { data: profile } = await supabase.from("users").select("is_admin").eq("id", user.id).maybeSingle();
-  if (!profile?.is_admin) redirect("/app");
+  const session = await getAppSession();
+  if (!session?.profile.is_admin) redirect("/app");
 
   const parsed = pauseSchema.safeParse({
     paused: formData.get("paused"),
@@ -28,14 +22,19 @@ async function setGlobalPause(formData: FormData) {
   });
   if (!parsed.success) return;
 
-  await supabase.from("system_settings").upsert({
-    key: "automation_global_paused",
-    value: {
-      paused: parsed.data.paused === "true",
-      reason: parsed.data.reason || null,
-    },
-    updated_by: user.id,
-  });
+  const value = {
+    paused: parsed.data.paused === "true",
+    reason: parsed.data.reason || null,
+  };
+
+  const sql = db();
+  await sql`
+    insert into system_settings (key, value, updated_by)
+    values (${"automation_global_paused"}, ${JSON.stringify(value)}::jsonb, ${session.userId})
+    on conflict (key) do update set
+      value = excluded.value,
+      updated_by = excluded.updated_by
+  `;
 
   revalidatePath("/admin");
 }
@@ -52,25 +51,15 @@ function isPauseSetting(value: unknown): value is PauseSetting {
 }
 
 export default async function AdminPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const session = await getAppSession();
 
-  const { data: profile } = user
-    ? await supabase.from("users").select("is_admin").eq("id", user.id).maybeSingle()
-    : { data: null };
-
-  if (!user || !profile?.is_admin) {
+  if (!session?.profile.is_admin) {
     redirect("/app");
   }
 
-  const { data: settingData } = await supabase
-    .from("system_settings")
-    .select("value")
-    .eq("key", "automation_global_paused")
-    .maybeSingle();
-  const pause = isPauseSetting(settingData?.value) ? settingData.value : { paused: false, reason: null };
+  const sql = db();
+  const rows = await sql`select value from system_settings where key = 'automation_global_paused' limit 1`;
+  const pause = isPauseSetting(rows[0]?.value) ? rows[0].value : { paused: false, reason: null };
 
   return (
     <main className="min-h-screen bg-[#F4F2EE] p-8 text-[#191919]">

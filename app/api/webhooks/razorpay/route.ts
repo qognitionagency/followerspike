@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { db } from "@/lib/db";
 import { verifyRazorpayWebhookSignature } from "@/lib/billing/razorpay";
 import { normalizeSubscriptionTier } from "@/lib/constants";
 
@@ -72,23 +72,37 @@ export async function POST(request: Request) {
   }
 
   const tier = normalizeSubscriptionTier(subscription.notes.tier);
-  const supabase = createAdminClient();
-  const { error } = await supabase.from("subscriptions").upsert(
-    {
-      user_id: subscription.notes.user_id,
-      razorpay_subscription_id: subscription.id,
-      razorpay_plan_id: subscription.plan_id,
-      tier,
-      billing_cycle: subscription.notes.billing_cycle ?? "monthly",
-      currency: subscription.notes.currency ?? "USD",
-      status: toStatus(subscription.status),
-      current_period_start: toTimestamp(subscription.current_start),
-      current_period_end: toTimestamp(subscription.current_end),
-    },
-    { onConflict: "razorpay_subscription_id" }
-  );
-
-  if (error) {
+  try {
+    const sql = db();
+    // Razorpay retries webhooks, so the upsert on razorpay_subscription_id is
+    // what keeps a redelivery from creating a second subscription row.
+    await sql`
+      insert into subscriptions (
+        user_id, razorpay_subscription_id, razorpay_plan_id, tier, billing_cycle,
+        currency, status, current_period_start, current_period_end
+      )
+      values (
+        ${subscription.notes.user_id ?? null},
+        ${subscription.id},
+        ${subscription.plan_id ?? null},
+        ${tier},
+        ${subscription.notes.billing_cycle ?? "monthly"},
+        ${subscription.notes.currency ?? "USD"},
+        ${toStatus(subscription.status)},
+        ${toTimestamp(subscription.current_start)},
+        ${toTimestamp(subscription.current_end)}
+      )
+      on conflict (razorpay_subscription_id) do update set
+        razorpay_plan_id = excluded.razorpay_plan_id,
+        tier = excluded.tier,
+        billing_cycle = excluded.billing_cycle,
+        currency = excluded.currency,
+        status = excluded.status,
+        current_period_start = excluded.current_period_start,
+        current_period_end = excluded.current_period_end,
+        updated_at = now()
+    `;
+  } catch {
     return NextResponse.json({ error: "Subscription sync failed" }, { status: 500 });
   }
 

@@ -8,9 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "seed:seo": "tsx scripts/seed-seo-pages.ts",
-    "rank:smoke": "tsx scripts/rank-smoke.ts"
+    "rank:smoke": "tsx scripts/rank-smoke.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.39.6",
     "@google/genai": "^2.3.0",
     "@hookform/resolvers": "^5.2.2",
     "@neondatabase/serverless": "^1.1.0",
@@ -21,8 +23,6 @@
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-switch": "^1.1.1",
     "@radix-ui/react-tabs": "^1.1.1",
-    "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.47.16",
     "@upstash/qstash": "^2.11.0",
     "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",
@@ -44,6 +44,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "4.1.11",
     "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^20",

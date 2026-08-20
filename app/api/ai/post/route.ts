@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { generatePost } from "@/lib/ai/generators";
 import { requireAppSession } from "@/lib/session";
-import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db";
 
 const PostBodySchema = z.object({
   topicSeed: z.string().min(3).max(300),
@@ -21,24 +21,24 @@ export async function POST(request: Request) {
       body.topicSeed
     );
 
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("posts")
-      .insert({
-        user_id: session.userId,
-        content: generated.content,
-        topic_seed: body.topicSeed,
-        status: "pending_approval",
-        source_prompt: generated.rationale,
-      })
-      .select("id, content, status")
-      .single();
+    const sql = db();
+    const rows = await sql`
+      insert into posts (user_id, content, topic_seed, status, source_prompt)
+      values (
+        ${session.userId},
+        ${generated.content},
+        ${body.topicSeed},
+        ${"pending_approval"},
+        ${generated.rationale}
+      )
+      returning id, content, status
+    `;
 
-    if (error) {
+    if (!rows.length) {
       return NextResponse.json({ error: "Could not save generated post" }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json(rows[0]);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.flatten() }, { status: 400 });

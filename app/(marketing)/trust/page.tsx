@@ -23,7 +23,7 @@ export default function TrustPage() {
         },
         {
           title: "Security Foundations",
-          body: "LinkedIn sessions are encrypted with AES-256-GCM, Supabase RLS protects user records, webhooks are signature-verified, and sensitive writes use server-side service-role flows.",
+          body: "Sensitive payloads are encrypted with AES-256-GCM, user records are reachable only through server-side code that scopes every query to the signed-in Clerk session, and webhooks are signature-verified.",
         },
         {
           title: "No Fake Certification Claims",

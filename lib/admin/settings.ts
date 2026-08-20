@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import { databaseConfigured, db } from "@/lib/db";
 
 type AutomationPauseSetting = {
   paused: boolean;
@@ -16,12 +16,13 @@ export async function getAutomationGlobalPause(): Promise<AutomationPauseSetting
     return { paused: true, reason: "env_global_pause" };
   }
 
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("system_settings")
-    .select("value")
-    .eq("key", "automation_global_paused")
-    .maybeSingle();
+  if (!databaseConfigured()) {
+    return { paused: false, reason: null };
+  }
 
-  return isPauseSetting(data?.value) ? data.value : { paused: false, reason: null };
+  const sql = db();
+  const rows = await sql`select value from system_settings where key = 'automation_global_paused' limit 1`;
+  const value = rows[0]?.value;
+
+  return isPauseSetting(value) ? value : { paused: false, reason: null };
 }

@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ROUTES } from "@/lib/constants";
 import { auditProfile, linkedinUrlSchema } from "@/lib/ai/generators";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { db } from "@/lib/db";
 import { sendAuditLeadEmail } from "@/lib/email/resend";
 
 export const metadata: Metadata = {
@@ -62,24 +62,28 @@ async function runAudit(formData: FormData) {
     redirect(`${ROUTES.audit}?error=invalid`);
   }
 
-  const supabase = createAdminClient();
-  const { data: lead, error: leadError } = await supabase
-    .from("audit_leads")
-    .insert({
-      email: parsed.data.email,
-      linkedin_url: parsed.data.linkedinUrl,
-      goal: parsed.data.goal,
-      utm_source: parsed.data.utm_source,
-      utm_medium: parsed.data.utm_medium,
-      utm_campaign: parsed.data.utm_campaign,
-      utm_term: parsed.data.utm_term,
-      utm_content: parsed.data.utm_content,
-      status: "processing",
-    })
-    .select("id")
-    .single();
+  const sql = db();
+  const leadRows = await sql`
+    insert into audit_leads (
+      email, linkedin_url, goal, utm_source, utm_medium, utm_campaign,
+      utm_term, utm_content, status
+    )
+    values (
+      ${parsed.data.email},
+      ${parsed.data.linkedinUrl},
+      ${parsed.data.goal ?? null},
+      ${parsed.data.utm_source ?? null},
+      ${parsed.data.utm_medium ?? null},
+      ${parsed.data.utm_campaign ?? null},
+      ${parsed.data.utm_term ?? null},
+      ${parsed.data.utm_content ?? null},
+      ${"processing"}
+    )
+    returning id
+  `;
 
-  if (leadError || !lead) {
+  const lead = leadRows[0] as { id: string } | undefined;
+  if (!lead) {
     redirect(`${ROUTES.audit}?error=server`);
   }
 
@@ -88,19 +92,26 @@ async function runAudit(formData: FormData) {
     goal: parsed.data.goal,
   });
 
-  await supabase.from("profile_audits").insert({
-    audit_lead_id: lead.id,
-    linkedin_url: parsed.data.linkedinUrl,
-    score: audit.score,
-    is_empty_profile: audit.isEmptyProfile,
-    summary: audit.summary,
-    headline_suggestion: audit.headlineSuggestion,
-    about_suggestion: audit.aboutSuggestion,
-    photo_banner_checklist: audit.photoBannerChecklist,
-    keyword_gaps: audit.keywordGaps,
-    content_plan: audit.contentPlan,
-    risk_flags: audit.riskFlags,
-  });
+  await sql`
+    insert into profile_audits (
+      audit_lead_id, linkedin_url, score, is_empty_profile, summary,
+      headline_suggestion, about_suggestion, photo_banner_checklist,
+      keyword_gaps, content_plan, risk_flags
+    )
+    values (
+      ${lead.id},
+      ${parsed.data.linkedinUrl},
+      ${audit.score},
+      ${audit.isEmptyProfile},
+      ${audit.summary},
+      ${audit.headlineSuggestion},
+      ${audit.aboutSuggestion},
+      ${audit.photoBannerChecklist},
+      ${audit.keywordGaps},
+      ${audit.contentPlan},
+      ${audit.riskFlags}
+    )
+  `;
 
   let delivery = "sent";
   try {
@@ -111,10 +122,10 @@ async function runAudit(formData: FormData) {
       leadId: lead.id,
     });
     delivery = emailDelivery.status === "sent" ? "sent" : "local";
-    await supabase.from("audit_leads").update({ status: emailDelivery.status === "sent" ? "completed" : "email_skipped" }).eq("id", lead.id);
+    await sql`update audit_leads set status = ${emailDelivery.status === "sent" ? "completed" : "email_skipped"} where id = ${lead.id}`;
   } catch {
     delivery = "failed";
-    await supabase.from("audit_leads").update({ status: "email_failed" }).eq("id", lead.id);
+    await sql`update audit_leads set status = ${"email_failed"} where id = ${lead.id}`;
   }
 
   redirect(`${ROUTES.audit}?submitted=1&score=${audit.score}&empty=${audit.isEmptyProfile ? "1" : "0"}&delivery=${delivery}`);
