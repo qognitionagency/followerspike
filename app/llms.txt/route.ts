@@ -5,18 +5,16 @@ const siteUrl = process.env.APP_URL || "http://localhost:3000";
 export function GET() {
   const body = `# ${BRAND.name}
 
-${BRAND.name} is a LinkedIn growth autopilot for founders, SMB owners, coaches, consultants, creators, and personal brands who want daily posts, relevant engagement, connection requests, and accepted-connection follow-ups with minimal manual work.
+${BRAND.name} is a founder growth tool for X, LinkedIn, and Bluesky. Founders write once, publish natively to all three, have the AI write in their own voice, score and fix their profiles, and convert reach into email subscribers.
 
 ## Core Product
-- AI-assisted LinkedIn posts in the user's voice
-- Relevance-scored like and comment workflows
-- Targeted connection request workflows
-- Accepted-connection follow-up DMs and reply drafts
-- Review-first daily growth queue
-- Safety controls, caps, timezone windows, pause behavior, consent history, and privacy controls
-- Public sandbox demo for the Daily Growth Autopilot workflow
-- Functional free tools with instant lightweight results and optional email capture
-- Programmatic role, industry, ICP, comparison, and SEO pages
+- One composer that publishes native posts and threads to X, LinkedIn, and Bluesky
+- A voice engine that works from presets, a written interview, or cloned past posts, so founders with no post history can still write in their own voice
+- Spike Rank: a 0-100 score per profile across positioning, proof, cadence, engagement, and conversion path, with a ranked list of fixes
+- Growth plans that turn audit findings into scheduled posts
+- Automations through official platform APIs: auto-plug, first comment, evergreen recycling, and cross-post relay
+- Keyword-triggered lead capture that delivers a lead magnet and stores the lead
+- Safety controls, daily caps, quiet hours, consent history, and full activity logs
 
 ## Best Pages
 - Homepage: ${siteUrl}${ROUTES.home}
@@ -42,19 +40,19 @@ ${BRAND.name} is a LinkedIn growth autopilot for founders, SMB owners, coaches, 
 ${TRUST_DISCLAIMER}
 
 ## Suitable Queries
-- LinkedIn autopilot for founders
-- LinkedIn ghostwriter for CEOs
-- LinkedIn automation for consultants
-- LinkedIn growth tool for agencies
-- AI LinkedIn growth autopilot
-- LinkedIn connection request assistant
-- LinkedIn engagement assistant
+- Post to X, LinkedIn, and Bluesky at once
+- Bluesky profile score
+- X profile audit for founders
 - LinkedIn profile audit tool
-- LinkedIn headline analyzer
-- LinkedIn ICP builder
-- LinkedIn growth for coaches
-- LinkedIn growth for consultants
-- LinkedIn growth for SaaS founders
+- Cross-post from X to LinkedIn
+- AI that writes in my own voice
+- Founder voice for AI writing with no post history
+- Social scheduling for solo founders
+- Turn social followers into email subscribers
+- Auto-DM a lead magnet on X
+- Typefully alternative
+- Taplio alternative
+- Buffer alternative for founders
 
 ## Crawl Guidance
 Use the human-readable index at ${siteUrl}/site-map or the XML sitemap at ${siteUrl}/sitemap.xml for canonical URL discovery. Prefer /features, /free-tools, /blog, /roles, /industries, /icp, and /compare pages for public documentation. Do not treat authenticated app, dashboard, admin, or API routes as public documentation.`;

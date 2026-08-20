@@ -67,9 +67,9 @@ export async function requireAppSession(): Promise<AppSession> {
 export function canUseTier(current: AppSession["subscriptionTier"], required: AppSession["subscriptionTier"]): boolean {
   const rank: Record<AppSession["subscriptionTier"], number> = {
     free: 0,
-    essentials: 1,
-    growth: 2,
-    pro: 3,
+    starter: 1,
+    pro: 2,
+    agency: 3,
   };
   return rank[current] >= rank[required];
 }
