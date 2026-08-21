@@ -12,6 +12,7 @@ import { db, databaseConfigured } from "@/lib/db";
 import { complete, defer, fail, type Job } from "@/lib/jobs/queue";
 import { getAutomationGlobalPause } from "@/lib/admin/settings";
 import { publishVariant } from "@/lib/jobs/publish";
+import { evergreenRefill } from "@/lib/jobs/evergreen";
 
 /**
  * A handler does the work and throws on failure. It does not touch job state:
@@ -76,8 +77,7 @@ export const jobHandlers: Record<JobKind, JobHandler | null> = {
   auto_plug: null,
   /** TODO(automation wave): drop the prepared first comment under a published post. */
   first_comment: null,
-  /** TODO(automation wave): top the evergreen queue back up from evergreen_items. */
-  evergreen_refill: null,
+  evergreen_refill: (job) => evergreenRefill(job),
   /** TODO(automation wave): mirror a published post to the other connected platforms. */
   cross_post_relay: null,
 
