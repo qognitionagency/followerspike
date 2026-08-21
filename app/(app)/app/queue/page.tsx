@@ -50,25 +50,6 @@ type PostRow = {
   scheduled_at: string | null;
 };
 
-type CommentRow = {
-  id: string;
-  generated_comment: string;
-  target_author_name: string | null;
-  target_post_snippet: string | null;
-  relevance_score: number | null;
-  status: string;
-  scheduled_at: string | null;
-};
-
-type ConnectionRow = {
-  id: string;
-  target_name: string | null;
-  target_profile_url: string;
-  personalized_note: string | null;
-  status: string;
-  scheduled_at: string | null;
-};
-
 export default async function QueuePage() {
   const session = await requireAppSession();
   const sql = db();
@@ -83,37 +64,16 @@ export default async function QueuePage() {
   `;
 
   const posts = postsData as unknown as PostRow[];
-  const comments: CommentRow[] = [];
-  const connections: ConnectionRow[] = [];
 
   const items: QueueItem[] = [
     ...posts.map((post) => ({
       id: post.id,
       type: "post" as const,
-      title: "LinkedIn post",
+      title: "Post",
       body: post.content,
       target: null,
       status: post.status,
       scheduledAt: post.scheduled_at,
-    })),
-    ...comments.map((comment) => ({
-      id: comment.id,
-      type: "comment" as const,
-      title: `Comment${comment.target_author_name ? ` on ${comment.target_author_name}` : ""}`,
-      body: comment.generated_comment,
-      target: comment.target_post_snippet,
-      status: comment.status,
-      scheduledAt: comment.scheduled_at,
-      score: comment.relevance_score ?? undefined,
-    })),
-    ...connections.map((connection) => ({
-      id: connection.id,
-      type: "connection" as const,
-      title: `Connection request${connection.target_name ? ` to ${connection.target_name}` : ""}`,
-      body: connection.personalized_note || "Connection request queued without a note.",
-      target: connection.target_profile_url,
-      status: connection.status,
-      scheduledAt: connection.scheduled_at,
     })),
   ];
 
@@ -121,7 +81,7 @@ export default async function QueuePage() {
     <div className="space-y-6">
       <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
         <p className="text-sm font-black uppercase text-[#0A66C2]">Daily growth queue</p>
-        <h1 className="mt-2 text-3xl font-black text-[#191919]">Approve posts, engagement, and connections.</h1>
+        <h1 className="mt-2 text-3xl font-black text-[#191919]">Approve what goes out.</h1>
         <p className="mt-2 text-sm leading-6 text-[#666]">
           Review mode builds trust before live execution. Autopilot can still pause when daily limits, timing windows, or account checks say no.
         </p>

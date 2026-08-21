@@ -7,7 +7,6 @@ import {
   ShieldCheck,
   Sparkles,
   UserPlus,
-  Users,
 } from "lucide-react";
 import { requireAppSession } from "@/lib/session";
 import { db } from "@/lib/db";
@@ -33,23 +32,6 @@ type PostRow = {
   content: string;
   status: string;
   scheduled_at: string | null;
-};
-
-type CommentRow = {
-  id: string;
-  generated_comment: string;
-  target_author_name: string | null;
-  target_post_snippet: string | null;
-  relevance_score: number | null;
-  status: string;
-};
-
-type ConnectionRow = {
-  id: string;
-  target_name: string | null;
-  target_profile_url: string;
-  personalized_note: string | null;
-  status: string;
 };
 
 const growthSteps = [
@@ -109,8 +91,6 @@ export default async function AppDashboardPage() {
   };
   const logs = logsData as unknown as LogRow[];
   const todayPost = postsData[0] as PostRow | undefined;
-  const comments: CommentRow[] = [];
-  const connections: ConnectionRow[] = [];
   const autopilotActive = session.subscriptionTier === "pro" && session.profile.autopilot_enabled && !session.profile.autopilot_paused;
 
   const stats = [
@@ -180,56 +160,9 @@ export default async function AppDashboardPage() {
             </p>
           </article>
 
-          <article className="rounded-2xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
-            <p className="text-sm font-black uppercase text-[#0A66C2]">Posts to like and comment on</p>
-            <div className="mt-4 divide-y divide-[#E2E2E2]">
-              {comments.length > 0 ? (
-                comments.map((comment) => (
-                  <div key={comment.id} className="py-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="font-black text-[#191919]">{comment.target_author_name || "Target conversation"}</p>
-                      <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-black text-green-700">
-                        {comment.relevance_score ?? 7}/10 fit
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-[#666]">{comment.target_post_snippet || "Relevant industry post queued."}</p>
-                    <p className="mt-3 rounded-xl bg-[#F8FAFC] p-3 text-sm leading-6 text-[#333]">{comment.generated_comment}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="py-8 text-center text-sm text-[#666]">No engagement items yet. Add target leaders or generate the next queue.</p>
-              )}
-            </div>
-          </article>
         </div>
 
         <div className="space-y-4">
-          <article className="rounded-2xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
-            <p className="text-sm font-black uppercase text-[#0A66C2]">People to connect with</p>
-            <div className="mt-4 divide-y divide-[#E2E2E2]">
-              {connections.length > 0 ? (
-                connections.map((connection) => (
-                  <div key={connection.id} className="py-4">
-                    <div className="flex items-start gap-3">
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#EEF3F8] text-[#0A66C2]">
-                        <Users className="h-5 w-5" />
-                      </span>
-                      <div>
-                        <p className="font-black text-[#191919]">{connection.target_name || "Target profile"}</p>
-                        <p className="mt-1 break-all text-sm text-[#666]">{connection.target_profile_url}</p>
-                        <p className="mt-3 text-sm leading-6 text-[#333]">
-                          {connection.personalized_note || "Connection request queued without a note."}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="py-8 text-center text-sm text-[#666]">No connection requests queued. Add audience and seed leaders to begin.</p>
-              )}
-            </div>
-          </article>
-
           <article className="rounded-2xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
             <p className="text-sm font-black uppercase text-[#0A66C2]">Growth loop</p>
             <div className="mt-5 grid gap-3">

@@ -1,4 +1,4 @@
-import type { ApprovalMode, AutomationAction, SubscriptionTier } from "@/lib/constants";
+import type { ApprovalMode, SubscriptionTier } from "@/lib/constants";
 
 export type JsonObject = Record<string, unknown>;
 
@@ -49,7 +49,8 @@ export type AppSession = {
   subscriptionTier: SubscriptionTier;
 };
 
-export type QueueItemType = "post" | "comment" | "connection";
+// comments and connections went with the retired LinkedIn automation product.
+export type QueueItemType = "post";
 
 export type QueueItem = {
   id: string;
@@ -60,25 +61,6 @@ export type QueueItem = {
   status: string;
   scheduledAt: string | null;
   score?: number;
-};
-
-export type WorkerAction = AutomationAction;
-
-export type WorkerJob = {
-  jobId: string;
-  userId: string;
-  action: WorkerAction;
-  targetUrl?: string;
-  payload: JsonObject;
-  scheduledAt: string;
-  safety: {
-    minDelaySeconds: number;
-    maxDelaySeconds: number;
-    windowStartHour: number;
-    windowEndHour: number;
-    approvalMode: ApprovalMode;
-    dailyLimit: number;
-  };
 };
 
 export type AuditResult = {

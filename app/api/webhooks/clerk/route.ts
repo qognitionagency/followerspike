@@ -48,5 +48,26 @@ export async function POST(request: NextRequest) {
     await sql`delete from users where clerk_user_id = ${event.data.id}`;
   }
 
+  // Clerk Organizations owns membership; `workspaces` only mirrors the org so
+  // the rest of the schema has a local uuid to foreign-key against. Same
+  // structural idempotency as the user events above — an upsert or a delete, so
+  // a redelivery changes nothing.
+  if (event.type === "organization.created" || event.type === "organization.updated") {
+    const data = event.data;
+    await sql`
+      insert into workspaces (clerk_org_id, name, slug)
+      values (${data.id}, ${data.name}, ${data.slug ?? null})
+      on conflict (clerk_org_id) do update set
+        name = excluded.name,
+        slug = excluded.slug,
+        updated_at = now()
+    `;
+  }
+
+  if (event.type === "organization.deleted" && event.data.id) {
+    // Everything workspace-owned cascades from workspaces.id.
+    await sql`delete from workspaces where clerk_org_id = ${event.data.id}`;
+  }
+
   return NextResponse.json({ received: true });
 }
