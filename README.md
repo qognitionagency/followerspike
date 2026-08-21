@@ -19,9 +19,9 @@ One-liner: "Grow your LinkedIn account on autopilot: posts, likes, comments, con
 
 1. Copy `.env.example` to `.env.local`.
 2. Fill database, AI, billing, queue, email, worker, and session encryption values.
-3. Install dependencies with `npm install`.
-4. Run the app with `npm run dev`.
-5. Seed SEO pages with `npm run seed:seo`.
+3. Install dependencies with `pnpm install`.
+4. Run the app with `pnpm dev`.
+5. Seed SEO pages with `pnpm seed:seo`.
 
 ## Production Integration Notes
 
@@ -30,8 +30,8 @@ One-liner: "Grow your LinkedIn account on autopilot: posts, likes, comments, con
 - Razorpay: create USD monthly and annual subscription plans in Razorpay, then set the six `RAZORPAY_PLAN_*_USD` values. Razorpay supports international subscription currencies, while settlement handling depends on your Razorpay account configuration.
 - Database: Neon serverless Postgres is the only datastore. Set `DATABASE_URL` to the pooled connection string and apply `db/migrations/*.sql` in filename order with `psql "$DATABASE_URL" -f <file>`.
 - Auth: Clerk. Set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`. `users.clerk_user_id` joins the Clerk identity to the local `users` row, which is provisioned on first sign-in by `lib/session.ts`; every other table keys off the local uuid.
-- Spike Rank: the Bluesky ranker reads Bluesky's public AppView and needs no credentials. Rank history is stored in `profile_scores`; without `DATABASE_URL` a rank still returns but nothing is recorded. Smoke-test with `npm run rank:smoke -- yourname.bsky.social`.
-- Tests: `npm run test:e2e` runs the Playwright suite against a production build — public pages, nav links, auth boundaries, and the free-tool funnel.
+- Spike Rank: the Bluesky ranker reads Bluesky's public AppView and needs no credentials. Rank history is stored in `profile_scores`; without `DATABASE_URL` a rank still returns but nothing is recorded. Smoke-test with `pnpm rank:smoke -- yourname.bsky.social`.
+- Tests: `pnpm test:e2e` runs the Playwright suite against a production build — public pages, nav links, auth boundaries, and the free-tool funnel.
 
 ## Safety Positioning
 

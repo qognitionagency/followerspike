@@ -34,7 +34,7 @@ export default defineConfig({
   ],
   webServer: {
     // Built output rather than dev: this is the code that actually ships.
-    command: `npm run start -- --port ${PORT}`,
+    command: `pnpm start --port ${PORT}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

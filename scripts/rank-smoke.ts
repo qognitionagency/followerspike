@@ -1,6 +1,6 @@
 /**
  * Smoke-test Spike Rank against a live public profile.
- *   npx tsx scripts/rank-smoke.ts bsky.app
+ *   pnpm tsx scripts/rank-smoke.ts bsky.app
  */
 import { rankBlueskyProfile } from "@/lib/rank/bluesky";
 import { getRankTrend, recordRankSnapshot } from "@/lib/rank/store";

@@ -22,14 +22,20 @@ has not been built yet. Most open work below comes from that gap.
 
 ## Commands
 
-    npm run dev              # local dev
-    npm run build            # production build
-    npm run test:e2e         # Playwright, needs a prod build + Clerk dev creds
-    npm run seed:seo         # seed static marketing/SEO pages
-    npm run rank:smoke -- yourname.bsky.social
-    npx tsc --noEmit         # typecheck — currently clean
+**pnpm is the package manager — never `npm` or `yarn`.** `package.json` pins it
+via `packageManager`, and `pnpm.onlyBuiltDependencies` lists the packages
+allowed to run install scripts (pnpm 10 blocks them by default; Tailwind's
+`@tailwindcss/oxide` and `esbuild` break without it). Add to that list rather
+than running `pnpm approve-builds` interactively.
 
-`npm run lint` is **not usable**: no ESLint config exists, so `next lint` drops
+    pnpm dev              # local dev
+    pnpm build            # production build
+    pnpm test:e2e         # Playwright, needs a prod build + Clerk dev creds
+    pnpm seed:seo         # seed static marketing/SEO pages
+    pnpm rank:smoke -- yourname.bsky.social
+    pnpm exec tsc --noEmit   # typecheck — currently clean
+
+`pnpm lint` is **not usable**: no ESLint config exists, so `next lint` drops
 into its interactive setup prompt. See the todo list.
 
 ## Invariants — do not break these
@@ -65,7 +71,7 @@ Roughly priority-ordered. Check items off here as they land.
 
 ### Correctness / hygiene
 - [ ] Add an ESLint config (`.eslintrc.json` with `next/core-web-vitals`) so
-      `npm run lint` runs non-interactively and can go in CI.
+      `pnpm lint` runs non-interactively and can go in CI.
 - [ ] Remove the dead `CommentRow`/`ConnectionRow` types and the hardcoded
       empty `comments`/`connections` arrays in `app/(app)/app/page.tsx` and
       `app/(app)/app/queue/page.tsx`, plus the UI branches that render them.
@@ -108,4 +114,4 @@ Decide build-or-drop for each; leaving empty tables around invites confusion.
       change → downgrade/cancel). No e2e coverage exists for billing today.
 - [ ] Production Clerk instance. `pk_test`/`sk_test` keys are a dev instance and
       will not work on the custom domain.
-- [ ] CI: typecheck + lint + `npm run test:e2e` on PRs.
+- [ ] CI: typecheck + lint + `pnpm test:e2e` on PRs.

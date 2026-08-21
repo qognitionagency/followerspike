@@ -2,6 +2,7 @@
   "name": "followerspike",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.26.2",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -56,5 +57,15 @@
     "tailwindcss": "4.1.11",
     "tsx": "^4.20.6",
     "typescript": "5.9.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@clerk/shared",
+      "@google/genai",
+      "@tailwindcss/oxide",
+      "esbuild",
+      "protobufjs",
+      "unrs-resolver"
+    ]
   }
 }
