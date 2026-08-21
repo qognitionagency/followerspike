@@ -106,12 +106,14 @@ Roughly priority-ordered. Check items off here as they land.
 - [ ] Publishing path. The queue sets `posts.status = 'scheduled'` and a
       `scheduled_at` an hour out, but no consumer ever publishes. Approving a
       post currently does nothing visible to the outside world.
-- [ ] Scheduler/dispatch. The cron endpoint was deleted (an e2e test asserts it
-      is gone rather than silently public). Rebuild it with QStash signature
-      verification before wiring the worker back up.
+- [x] ~~Scheduler/dispatch~~ — `/api/cron/dispatch` is back, QStash-signed and
+      failing closed; `/api/jobs/run` executes one job per signed message.
+      `pnpm jobs:tick` drives the same loop locally with no QStash account.
 - [ ] Per-tier daily limits enforced against `user_daily_usage`, plus the
       auto-pause path via `users.consecutive_error_count` and
-      `automation_log`.
+      `automation_log`. `lib/entitlements.ts` answers the connect/schedule
+      questions; the per-day caps still need the safety gate that consumes them.
+      The global kill switch is already wired into `runJob`.
 
 ### v2 tables with no code behind them
 Decide build-or-drop for each; leaving empty tables around invites confusion.
@@ -120,8 +122,8 @@ Decide build-or-drop for each; leaving empty tables around invites confusion.
       pipeline is schema-only. (`pgvector` is enabled for the embeddings.)
 - [ ] `evergreen_items` — evergreen recycling not started
 - [ ] `growth_plan_items` — `growth_plans` is only read by the export route
-- [ ] `ai_generations` — AI calls are not logged; wire it up if we want cost
-      and quality tracking
+- [x] ~~`ai_generations`~~ — every AI call is logged with provider, model,
+      tokens and cost.
 
 ### Not configured in production
 Checked against `vercel env`: production has DATABASE_URL, Clerk, and
