@@ -47,6 +47,9 @@ const MODEL_RATES: Array<{ prefix: string; input: number; output: number }> = [
   { prefix: "gemini-2.0-flash", input: 0.1, output: 0.4 },
   { prefix: "deepseek-reasoner", input: 0.55, output: 2.19 },
   { prefix: "deepseek-chat", input: 0.27, output: 1.1 },
+  // Embeddings bill input only; the output column is zero rather than absent
+  // so an embedding row costs the same shape of arithmetic as every other.
+  { prefix: "gemini-embedding", input: 0.15, output: 0 },
 ];
 
 /** Zero for an unknown model — see MODEL_RATES. */
