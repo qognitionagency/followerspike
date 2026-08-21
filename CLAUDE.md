@@ -106,12 +106,12 @@ Roughly priority-ordered. Check items off here as they land.
       claims is the risk here.
 
 ### The automation engine (the big one)
-- [ ] Social account connection flow. `social_accounts` exists with encrypted
-      token columns, but nothing writes to it and there is no OAuth for X,
-      LinkedIn, or Bluesky. This blocks everything else in this section.
-- [ ] Publishing path. The queue sets `posts.status = 'scheduled'` and a
-      `scheduled_at` an hour out, but no consumer ever publishes. Approving a
-      post currently does nothing visible to the outside world.
+- [x] ~~Social account connection flow~~ — `/app/accounts` connects Bluesky for
+      real with an app password; X and LinkedIn show as unavailable until an
+      OAuth app exists. `lib/platforms/connect.ts` is the only writer.
+- [x] ~~Publishing path~~ — `/app/composer` writes per-platform variants and the
+      `publish_variant` job publishes them, claiming each variant with
+      `where platform_post_id is null` so a retry cannot double-post.
 - [x] ~~Scheduler/dispatch~~ — `/api/cron/dispatch` is back, QStash-signed and
       failing closed; `/api/jobs/run` executes one job per signed message.
       `pnpm jobs:tick` drives the same loop locally with no QStash account.
