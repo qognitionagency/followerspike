@@ -28,14 +28,14 @@ jobs:
       DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # pnpm before node, so setup-node's pnpm cache has a store to point at.
       # The version comes from package.json's packageManager field rather than
       # being repeated here, which is what keeps CI on the same pnpm as local.
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           # Matches the Vercel project's runtime (nodeVersion 24.x).
           node-version: 24
@@ -78,7 +78,7 @@ jobs:
 
       - name: Upload Playwright report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: |
