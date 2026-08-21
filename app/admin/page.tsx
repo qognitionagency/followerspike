@@ -16,6 +16,8 @@ const pauseSchema = z.object({
 
 async function setGlobalPause(formData: FormData) {
   "use server";
+  // The layout gates the page, but a server action is its own entry point and
+  // has to check for itself.
   const session = await getAppSession();
   if (!session?.profile.is_admin) redirect("/app");
 
@@ -53,23 +55,67 @@ function isPauseSetting(value: unknown): value is PauseSetting {
   return typeof record.paused === "boolean" && (typeof record.reason === "string" || record.reason === null);
 }
 
+function StatCard({ label, value, hint }: { label: string; value: number | string; hint?: string }) {
+  return (
+    <div className="rounded-xl border border-[#D6D6D6] bg-white p-5 shadow-sm">
+      <p className="text-xs font-black uppercase tracking-wide text-[#666]">{label}</p>
+      <p className="mt-2 text-3xl font-black text-[#191919]">{value}</p>
+      {hint ? <p className="mt-1 text-xs text-[#666]">{hint}</p> : null}
+    </div>
+  );
+}
+
 export default async function AdminPage() {
-  const session = await getAppSession();
-
-  if (!session?.profile.is_admin) {
-    redirect("/app");
-  }
-
   const sql = db();
-  const rows = await sql`select value from system_settings where key = 'automation_global_paused' limit 1`;
-  const pause = isPauseSetting(rows[0]?.value) ? rows[0].value : { paused: false, reason: null };
+
+  const [settingRows, userRows, postRows, leadRows, toolLeadRows] = await Promise.all([
+    sql`select value from system_settings where key = 'automation_global_paused' limit 1`,
+    sql`
+      select
+        count(*)::int as total,
+        count(*) filter (where created_at > now() - interval '7 days')::int as new_this_week,
+        count(*) filter (where is_admin)::int as admins
+      from users
+    `,
+    sql`
+      select
+        count(*)::int as total,
+        count(*) filter (where status = 'scheduled')::int as scheduled,
+        count(*) filter (where status = 'published')::int as published
+      from posts
+    `,
+    sql`select count(*)::int as total from leads`,
+    sql`
+      select
+        count(*)::int as total,
+        count(*) filter (where created_at > now() - interval '7 days')::int as new_this_week
+      from free_tool_leads
+    `,
+  ]);
+
+  const pause = isPauseSetting(settingRows[0]?.value) ? settingRows[0].value : { paused: false, reason: null };
+  const users = userRows[0] as { total: number; new_this_week: number; admins: number };
+  const posts = postRows[0] as { total: number; scheduled: number; published: number };
+  const leads = leadRows[0] as { total: number };
+  const toolLeads = toolLeadRows[0] as { total: number; new_this_week: number };
 
   return (
-    <main className="min-h-screen bg-[#F4F2EE] p-8 text-[#191919]">
+    <>
       <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
         <p className="text-sm font-black uppercase text-[#0A66C2]">Admin</p>
         <h1 className="mt-2 text-3xl font-black">FollowerSpike control room</h1>
-        <p className="mt-2 text-sm text-[#666]">Emergency controls for automation operations.</p>
+        <p className="mt-2 text-sm text-[#666]">Operational status and emergency controls.</p>
+      </section>
+
+      <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Users" value={users.total} hint={`${users.new_this_week} new in 7 days`} />
+        <StatCard
+          label="Posts"
+          value={posts.total}
+          hint={`${posts.scheduled} scheduled · ${posts.published} published`}
+        />
+        <StatCard label="Captured leads" value={leads.total} hint="From lead-capture automations" />
+        <StatCard label="Free-tool leads" value={toolLeads.total} hint={`${toolLeads.new_this_week} new in 7 days`} />
       </section>
 
       <section className="mt-6 rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
@@ -78,8 +124,8 @@ export default async function AdminPage() {
           <div>
             <h2 className="text-xl font-black">Global automation kill switch</h2>
             <p className="mt-2 text-sm leading-6 text-[#666]">
-              This stops QStash dispatch before jobs reach the Playwright worker. Use it for incidents, provider
-              issues, LinkedIn UI changes, or legal review.
+              Stops scheduled dispatch before any job runs. Use it for incidents, provider issues,
+              platform API changes, or legal review.
             </p>
           </div>
         </div>
@@ -108,6 +154,6 @@ export default async function AdminPage() {
           </form>
         </div>
       </section>
-    </main>
+    </>
   );
 }

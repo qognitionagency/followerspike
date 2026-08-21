@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ClerkProvider } from "@clerk/nextjs";
-import { BarChart3, ListChecks, MessageSquareText, Settings, TrendingUp } from "lucide-react";
+import { BarChart3, ListChecks, MessageSquareText, Settings, ShieldAlert, TrendingUp } from "lucide-react";
 import { requireAppSession } from "@/lib/session";
 import { BRAND } from "@/lib/constants";
 
@@ -35,6 +35,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           ))}
         </nav>
         <div className="border-t border-[#D6D6D6] p-4 text-sm">
+          {session.profile.is_admin ? (
+            <Link
+              href="/admin"
+              className="mb-3 flex items-center gap-2 rounded-lg bg-[#FEF2F2] px-3 py-2 text-sm font-bold text-red-700 hover:bg-[#FEE2E2]"
+            >
+              <ShieldAlert className="h-4 w-4" />
+              Admin portal
+            </Link>
+          ) : null}
           <p className="font-bold text-[#191919]">{session.profile.full_name || session.email}</p>
           <p className="mt-1 capitalize text-[#666]">{session.subscriptionTier} plan</p>
         </div>
@@ -53,7 +62,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
         <main className="flex-1 p-4 pb-24 sm:p-6 lg:p-8">{children}</main>
 
-        <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t border-[#D6D6D6] bg-white md:hidden">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-4 border-t border-[#D6D6D6] bg-white md:hidden">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 px-2 py-2 text-[11px] font-bold text-[#666]">
               <item.icon className="h-5 w-5" />

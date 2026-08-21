@@ -32,6 +32,8 @@ export const coreRoutes: PublicRoute[] = [
   { label: "Terms", href: ROUTES.terms, description: "Terms of service." },
   { label: "DPA", href: ROUTES.dpa, description: "Data processing addendum." },
   { label: "Subprocessors", href: ROUTES.subprocessors, description: "Subprocessor list." },
+  { label: "Features hub", href: "/features", description: "Index of every product feature page." },
+  { label: "How it works", href: "/how-it-works", description: "Three-step founder growth workflow." },
   { label: "All pages", href: "/site-map", description: "Human-readable public page index." },
   { label: "llms.txt", href: "/llms.txt", description: "LLM visibility file." },
   { label: "LinkedIn autopilot", href: "/linkedin-autopilot", description: "Pillar guide." },
