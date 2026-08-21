@@ -3,6 +3,15 @@
 Working notes for Claude Code in this repo. Keep this file current — it is the
 first thing read in a new session.
 
+## Repo location — read first
+
+This repo lives at **`~/dev/followerspike`**, deliberately NOT in
+`~/Documents/GitHub/`. That path is inside iCloud Drive, and with the disk near
+full macOS evicted file contents there: `stat` reported the real size while the
+file read as empty, `.git/HEAD` and `.git/config` included, which broke git
+entirely. Check `stat -f '%Sf' <file>` for a `dataless` flag before believing
+any "corruption". Do not move this repo back under `~/Documents`.
+
 ## What this is
 
 FollowerSpike is a Next.js App Router SaaS. It is mid-pivot: the original
@@ -70,11 +79,19 @@ into its interactive setup prompt. See the todo list.
 Roughly priority-ordered. Check items off here as they land.
 
 ### Correctness / hygiene
+- [x] ~~Individual pages for the nav items~~ — `/features` index and
+      `/how-it-works` are real pages now, not homepage anchors. The six
+      `/features/<slug>` detail pages already existed.
+- [x] ~~Split the admin portal from the user portal~~ — `/admin` has its own
+      layout, sidebar, and one gate covering every child page, plus users,
+      leads, and activity-log views.
 - [ ] Add an ESLint config (`.eslintrc.json` with `next/core-web-vitals`) so
       `pnpm lint` runs non-interactively and can go in CI.
 - [ ] Remove the dead `CommentRow`/`ConnectionRow` types and the hardcoded
       empty `comments`/`connections` arrays in `app/(app)/app/page.tsx` and
       `app/(app)/app/queue/page.tsx`, plus the UI branches that render them.
+- [ ] Nav "Overview" still points at the homepage. Fine as-is, but if it should
+      be a distinct page, that is the last anchor-style entry in the menu.
 - [ ] Reconcile marketing copy with the retired engine. `app/(marketing)/trust`,
       `app/(marketing)/security`, `/admin`, and `README.md` still describe a live
       QStash → Playwright worker with human-speed delays and action windows.
@@ -104,6 +121,14 @@ Decide build-or-drop for each; leaving empty tables around invites confusion.
 - [ ] `growth_plan_items` — `growth_plans` is only read by the export route
 - [ ] `ai_generations` — AI calls are not logged; wire it up if we want cost
       and quality tracking
+
+### Not configured in production
+Checked against `vercel env`: production has DATABASE_URL, Clerk, and
+SESSION_ENCRYPTION_KEY only.
+- [ ] `GEMINI_API_KEY` / `DEEPSEEK_API_KEY` — every AI generation path is dead
+      in prod, including the free tools that call it
+- [ ] `RESEND_API_KEY` — no transactional email is being sent
+- [ ] `RAZORPAY_*` — checkout cannot complete in production
 
 ### Billing / ops
 - [ ] Create the six `RAZORPAY_PLAN_*_USD` plans for the current
