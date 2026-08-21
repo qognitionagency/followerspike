@@ -1,21 +1,15 @@
 import {
-  BarChart3,
-  BookOpenText,
   BrainCircuit,
   CalendarDays,
   FileSearch,
   Gauge,
-  Handshake,
   Layers3,
-  LockKeyhole,
-  MessageSquareText,
   PenLine,
   Send,
   ShieldCheck,
   Sparkles,
   Target,
   UserRoundCheck,
-  Users,
 } from "lucide-react";
 import { INDUSTRIES, ROLES, ROUTES } from "@/lib/constants";
 

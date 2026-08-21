@@ -44,8 +44,9 @@ than running `pnpm approve-builds` interactively.
     pnpm rank:smoke -- yourname.bsky.social
     pnpm exec tsc --noEmit   # typecheck — currently clean
 
-`pnpm lint` is **not usable**: no ESLint config exists, so `next lint` drops
-into its interactive setup prompt. See the todo list.
+`pnpm lint` is clean. It needs both `next/core-web-vitals` and `next/typescript`
+in `.eslintrc.json` — core-web-vitals alone leaves the `@typescript-eslint`
+rules undefined, and `lib/db.ts` has an inline disable for one of them.
 
 ## Invariants — do not break these
 
@@ -85,8 +86,8 @@ Roughly priority-ordered. Check items off here as they land.
 - [x] ~~Split the admin portal from the user portal~~ — `/admin` has its own
       layout, sidebar, and one gate covering every child page, plus users,
       leads, and activity-log views.
-- [ ] Add an ESLint config (`.eslintrc.json` with `next/core-web-vitals`) so
-      `pnpm lint` runs non-interactively and can go in CI.
+- [x] ~~Add an ESLint config~~ — `.eslintrc.json` extends `next/core-web-vitals`
+      and `next/typescript`; `pnpm lint` runs clean and non-interactively.
 - [ ] Remove the dead `CommentRow`/`ConnectionRow` types and the hardcoded
       empty `comments`/`connections` arrays in `app/(app)/app/page.tsx` and
       `app/(app)/app/queue/page.tsx`, plus the UI branches that render them.

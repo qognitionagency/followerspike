@@ -34,6 +34,11 @@ const isPublicRoute = createRouteMatcher([
   "/compare(.*)",
   "/api/free-tools(.*)",
   "/api/webhooks(.*)",
+  // Signed by QStash rather than carrying a Clerk session. Clerk would reject
+  // the scheduler outright, so the signature check inside each handler is the
+  // only gate — the same posture the Razorpay webhook has.
+  "/api/cron(.*)",
+  "/api/jobs(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
