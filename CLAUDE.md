@@ -93,6 +93,12 @@ Roughly priority-ordered. Check items off here as they land.
       `app/(app)/app/queue/page.tsx`, plus the UI branches that render them.
 - [ ] Nav "Overview" still points at the homepage. Fine as-is, but if it should
       be a distinct page, that is the last anchor-style entry in the menu.
+- [ ] Pricing sells "Keyword Auto-DM on X and Bluesky" (Pro tier,
+      `lib/constants.ts`), but Bluesky DMs only reach accounts that opted into
+      messages from strangers, so the automation would silently fail for most
+      recipients. `capabilities.dm` is false for Bluesky. Either narrow the copy
+      to X, or redefine the Bluesky half as a public reply. The *capture* side
+      is fine — `readReplies` is true for both.
 - [ ] Reconcile marketing copy with the retired engine. `app/(marketing)/trust`,
       `app/(marketing)/security`, `/admin`, and `README.md` still describe a live
       QStash → Playwright worker with human-speed delays and action windows.
