@@ -10,6 +10,7 @@
     "lint": "next lint",
     "seed:seo": "tsx scripts/seed-seo-pages.ts",
     "rank:smoke": "tsx scripts/rank-smoke.ts",
+    "jobs:tick": "tsx scripts/run-jobs.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {
