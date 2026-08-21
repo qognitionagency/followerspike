@@ -621,24 +621,27 @@ export function buildIndustryPages(): AudiencePage[] {
 
 export const icpPages: AudiencePage[] = [
   ["founder-led-saas", "Founder-led SaaS", "reach operators, buyers, partners, and investors with clear founder-led positioning"],
-  ["local-service-businesses", "Local service businesses", "turn local proof and operator expertise into a visible professional network"],
-  ["coaching-and-advisory", "Coaching and advisory", "attract clients through useful teaching, trust signals, and warm follow-up"],
-  ["consulting-firms", "Consulting firms", "show diagnostic expertise and build relationships with decision-makers"],
-  ["creator-led-businesses", "Creator-led businesses", "connect attention, expertise, and relationship-building into one workflow"],
+  ["local-service-businesses", "Local service businesses", "turn local proof and operator expertise into a visible professional presence"],
+  ["coaching-and-advisory", "Coaching and advisory", "attract clients through useful teaching and trust signals"],
+  ["consulting-firms", "Consulting firms", "show diagnostic expertise where decision-makers already read"],
+  ["creator-led-businesses", "Creator-led businesses", "publish once and land natively on every platform their audience uses"],
   ["agencies-and-studios", "Agencies and studios", "turn client work, frameworks, and market observations into authority"],
 ].map(([slug, name, focus]) => ({
   slug,
   type: "icp",
   name,
   eyebrow: "ICP playbook",
-  title: `LinkedIn growth system for ${name}`,
+  title: `Publishing system for ${name}`,
   description: `FollowerSpike helps ${name} ${focus}.`,
-  pain: `${name} need consistent relationship-building, not a feed full of generic posts and disconnected outreach.`,
-  workflow: ["Name the buying committee", "Choose seed leaders and trigger topics", "Build a daily queue", "Review and run with conservative limits"],
-  features: ["ICP builder", "Topic map", "Engagement scoring", "Follow-up prompts"],
+  pain: `${name} need a consistent point of view published often enough to be remembered, not a feed full of generic posts.`,
+  // Describes the product's actual sequence. The previous version named a
+  // buying committee, seed leaders and an engagement queue — artefacts of the
+  // retired automation engine, none of which exist in the software.
+  workflow: ["Build a voice profile from posts you already wrote", "Draft once and preview what each platform will publish", "Queue the first comment and the plug with it", "Review the queue, then let the automations out of simulation"],
+  features: ["Voice profile", "Multi-platform composer", "First comment and auto-plug", "Keyword capture with email delivery"],
   faq: [
-    { question: "Can I edit the ICP later?", answer: "Yes. ICP, seed leaders, and topics should evolve as the market responds." },
-    { question: "Does this create cold DM sequences?", answer: "No. Follow-ups focus on accepted connections and reviewable replies." },
+    { question: "Can I change how it sounds later?", answer: "Yes. The voice profile is versioned, and every edit you make to a generated draft is recorded as a correction that shapes the next one." },
+    { question: "Does this create cold DM sequences?", answer: "No. Nothing here messages strangers. Capture only ever reads the replies under your own posts, and only emails someone who replied asking for something." },
   ],
 }));
 

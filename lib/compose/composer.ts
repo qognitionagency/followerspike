@@ -24,6 +24,12 @@ export type ComposeInput = {
   /** Adds " 1/n" counters, whose characters are budgeted before splitting. */
   numbered?: boolean;
   createdVia?: "manual" | "ai" | "voice_cloner" | "growth_plan" | "evergreen" | "relay";
+  /**
+   * The post this one was derived from. Set by the relay, which is also what
+   * reads it back: a post with a `source_post_id` is a mirror, and mirroring a
+   * mirror is how a relay loop starts.
+   */
+  sourcePostId?: string | null;
 };
 
 export type ComposePreview = {
@@ -89,8 +95,15 @@ export async function createDraft(input: ComposeInput): Promise<SaveResult> {
   const isThread = previews.some((preview) => preview.items.length > 1);
 
   const postRows = await sql`
-    insert into posts (workspace_id, user_id, status, is_thread, created_via)
-    values (${input.workspaceId}, ${input.userId}, 'draft', ${isThread}, ${input.createdVia ?? "manual"})
+    insert into posts (workspace_id, user_id, status, is_thread, created_via, source_post_id)
+    values (
+      ${input.workspaceId},
+      ${input.userId},
+      'draft',
+      ${isThread},
+      ${input.createdVia ?? "manual"},
+      ${input.sourcePostId ?? null}
+    )
     returning id
   `;
   const postId = postRows[0]?.id as string | undefined;

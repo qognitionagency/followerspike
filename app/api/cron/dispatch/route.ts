@@ -15,6 +15,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { claimDue, publishJobMessage, qstashPublishConfigured, reapExpiredLeases, verifyQStashSignature, fail } from "@/lib/jobs/queue";
 import { runJob } from "@/lib/jobs/handlers";
+import { sweepRecurringWork } from "@/lib/jobs/schedule";
 
 // Node, not edge: signature verification needs the crypto primitives, and the
 // handlers this can run inline are server-only throughout.
@@ -57,6 +58,12 @@ export async function POST(request: Request) {
     // Before claiming, not after: a job orphaned by a killed runner is due
     // again and should go out in this tick rather than waiting for the next.
     const reaped = await reapExpiredLeases();
+
+    // Also before claiming, so anything the calendar has just made due goes out
+    // in this tick. The sweep is keyed per period, not per tick, so calling it
+    // every time costs two indexed queries and enqueues nothing.
+    const swept = await sweepRecurringWork();
+
     const jobs = await claimDue(parsed.data.limit ?? DEFAULT_BATCH);
 
     if (!qstashPublishConfigured()) {
@@ -68,6 +75,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         mode: "inline",
         reaped,
+        swept,
         claimed: jobs.length,
         succeeded: results.filter((result) => result.ok).length,
       });
@@ -85,7 +93,7 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ mode: "qstash", reaped, claimed: jobs.length, dispatched });
+    return NextResponse.json({ mode: "qstash", reaped, swept, claimed: jobs.length, dispatched });
   } catch {
     return NextResponse.json({ error: "Dispatch failed" }, { status: 500 });
   }

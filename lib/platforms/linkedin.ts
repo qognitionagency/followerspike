@@ -15,11 +15,12 @@
  * endpoints are gated behind Marketing Developer Platform access, which is
  * granted per-company after review and not to a self-serve SaaS. So keyword
  * capture cannot work here, and the honest move is for the UI to hide the
- * feature on LinkedIn rather than offer it and fail. The pricing page already
- * commits to this: `lib/constants.ts` sells "Keyword Auto-DM on X", naming the
- * only platform where both halves — reading the keyword and delivering the
- * reply privately — actually exist. Flipping this flag to true would make the
- * product page a lie before it made the code work.
+ * feature on LinkedIn rather than offer it and fail — which `lib/jobs/leads.ts`
+ * does by branching on this flag, and `/app/automations` does by naming the
+ * platforms where capture is real. Delivery is by email to an address the
+ * replier volunteered, not by DM: `capabilities.dm` is false here too, so there
+ * is no private channel to answer on. Flipping either flag to true would make
+ * the product page a lie before it made the code work.
  */
 import { optionalEnv } from "@/lib/env";
 import {

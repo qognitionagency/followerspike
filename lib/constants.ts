@@ -40,6 +40,13 @@ export function normalizeSubscriptionTier(tier: unknown): SubscriptionTier {
 
 // Paid tiers only. The free tier is handled by absence of a subscription row —
 // see FREE_TIER_LIMITS below. `limits` are the per-day caps shown on the pricing page.
+//
+// `planEnv` and `annualPlanEnv` name the six Razorpay plans this ladder needs.
+// There is no longer a fallback to the retired Essentials/Growth plan ids: the
+// old names mapped Agency onto RAZORPAY_PLAN_PRO_MONTHLY_USD, so a deployment
+// that set the new Pro plan and not the new Agency plan would have quietly
+// charged an Agency subscriber the Pro price. Missing configuration should fail
+// loudly, not bill the wrong amount.
 export const PRICING = [
   {
     tier: "starter",
@@ -48,7 +55,6 @@ export const PRICING = [
     monthlyUsd: "$19",
     annualUsd: "$190",
     planEnv: "RAZORPAY_PLAN_STARTER_MONTHLY_USD",
-    legacyPlanEnv: "RAZORPAY_PLAN_ESSENTIALS_MONTHLY_USD",
     annualPlanEnv: "RAZORPAY_PLAN_STARTER_ANNUAL_USD",
     popular: false,
     description: "For the founder who wants to post consistently on all three channels without thinking about it.",
@@ -68,7 +74,6 @@ export const PRICING = [
     monthlyUsd: "$39",
     annualUsd: "$390",
     planEnv: "RAZORPAY_PLAN_PRO_MONTHLY_USD",
-    legacyPlanEnv: "RAZORPAY_PLAN_GROWTH_MONTHLY_USD",
     annualPlanEnv: "RAZORPAY_PLAN_PRO_ANNUAL_USD",
     popular: true,
     description: "For founders turning reach into subscribers, with automation and voice cloning.",
@@ -78,7 +83,7 @@ export const PRICING = [
       "Voice Cloner trained on your best posts",
       "Growth Plans that write straight into your queue",
       "Auto-Plug, First Comment, Evergreen, and Cross-post Relay",
-      "Keyword Auto-DM on X, with hard caps",
+      "Keyword capture on your posts, delivered by email, with hard caps",
     ],
   },
   {
@@ -88,7 +93,6 @@ export const PRICING = [
     monthlyUsd: "$79",
     annualUsd: "$790",
     planEnv: "RAZORPAY_PLAN_AGENCY_MONTHLY_USD",
-    legacyPlanEnv: "RAZORPAY_PLAN_PRO_MONTHLY_USD",
     annualPlanEnv: "RAZORPAY_PLAN_AGENCY_ANNUAL_USD",
     popular: false,
     description: "For ghostwriters and one-person agencies running several founder accounts.",

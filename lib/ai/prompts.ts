@@ -71,3 +71,26 @@ Return strict JSON:
   "perPlatform": { "x": { "notes": "..." }, "linkedin": { "notes": "..." }, "bluesky": { "notes": "..." } }
 }
 `;
+
+/**
+ * Writing as the user.
+ *
+ * The rules are negative on purpose. A model given a voice profile and a topic
+ * will happily invent a customer, a revenue figure, or a formative anecdote to
+ * make the post land, and the result is published under a real person's name.
+ * Grounding is enumerated in the voice block; anything outside it is forbidden.
+ */
+export const GENERATE_IN_VOICE_PROMPT = `
+You are ghostwriting one social post as a specific person. You have their voice profile, posts they have written, and corrections they have made to your previous drafts.
+
+Absolute rules:
+- Never invent facts about them. No revenue, customers, funding, headcount, job titles, awards, or personal anecdotes unless they appear in the grounding list.
+- If the topic needs a specific claim you have not been given, write around it rather than inventing one.
+- Match the voice profile over your own instincts about what a good post looks like. Their style dials win every time.
+- Do not open with a rhetorical question unless their own examples do.
+- No em-dashes, no "in today's fast-paced world", no "let's dive in", no engagement-bait closing question unless their closing style calls for one.
+
+Return strict JSON: {"content": "...", "rationale": "..."}.
+"content" is the post itself, ready to publish, with no surrounding quotes or commentary.
+"rationale" is one sentence for the author explaining the choice you made, not a summary of the post.
+`;

@@ -1,10 +1,10 @@
-import { db, databaseConfigured } from "@/lib/db";
+import { databaseConfigured } from "@/lib/db";
 import { PermanentJobError } from "@/lib/jobs/handlers";
 import type { Job } from "@/lib/jobs/queue";
 import { claimNextDue } from "@/lib/evergreen/store";
 import { createDraft, schedulePost } from "@/lib/compose/composer";
 import { logAutomationEvent } from "@/lib/automation/usage";
-import { normalizeSubscriptionTier, type SubscriptionTier } from "@/lib/constants";
+import { tierForUser } from "@/lib/jobs/tier";
 import type { Platform } from "@/lib/types/db";
 
 /**
@@ -18,17 +18,6 @@ import type { Platform } from "@/lib/types/db";
 
 /** How far out a recycled post lands. Far enough that a user who did not want it can still cancel. */
 const LEAD_TIME_MINUTES = 30;
-
-async function tierFor(userId: string): Promise<SubscriptionTier> {
-  const sql = db();
-  const rows = await sql`
-    select tier from subscriptions
-    where user_id = ${userId} and status in ('active', 'trialing', 'past_due')
-    order by created_at desc
-    limit 1
-  `;
-  return normalizeSubscriptionTier(rows[0]?.tier);
-}
 
 export async function evergreenRefill(job: Job): Promise<void> {
   if (!databaseConfigured()) throw new Error("The database is not configured");
@@ -97,7 +86,7 @@ export async function evergreenRefill(job: Job): Promise<void> {
     userId: item.user_id,
     postId: draft.postId,
     scheduledAt,
-    tier: await tierFor(item.user_id),
+    tier: await tierForUser(item.user_id),
   });
 
   if (!scheduled.ok) {

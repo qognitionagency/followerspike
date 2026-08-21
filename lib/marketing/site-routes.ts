@@ -24,7 +24,7 @@ export type PublicRouteGroup = {
 
 export const coreRoutes: PublicRoute[] = [
   { label: "Home", href: ROUTES.home, description: "Main LinkedIn growth autopilot landing page." },
-  { label: "Pricing", href: ROUTES.pricing, description: "Essentials, Growth, and Pro pricing." },
+  { label: "Pricing", href: ROUTES.pricing, description: "Starter, Pro, and Agency pricing." },
   { label: "Free audit", href: ROUTES.audit, description: "Legacy LinkedIn audit tool route." },
   { label: "Trust", href: ROUTES.trust, description: "Consent, risk, pause, and safety model." },
   { label: "Security", href: ROUTES.security, description: "Security and session handling." },

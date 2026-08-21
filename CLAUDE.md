@@ -49,6 +49,7 @@ than running `pnpm approve-builds` interactively.
     pnpm db:migrate       # apply pending migrations, recording each one
     pnpm jobs:tick -- --once   # drive the job queue locally, no QStash needed
     pnpm rank:smoke -- yourname.bsky.social
+    pnpm billing:plans    # report the six Razorpay plans; --create makes missing ones
     pnpm test:e2e         # Playwright, needs a prod build
 
 `pnpm test:e2e` runs two projects. `--project="signed-out"` needs only a Clerk
@@ -80,6 +81,19 @@ test account), and it **writes to whatever database it points at**.
   second place for that to be wrong.
 - Every automated action passes `lib/automation/safety.ts` first. Claims on
   `/trust`, `/security` and `README.md` are kept to what that gate enforces.
+- **An automation's `dry_run` is decided in its own handler, not by the safety
+  gate.** The gate only reads `dry_run` when it is handed an `automationId`, and
+  the replies and relays these automations produce publish as ordinary
+  `publish_variant` jobs that carry none. Every handler in `lib/jobs/` that acts
+  on behalf of an automation therefore checks `dry_run` itself before writing
+  anything. Miss that check and a "simulating" automation posts for real.
+- A reply queued by `first_comment` or `auto_plug` passes `as: "comments"` in its
+  publish payload, so it spends the comment allowance rather than the post one.
+  The pricing page sells those as separate caps.
+- Automations are triggered from `lib/jobs/followups.ts`, which runs after a
+  successful publish and only for `thread_order` 0 — item 3 of a thread is not a
+  second post to plug. It never throws into `publishVariant`: by then the post is
+  live, and failing the job would retry a publish that already happened.
 - `comments`, `connections`, and `target_leaders` are deliberately gone. Do not
   reintroduce them — they belong to the retired automation product.
 - Middleware redirects unauthenticated traffic explicitly rather than via
@@ -116,6 +130,11 @@ branch before the user count is above one.
   per-tier daily caps, per-automation caps
 - Voice: interview, synthesis, versioned profiles, calibration stats, pgvector
   exemplar retrieval
+- Automations at `/app/automations`: first comment, auto-plug, cross-post relay,
+  keyword capture with email delivery, and an evergreen cadence. Each is off and
+  simulating by default, and every decision lands in `automation_log`
+- Cadences: `lib/jobs/schedule.ts` sweeps on every dispatcher tick and enqueues
+  evergreen refills and a weekly Spike Rank refresh, keyed per period
 - `/admin`: kill switch, users, leads, activity log
 - Privacy: data export and account deletion routes
 - Webhooks: Clerk (user sync) and Razorpay (signature-verified)
@@ -125,12 +144,14 @@ branch before the user count is above one.
 Roughly priority-ordered. Check items off here as they land.
 
 ### Correctness / hygiene
-- [ ] Reconcile the rest of the marketing copy with the retired engine. `/trust`,
-      `/security` and `README.md` are done, but the homepage,
-      `/linkedin-autopilot`, `/tools/[slug]` and `/icp` still sell "likes,
-      comments, connection requests, and follow-up DMs" as things the product
-      does daily. None of that is built. This is roadmap copy presented as
-      current capability.
+- [ ] Reconcile the *rest* of the marketing copy with the retired engine. Done:
+      `/trust`, `/security`, `README.md`, the homepage, `/linkedin-autopilot`,
+      `/tools/[slug]` (via `lib/seo.ts`, which generates ~1,300 pages from one
+      template) and `/icp`. Still selling likes, comments, connection requests
+      or follow-up DMs as current capability: `/pricing`,
+      `/linkedin-ghostwriter`, `/free-tools`, `/blog` and `/blog/[slug]`,
+      `app/llms.txt`, and the `featurePages`/`comparisonPages`/blog entries in
+      `lib/marketing/content.ts` plus `lib/marketing/free-tools.ts`.
 - [ ] `next.config.mjs` sets `output: "standalone"`, which Vercel does not need
       and which makes `pnpm start` warn that it is not serving the standalone
       build. Harmless today; drop it unless something deploys by container.
@@ -156,11 +177,19 @@ Roughly priority-ordered. Check items off here as they land.
       improve from corrections.
 - [ ] The composer does not use the voice profile. `similarExemplars()` is built
       and indexed but no generator passes a voice into its prompt.
-- [ ] Job kinds still registered with null handlers: `auto_plug`, `first_comment`,
-      `cross_post_relay`, `lead_poll`, `deliver_lead_email`, `rank_refresh`.
-      Pro tier sells the first three by name.
-- [ ] Nothing schedules `evergreen_refill` on a cadence — it only fires from the
-      "Queue one now" button.
+- [x] ~~Job kinds with null handlers~~ — all six run: `first_comment` and
+      `auto_plug` in `lib/jobs/reply.ts`, `cross_post_relay` in
+      `lib/jobs/relay.ts`, `lead_poll` and `deliver_lead_email` in
+      `lib/jobs/leads.ts`, `rank_refresh` in `lib/jobs/rank.ts`. Configured at
+      `/app/automations`, backed by `lib/automations/store.ts`
+- [x] ~~Nothing schedules `evergreen_refill` on a cadence~~ —
+      `lib/jobs/schedule.ts`, swept by the dispatcher and by `pnpm jobs:tick`
+- [ ] `auto_dm`, `thread_drip`, `source_watcher` and `lead_followup` are still
+      values of `automations.kind` with nothing behind them.
+      `IMPLEMENTED_AUTOMATION_KINDS` is what keeps them out of the UI; an e2e
+      test asserts they stay out.
+- [ ] `rank_refresh` only scores Bluesky. X has no scorer at all, and LinkedIn's
+      needs pasted profile text, so neither can be refreshed on a schedule.
 
 ### Not configured in production
 Checked against `vercel env`: production has `DATABASE_URL`, Clerk, and
@@ -173,12 +202,20 @@ Checked against `vercel env`: production has `DATABASE_URL`, Clerk, and
       publishes on a schedule in production yet
 
 ### Billing / ops
-- [ ] Create the six `RAZORPAY_PLAN_*_USD` plans for the current
-      $19/$39/$79 ladder and set them in prod. `lib/billing/razorpay.ts` falls
-      back to the retired Essentials/Growth env vars; drop those once no live
-      subscription references them.
-- [ ] Verify subscription lifecycle end to end (checkout → webhook → tier
-      change → downgrade/cancel). No e2e coverage exists for billing today.
+- [x] ~~Drop the retired Essentials/Growth plan fallbacks~~ — verified first that
+      `subscriptions` is empty in production, so nothing referenced them. The old
+      fallback mapped Agency onto `RAZORPAY_PLAN_PRO_MONTHLY_USD`, so a
+      half-configured deployment charged $39 for a $79 plan; a missing plan id
+      now throws instead. `normalizeSubscriptionTier` still maps the old tier
+      *names*, which is about existing rows rather than checkout
+- [ ] Create the six `RAZORPAY_PLAN_*_USD` plans and set them in prod. Needs the
+      Razorpay account: run `pnpm billing:plans` to see what is missing, then
+      `-- --create`. Amounts come from `PRICING`, and the script refuses to agree
+      with a plan whose price no longer matches the pricing page
+- [x] ~~e2e coverage for billing~~ — `e2e/billing.spec.ts` covers plan
+      resolution, webhook signatures, the endpoint's refusal of unsigned
+      requests, tier normalisation, and entitlement ordering. A live checkout is
+      deliberately not automated; `pnpm billing:plans` covers the account side
 - [ ] Production Clerk instance. `pk_test`/`sk_test` keys are a dev instance and
       will not work on the custom domain.
 - [x] ~~CI~~ — `.github/workflows/ci.yml` runs typecheck, lint and build on every

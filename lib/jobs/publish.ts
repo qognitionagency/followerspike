@@ -12,6 +12,7 @@ import {
 } from "@/lib/platforms/types";
 import { assertCanRun } from "@/lib/automation/safety";
 import { incrementUsage, logAutomationEvent, recordFailure, recordSuccess } from "@/lib/automation/usage";
+import { scheduleFollowUps } from "@/lib/jobs/followups";
 import type { Platform } from "@/lib/types/db";
 
 /**
@@ -111,6 +112,19 @@ async function settlePostStatus(postId: string): Promise<void> {
   `;
 }
 
+/**
+ * Which daily allowance this publish spends.
+ *
+ * A reply queued by `first_comment` or `auto_plug` is a comment, and the pricing
+ * page sells comment and post caps as separate numbers. Reading it from the
+ * payload keeps one publisher while letting the caller say what it is spending;
+ * anything other than the one recognised value falls back to `posts`, so a
+ * malformed payload cannot spend an allowance it did not name.
+ */
+function usageField(job: Job): "posts" | "comments" {
+  return job.payload?.as === "comments" ? "comments" : "posts";
+}
+
 export async function publishVariant(job: Job): Promise<void> {
   if (!databaseConfigured()) throw new Error("The database is not configured");
 
@@ -118,6 +132,7 @@ export async function publishVariant(job: Job): Promise<void> {
   if (typeof variantId !== "string") {
     throw new PermanentJobError("publish_variant requires a variantId");
   }
+  const field = usageField(job);
 
   const variant = await claimVariant(variantId);
   if (!variant) {
@@ -132,7 +147,7 @@ export async function publishVariant(job: Job): Promise<void> {
   const decision = await assertCanRun({
     workspaceId: variant.workspace_id,
     userId: variant.user_id,
-    field: "posts",
+    field,
     // The author picked this time, so quiet hours do not apply to it.
     userScheduled: true,
   });
@@ -185,7 +200,7 @@ export async function publishVariant(job: Job): Promise<void> {
       where id = ${variant.id}
     `;
 
-    await incrementUsage(variant.user_id, variant.workspace_id, "posts");
+    await incrementUsage(variant.user_id, variant.workspace_id, field);
     await recordSuccess(variant.user_id);
     await settlePostStatus(variant.post_id);
 
@@ -197,6 +212,22 @@ export async function publishVariant(job: Job): Promise<void> {
       outcome: "success",
       meta: { variant_id: variant.id, platform_post_id: result.platformPostId },
     });
+
+    // Last, and only for a post: the follow-ups are triggered by something the
+    // account published, and a reply queued by one of them publishing is not a
+    // new event to react to. Without this guard a first comment would schedule
+    // its own first comment.
+    if (field === "posts") {
+      await scheduleFollowUps({
+        variantId: variant.id,
+        postId: variant.post_id,
+        platform: variant.platform,
+        threadOrder: variant.thread_order,
+        workspaceId: variant.workspace_id,
+        userId: variant.user_id,
+        firstComment: variant.first_comment,
+      });
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
 

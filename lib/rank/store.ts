@@ -52,7 +52,7 @@ export function normalizeRankHandle(platform: RankPlatform, handle: string): str
  */
 export async function recordRankSnapshot(
   result: RankResult,
-  options: { userId?: string | null; freeToolLeadId?: string | null } = {}
+  options: { userId?: string | null; workspaceId?: string | null; freeToolLeadId?: string | null } = {}
 ): Promise<string | null> {
   if (!databaseConfigured()) return null;
 
@@ -63,11 +63,17 @@ export async function recordRankSnapshot(
     // Public profile reads are cached for 15 minutes, so a visitor who re-runs the
     // tool gets byte-identical data back. Reusing the recent row keeps refreshes
     // from stacking flat points onto the trend line.
+    //
+    // Scoped to the same subject as the write below, or an anonymous run of the
+    // free tool on a handle a workspace also tracks would be handed back as that
+    // workspace's snapshot — and `latestRankResult` would then read a row that
+    // has no workspace on it at all.
     const recent = await sql`
       select id, score
       from profile_scores
       where platform = ${result.platform}
         and handle = ${handle}
+        and workspace_id is not distinct from ${options.workspaceId ?? null}
         and created_at >= now() - make_interval(mins => ${DEDUPE_WINDOW_MINUTES})
       order by created_at desc
       limit 1
@@ -79,7 +85,7 @@ export async function recordRankSnapshot(
 
     const inserted = await sql`
       insert into profile_scores
-        (platform, handle, score, pillars, top_fixes, observed, user_id, free_tool_lead_id)
+        (platform, handle, score, pillars, top_fixes, observed, user_id, workspace_id, free_tool_lead_id)
       values (
         ${result.platform},
         ${handle},
@@ -88,6 +94,7 @@ export async function recordRankSnapshot(
         ${JSON.stringify(result.topFixes)}::jsonb,
         ${JSON.stringify(result.observed)}::jsonb,
         ${options.userId ?? null},
+        ${options.workspaceId ?? null},
         ${options.freeToolLeadId ?? null}
       )
       returning id

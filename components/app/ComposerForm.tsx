@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { AlertTriangle, Send } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
+import { AlertTriangle, Send, Sparkles, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { PLATFORM_LIMIT, THREADABLE, splitIntoThread, type ThreadPlatform } from "@/lib/compose/thread";
@@ -22,13 +23,26 @@ export type ComposerPlatformOption = {
   connected: boolean;
 };
 
+/** What the generate server action hands back. Failure is reported, never a canned post. */
+export type GenerateResult =
+  | { ok: true; content: string; rationale: string; voiceProfileId: string }
+  | { ok: false; error: string };
+
 export function ComposerForm({
   options,
   action,
+  generate,
+  discard,
+  hasVoice,
+  voiceName,
   error,
 }: {
   options: ComposerPlatformOption[];
   action: (formData: FormData) => void;
+  generate: (input: { topic: string; platform?: ThreadPlatform }) => Promise<GenerateResult>;
+  discard: (formData: FormData) => void;
+  hasVoice: boolean;
+  voiceName: string | null;
   error?: string;
 }) {
   const connected = options.filter((option) => option.connected);
@@ -37,6 +51,36 @@ export function ComposerForm({
   const [selected, setSelected] = useState<ThreadPlatform[]>(
     connected.length > 0 ? [connected[0].platform] : []
   );
+
+  const [topic, setTopic] = useState("");
+  const [pending, startGenerating] = useTransition();
+  const [generateError, setGenerateError] = useState<string | null>(null);
+  const [rationale, setRationale] = useState<string | null>(null);
+  // The exact text the model produced, held so the save path can tell whether
+  // the author changed it. Cleared the moment the draft stops being a
+  // generation, or a later edit would be attributed to a profile that did not
+  // write this text.
+  const [generated, setGenerated] = useState<{ text: string; voiceProfileId: string } | null>(null);
+
+  function runGenerate() {
+    setGenerateError(null);
+    startGenerating(async () => {
+      const result = await generate({ topic, platform: selected[0] });
+      if (!result.ok) {
+        setGenerateError(result.error);
+        return;
+      }
+      setContent(result.content);
+      setRationale(result.rationale || null);
+      setGenerated({ text: result.content, voiceProfileId: result.voiceProfileId });
+    });
+  }
+
+  function clearGeneration() {
+    setGenerated(null);
+    setRationale(null);
+    setContent("");
+  }
 
   const previews = useMemo(
     () =>
@@ -87,6 +131,8 @@ export function ComposerForm({
       <input type="hidden" name="content" value={content} />
       <input type="hidden" name="platforms" value={selected.join(",")} />
       <input type="hidden" name="numbered" value={numbered ? "true" : "false"} />
+      <input type="hidden" name="generatedText" value={generated?.text ?? ""} />
+      <input type="hidden" name="voiceProfileId" value={generated?.voiceProfileId ?? ""} />
 
       <div className="space-y-4">
         <div className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">

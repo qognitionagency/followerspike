@@ -13,6 +13,10 @@ import { complete, defer, fail, type Job } from "@/lib/jobs/queue";
 import { getAutomationGlobalPause } from "@/lib/admin/settings";
 import { publishVariant } from "@/lib/jobs/publish";
 import { evergreenRefill } from "@/lib/jobs/evergreen";
+import { autoPlug, firstComment } from "@/lib/jobs/reply";
+import { crossPostRelay } from "@/lib/jobs/relay";
+import { deliverLeadEmail, leadPoll } from "@/lib/jobs/leads";
+import { rankRefresh } from "@/lib/jobs/rank";
 
 /**
  * A handler does the work and throws on failure. It does not touch job state:
@@ -67,29 +71,27 @@ const noop: JobHandler = async (job) => {
 /**
  * Every kind the queue knows about. A null slot is a reserved name with no
  * implementation behind it yet — filled in by the wave that builds the feature.
+ *
+ * There are none left. Every kind below runs, and the ones that reply under a
+ * post do it by appending a variant and letting `publish_variant` publish it,
+ * so this map has exactly one entry that talks to a platform.
  */
 export const jobHandlers: Record<JobKind, JobHandler | null> = {
   noop,
 
   // --- Publishing -----------------------------------------------------------
   publish_variant: (job) => publishVariant(job),
-  /** TODO(automation wave): post the plug reply once the parent post clears its threshold. */
-  auto_plug: null,
-  /** TODO(automation wave): drop the prepared first comment under a published post. */
-  first_comment: null,
+  auto_plug: (job) => autoPlug(job),
+  first_comment: (job) => firstComment(job),
   evergreen_refill: (job) => evergreenRefill(job),
-  /** TODO(automation wave): mirror a published post to the other connected platforms. */
-  cross_post_relay: null,
+  cross_post_relay: (job) => crossPostRelay(job),
 
   // --- Leads ----------------------------------------------------------------
-  /** TODO(leads wave): poll a source post for keyword comments and capture them into leads. */
-  lead_poll: null,
-  /** TODO(leads wave): send the captured lead its promised delivery via Resend. */
-  deliver_lead_email: null,
+  lead_poll: (job) => leadPoll(job),
+  deliver_lead_email: (job) => deliverLeadEmail(job),
 
   // --- Spike Rank -----------------------------------------------------------
-  /** TODO(rank wave): re-score a connected account and append to profile_scores. */
-  rank_refresh: null,
+  rank_refresh: (job) => rankRefresh(job),
 };
 
 /** Null for an unknown kind and for a reserved kind that has no implementation yet. */

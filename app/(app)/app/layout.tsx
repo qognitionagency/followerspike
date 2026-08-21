@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ClerkProvider } from "@clerk/nextjs";
-import { BarChart3, Link2, ListChecks, MessageSquareText, PenSquare, Recycle, Settings, ShieldAlert, Target, TrendingUp } from "lucide-react";
+import { BarChart3, Link2, ListChecks, MessageSquareText, PenSquare, Recycle, Settings, ShieldAlert, Target, TrendingUp, Zap } from "lucide-react";
 import { requireAppSession } from "@/lib/session";
 import { BRAND } from "@/lib/constants";
 
@@ -15,6 +15,7 @@ const navItems = [
   { href: "/app/queue", label: "Queue", icon: ListChecks, primary: true },
   { href: "/app/growth", label: "Growth", icon: Target, primary: false },
   { href: "/app/evergreen", label: "Evergreen", icon: Recycle, primary: false },
+  { href: "/app/automations", label: "Automations", icon: Zap, primary: false },
   { href: "/app/accounts", label: "Accounts", icon: Link2, primary: false },
   { href: "/app/voice", label: "Voice", icon: MessageSquareText, primary: true },
   { href: "/app/settings", label: "Settings", icon: Settings, primary: true },

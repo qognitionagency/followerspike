@@ -23,13 +23,13 @@ export function planIdForCheckout(params: {
   }
 
   const envName = params.billingCycle === "annual" ? plan.annualPlanEnv : plan.planEnv;
-  const fallbackEnvName = params.billingCycle === "monthly" ? plan.legacyPlanEnv : "";
-  const planId = optionalEnv(envName) || (fallbackEnvName ? optionalEnv(fallbackEnvName) : "");
+  const planId = optionalEnv(envName);
 
+  // No fallback to the retired plan ids. The old one mapped Agency to
+  // RAZORPAY_PLAN_PRO_MONTHLY_USD, which meant a half-configured deployment
+  // charged the wrong price instead of refusing to start a checkout.
   if (!planId) {
-    throw new Error(
-      `Missing required environment variable: ${envName}${fallbackEnvName ? ` or ${fallbackEnvName}` : ""}`
-    );
+    throw new Error(`Missing required environment variable: ${envName}`);
   }
 
   return planId;

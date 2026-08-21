@@ -100,7 +100,7 @@ export default function ComparePage({ params }: PageProps) {
         <section className="mt-10 rounded-lg border border-[#d8d2c4] bg-[#111827] p-6 text-white shadow-sm">
           <h2 className="text-2xl font-black">Try the software workflow.</h2>
           <p className="mt-3 text-sm leading-6 text-slate-300">
-            Start with the free audit or open pricing to compare Essentials, Growth, and Pro.
+            Start with the free profile score or open pricing to compare Starter, Pro, and Agency.
           </p>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <Link href="/free-tools/spike-rank-linkedin" className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-white px-5 text-sm font-black text-[#111827]">

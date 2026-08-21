@@ -127,7 +127,7 @@ export default async function SettingsPage({
           <h2 className="text-xl font-black text-[#191919]">Approval mode</h2>
           <form action={updateApprovalMode} className="mt-5 grid gap-3">
             {[
-              ["review", "Review", "Every post, comment, connection request, and follow-up waits in the queue."],
+              ["review", "Review", "Every post and automated reply waits in the queue until you approve it."],
               ["auto", "Auto", canUseAutopilot ? "Eligible actions can execute when FollowerSpike safety checks pass." : "Pro unlocks live autopilot after consent."],
               ["off", "Off", "Autopilot pauses and only drafts are created."],
             ].map(([value, label, help]) => (
@@ -162,8 +162,8 @@ export default async function SettingsPage({
               <AlertTriangle className="h-4 w-4" />
               Account control acknowledgement
             </div>
-            Pro autopilot can run LinkedIn actions for you only after consent. It uses review mode, conservative limits,
-            timing windows, logs, and pause controls, but cannot guarantee platform outcomes.
+            Automations publish under your name only after consent. They run inside review mode, per-plan daily caps,
+            quiet hours in your timezone, an activity log, and a global stop — but cannot guarantee platform outcomes.
           </div>
           {!canUseAutopilot ? (
             <div className="mt-4 rounded-lg border border-[#D6D6D6] bg-[#F8FAFC] p-4 text-sm font-semibold text-[#555]">
@@ -173,7 +173,7 @@ export default async function SettingsPage({
           <form action={updateAutopilotConsent} className="mt-5 space-y-4">
             <label className="flex items-start gap-3 text-sm font-semibold text-[#333]">
               <input type="checkbox" name="risk" value="accepted" required disabled={!canUseAutopilot} />
-              I understand FollowerSpike will run approved LinkedIn growth actions for me and can be paused anytime.
+              I understand FollowerSpike will publish approved posts and replies under my name, and can be paused at any time.
             </label>
             <Button name="enabled" value="true" disabled={!canUseAutopilot} className="h-11 w-full rounded-full bg-[#0A66C2] font-bold text-white hover:bg-[#004182]">
               <PlayCircle className="h-4 w-4" />
@@ -197,10 +197,11 @@ export default async function SettingsPage({
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <p className="text-sm font-black uppercase text-[#0A66C2]">Plan and billing</p>
-            <h2 className="mt-2 text-xl font-black text-[#191919]">Essentials, Growth, or Pro autopilot</h2>
+            <h2 className="mt-2 text-xl font-black text-[#191919]">Starter, Pro, or Agency</h2>
             <p className="mt-2 text-sm leading-6 text-[#666]">
-              Essentials gives you AI posts and a manual queue. Growth adds the daily growth queue. Pro unlocks conservative
-              autopilot, follow-up DMs, and higher limits.
+              Starter is the composer, your voice profile, and a weekly Spike Rank. Pro adds the post-publish automations —
+              first comment, auto-plug, evergreen cadence, cross-post relay, and keyword capture. Agency runs several
+              accounts, each with its own saved voice.
             </p>
           </div>
           <div className="rounded-full bg-[#EEF3F8] px-4 py-2 text-sm font-black text-[#0A66C2]">

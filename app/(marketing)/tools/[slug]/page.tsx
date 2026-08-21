@@ -23,7 +23,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
   if (!page) {
     return {
       title: "LinkedIn Growth Tool",
-      description: "FollowerSpike helps professionals grow on LinkedIn with posts, engagement, connection requests, follow-ups, and review-first controls.",
+      description: "FollowerSpike helps professionals publish to X, LinkedIn, and Bluesky in their own voice, with a review queue and post-publish automations.",
     };
   }
 
@@ -75,17 +75,17 @@ export default function SeoLandingPage({ params }: PageProps) {
         <section className="mt-6 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="rounded-lg border border-black/10 bg-[#111827] p-6 text-white">
             <ShieldCheck className="h-7 w-7 text-cyan-200" />
-            <h2 className="mt-4 text-2xl font-black">Review-first growth autopilot</h2>
+            <h2 className="mt-4 text-2xl font-black">Review-first publishing</h2>
             <p className="mt-3 text-sm leading-6 text-slate-300">
-              FollowerSpike is built for people who need consistent LinkedIn growth without giving up control of voice,
-              target audiences, daily limits, or automation risk.
+              FollowerSpike is built for people who need to publish consistently across three platforms without giving up
+              control of their voice, their daily limits, or how much runs on its own.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             {[
-              ["Post", "Daily posts shaped by profile, niche, and approved voice notes."],
-              ["Engage", "Review likes, comments, connection requests, and accepted-connection follow-ups."],
-              ["Control", "Consent, caps, pause behavior, logs, and privacy controls."],
+              ["Write", "Drafts shaped by a voice profile built from your own posts."],
+              ["Publish", "One editor, native output for X, LinkedIn, and Bluesky, reviewed before it goes."],
+              ["Control", "Consent, quiet hours, daily caps, an activity log, and a global stop."],
             ].map(([title, body]) => (
               <div key={title} className="rounded-lg border border-black/10 bg-white p-5 shadow-sm">
                 <h2 className="font-black text-[#111827]">{title}</h2>

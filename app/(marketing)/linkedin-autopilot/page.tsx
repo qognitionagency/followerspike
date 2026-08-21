@@ -4,44 +4,63 @@ import { PillarPage } from "@/components/marketing/PillarPage";
 export const metadata: Metadata = {
   title: "LinkedIn Autopilot for Founders and Experts",
   description:
-    "Learn how FollowerSpike turns LinkedIn into a review-first autopilot for posts, likes, comments, connection requests, follow-up DMs, and daily expert visibility.",
+    "What can honestly be automated on LinkedIn: voice-modelled drafts, scheduled publishing through the official API, a review queue, quiet hours, and daily caps. No likes, no connection requests, no DMs.",
 };
 
+/**
+ * The pillar page for "LinkedIn autopilot".
+ *
+ * It used to sell likes, comments, connection requests and follow-up DMs as a
+ * daily routine. None of that is built — the browser-automation engine that once
+ * did it was retired — so this page now answers the search term with what the
+ * product actually does and, just as usefully, what LinkedIn's API will not let
+ * anybody do. The distinction is the reason to trust the rest of the page.
+ */
 export default function LinkedInAutopilotPage() {
   return (
     <PillarPage
       eyebrow="LinkedIn autopilot"
-      title="A safer LinkedIn autopilot for people with real reputations."
-      description="FollowerSpike turns LinkedIn growth into a daily workflow: draft useful posts, find relevant conversations, queue target connections, prepare accepted-connection follow-ups, and review everything before it goes live."
+      title="The part of LinkedIn worth automating is the publishing."
+      description="FollowerSpike drafts in your own voice, shows you exactly what LinkedIn will receive, and publishes it on a schedule through LinkedIn's official Posts API. Everything else people sell as autopilot — likes, connection requests, follow-up DMs — is browser automation against LinkedIn's terms, and it is deliberately not here."
       bullets={[
-        "Daily posts shaped by your profile, ICP, offers, and approved voice notes.",
-        "Relevance-scored comments so engagement stays useful instead of random.",
-        "Connection requests, follow-up DMs, timing windows, caps, pause controls, and activity logs.",
+        "Posts shaped by a voice profile built from your own writing, not a generic tone setting.",
+        "A review queue where every scheduled post can be edited or cancelled before it goes out.",
+        "Quiet hours in your timezone, per-plan daily caps, auto-pause after repeated failures, and a global stop.",
       ]}
       sections={[
         {
-          title: "Review before execution",
-          body: "Autopilot starts with approval queues, so founders and teams can prove voice and targeting before allowing more automation.",
+          title: "What runs on its own",
+          body: "Scheduled publishing, evergreen recycling on a cadence you set, and a cross-post relay that mirrors a LinkedIn post onto X and Bluesky. Each one is off by default, simulates by default, and records every decision it makes to an activity log you can read.",
         },
         {
-          title: "Built for consistency",
-          body: "The product reduces blank-page friction by turning positioning, target lists, and content prompts into a repeatable daily cadence.",
+          title: "What LinkedIn does not allow us to do",
+          body: "LinkedIn exposes no endpoint we can use to comment on a post, read the comments on one, or send a message, at the permissions available to us. So first comments, keyword capture, and auto-plug work on X and Bluesky and are marked unavailable on LinkedIn rather than quietly failing. An automation that claimed otherwise would be running a browser against your account.",
         },
         {
-          title: "Risk-managed controls",
-          body: "FollowerSpike uses consent, caps, timing windows, audit logs, and pause behavior to reduce platform-sensitive risk.",
+          title: "Why there is no engagement queue",
+          body: "Automated likes, follows, and connection requests carry real account risk and are the reason most LinkedIn autopilot tools get accounts restricted. FollowerSpike publishes and reads only through official APIs, under permissions you grant and can revoke.",
         },
       ]}
       faq={[
         {
           question: "Is LinkedIn autopilot safe?",
           answer:
-            "Automation carries platform risk. FollowerSpike is designed to reduce that risk with review mode, conservative controls, and transparent disclaimers.",
+            "Publishing through the official API on a schedule is ordinary use. The unsafe version is a tool driving a logged-in browser to like, follow, and message on your behalf — that is what gets accounts restricted, and it is not what this does.",
+        },
+        {
+          question: "Will it send connection requests or DMs for me?",
+          answer:
+            "No. Neither is built, and neither is planned. LinkedIn messaging is Partner-only, and connection requests are only reachable by automating a browser session.",
+        },
+        {
+          question: "Can it post the first comment under my LinkedIn post?",
+          answer:
+            "Not on LinkedIn. The first comment feature works on X and Bluesky, where replying to your own post is a normal API call. On LinkedIn it is shown as unsupported.",
         },
         {
           question: "Who is this for?",
           answer:
-            "It is for founders, SMB owners, coaches, consultants, creators, and personal brands who need consistent expert visibility without spending every day inside LinkedIn.",
+            "Founders, operators, coaches, and consultants who want to publish consistently on LinkedIn alongside X and Bluesky without spending every morning inside three apps.",
         },
       ]}
     />

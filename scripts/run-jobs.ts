@@ -13,6 +13,7 @@
  */
 import { claimDue, reapExpiredLeases } from "@/lib/jobs/queue";
 import { runJob } from "@/lib/jobs/handlers";
+import { sweepRecurringWork } from "@/lib/jobs/schedule";
 import { databaseConfigured } from "@/lib/db";
 
 const BATCH = 25;
@@ -22,6 +23,14 @@ async function tick(): Promise<number> {
   const reaped = await reapExpiredLeases();
   if (reaped > 0) {
     console.log(`reaped ${reaped} expired lease(s)`);
+  }
+
+  // Same order as the dispatcher: anything the calendar has just made due goes
+  // out in this tick. Without it, evergreen cadence and the weekly rank refresh
+  // would be untestable locally.
+  const swept = await sweepRecurringWork();
+  if (swept.evergreen > 0 || swept.rank > 0) {
+    console.log(`swept ${swept.evergreen} evergreen refill(s), ${swept.rank} rank refresh(es)`);
   }
 
   const jobs = await claimDue(BATCH);

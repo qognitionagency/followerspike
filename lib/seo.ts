@@ -37,13 +37,19 @@ function page(seed: {
   const audience = seed.role || seed.industry || seed.city || "busy professionals";
   const contextParts = [seed.industry, seed.role, seed.city ? `in ${seed.city}` : ""].filter(Boolean).join(" ");
   const context = contextParts || audience;
+  // Every string below describes publishing, voice, and post-publish automation,
+  // because that is what the product does. It used to describe likes, comments
+  // on other people's posts, connection requests and follow-up DMs — the retired
+  // browser-automation engine — across roughly thirteen hundred generated pages
+  // at once, which made this template the single largest source of claims the
+  // software could not honour.
   const introByType: Record<string, string> = {
-    industry: `<p>${seed.keyword} is about turning subject-matter expertise into a daily LinkedIn growth loop. FollowerSpike helps ${seed.industry} teams create posts, review comments, queue relevant engagement, and connect with the right people without handing every word or action to an agency.</p>`,
-    city: `<p>${seed.keyword} need a practical way to stay visible in a local or regional network. FollowerSpike gives professionals in ${seed.city} a review-first workflow for posts, likes, comments, connection requests, and accepted-connection follow-ups.</p>`,
-    role: `<p>${seed.keyword} should protect voice and reputation while making consistency easier. FollowerSpike helps ${seed.role}s turn positioning, seed leaders, target lists, and daily review queues into a repeatable LinkedIn growth system.</p>`,
-    industry_city: `<p>${seed.h1} starts with relevance: the right niche, the right market, and a daily cadence that does not feel random. FollowerSpike helps ${context} create posts, engage with industry conversations, send connection requests, and prepare follow-ups with review controls.</p>`,
-    role_city: `<p>${seed.h1} need both local relevance and a clear expert point of view. FollowerSpike helps ${context} keep a steady LinkedIn presence with AI-assisted drafts, relevance scoring, connection queues, and approval workflows.</p>`,
-    comparison: `<p>${seed.keyword} comes down to control, consistency, and cost. FollowerSpike is built as a review-first LinkedIn growth assistant for people who want software leverage without pretending platform risk does not exist.</p>`,
+    industry: `<p>${seed.keyword} is mostly a publishing problem: subject-matter expertise that never gets written down on a regular day. FollowerSpike learns how ${seed.industry} operators actually write, drafts in that voice, and publishes to X, LinkedIn, and Bluesky from one editor with every post reviewable first.</p>`,
+    city: `<p>${seed.keyword} need a way to stay visible without spending every morning in three apps. FollowerSpike gives professionals in ${seed.city} one composer for X, LinkedIn, and Bluesky, a voice profile built from their own posts, and a review queue nothing leaves unapproved.</p>`,
+    role: `<p>${seed.keyword} should protect voice and reputation while making consistency easier. FollowerSpike helps ${seed.role}s turn their own writing into a voice profile, publish it natively to each platform, and let the follow-ups — first comment, plug, cross-post, keyword capture — run inside caps they set.</p>`,
+    industry_city: `<p>${seed.h1} starts with cadence: a point of view, published often enough to be remembered. FollowerSpike helps ${context} write once, see exactly what each platform will receive, and schedule it with quiet hours and daily caps applied.</p>`,
+    role_city: `<p>${seed.h1} need a clear expert point of view and the discipline to publish it. FollowerSpike helps ${context} keep a steady presence with voice-modelled drafts, per-platform previews, and an approval queue.</p>`,
+    comparison: `<p>${seed.keyword} comes down to control, consistency, and cost. FollowerSpike is a review-first publishing tool for people who want software leverage without pretending platform risk does not exist — which is why it publishes and reads only through official APIs, and never automates likes, follows, or connection requests.</p>`,
   };
 
   return {
@@ -54,32 +60,37 @@ function page(seed: {
     role: seed.role,
     keyword: seed.keyword,
     meta_title: `${seed.keyword} | FollowerSpike`,
-    meta_description: `Use FollowerSpike to turn LinkedIn into a daily growth channel with posts, comments, connections, and follow-ups built for ${seed.keyword}.`,
+    meta_description: `Use FollowerSpike to publish to X, LinkedIn, and Bluesky in your own voice, with a review queue and post-publish automations built for ${seed.keyword}.`,
     h1: seed.h1,
     intro_html:
       introByType[seed.templateType] ||
-      `<p>FollowerSpike gives ${audience} a risk-managed LinkedIn autopilot: brand-tone learning, review-first queues, relevance scoring, and account-safety controls.</p>`,
+      `<p>FollowerSpike gives ${audience} one composer for X, LinkedIn, and Bluesky, a voice profile built from their own writing, a review-first queue, and account-safety controls.</p>`,
     features_json: [
-      "Daily posts in your voice",
-      "Relevance-scored likes and comments",
-      "Review-first approval workflow",
-      "Profile audit lead magnet",
-      "GDPR-ready privacy controls",
+      "Posts drafted in a voice profile built from your own writing",
+      "One editor, native output for X, LinkedIn, and Bluesky",
+      "Review-first approval queue with quiet hours and daily caps",
+      "First comment, auto-plug, and cross-post relay after a post goes live",
+      "Free profile scoring, and privacy controls including export and deletion",
     ],
     workflow_example_json: {
-      title: "Example daily workflow",
-      body: `Review one useful post, a short list of relevant conversations, right-fit connection requests, and accepted-connection follow-ups for ${audience}. Nothing runs without the user-approved mode and safety checks.`,
+      title: "Example working session",
+      body: `Write one post, check what each platform will actually publish, queue the first comment to go under it, and schedule the plug for four hours later. Everything for ${audience} waits in the queue until approved, and no automation acts until it is taken out of simulation.`,
     },
     faq_json: [
       {
         question: "Is FollowerSpike affiliated with LinkedIn?",
         answer:
-          "No. FollowerSpike is an independent tool and is not affiliated with, endorsed by, or certified by LinkedIn.",
+          "No. FollowerSpike is an independent tool and is not affiliated with, endorsed by, or certified by X, LinkedIn, or Bluesky.",
       },
       {
         question: "Can I review content before it goes live?",
         answer:
-          "Yes. Review mode is on by default for new users and can stay enabled for every post, comment, and connection.",
+          "Yes. Every post is scheduled through a queue you can edit or cancel from, and every automation simulates until you switch that off.",
+      },
+      {
+        question: "Does it automate likes, follows, or connection requests?",
+        answer:
+          "No. Those carry real account risk and are deliberately not built. FollowerSpike publishes and reads through each platform's official API, and only ever acts on your own posts.",
       },
     ],
     published: true,

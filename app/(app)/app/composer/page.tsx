@@ -7,8 +7,11 @@ import { createDraft, schedulePost } from "@/lib/compose/composer";
 import { activeConnections } from "@/lib/platforms/connect";
 import { ALL_PLATFORMS } from "@/lib/platforms/registry";
 import { platformLabel } from "@/lib/platforms/types";
-import { ComposerForm, type ComposerPlatformOption } from "@/components/app/ComposerForm";
+import { generateInVoice } from "@/lib/voice/generate";
+import { activeProfile, recordCalibration } from "@/lib/voice/store";
+import { ComposerForm, type ComposerPlatformOption, type GenerateResult } from "@/components/app/ComposerForm";
 import type { ThreadPlatform } from "@/lib/compose/thread";
+import type { Platform } from "@/lib/types/db";
 
 export const metadata = { title: "Composer" };
 
@@ -17,7 +20,81 @@ const composeSchema = z.object({
   platforms: z.string().min(1),
   numbered: z.enum(["true", "false"]),
   intent: z.enum(["draft", "schedule"]),
+  // Present only when the text started as a generation. Both are needed to
+  // attribute a correction to the profile that produced the draft.
+  generatedText: z.string().max(20_000).optional(),
+  voiceProfileId: z.string().uuid().optional(),
 });
+
+const generateSchema = z.object({
+  topic: z.string().min(3).max(500),
+  platform: z.enum(["x", "linkedin", "bluesky"]).optional(),
+});
+
+const discardSchema = z.object({
+  generatedText: z.string().min(1).max(20_000),
+  voiceProfileId: z.string().uuid(),
+});
+
+/**
+ * Writes one draft in the author's saved voice.
+ *
+ * Returns its result instead of redirecting: the text lands back in the editor
+ * for the author to change, and it is that change — or the absence of one — that
+ * `voice_calibrations` records when the form is finally submitted.
+ */
+async function generate(input: { topic: string; platform?: Platform }): Promise<GenerateResult> {
+  "use server";
+  const session = await requireAppSession();
+  const context = await requireWorkspace(session);
+
+  const parsed = generateSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: "Describe what the post should be about." };
+  }
+
+  const result = await generateInVoice({
+    workspaceId: context.workspace.id,
+    userId: session.userId,
+    topic: parsed.data.topic,
+    platform: parsed.data.platform,
+  });
+
+  if (!result.ok) {
+    // Both failures are the user's to act on, and neither is recoverable by
+    // retrying the same call, so they are reported rather than swallowed.
+    return result.reason === "no_profile"
+      ? { ok: false, error: "Build a voice profile first — the composer will not guess at how you sound." }
+      : { ok: false, error: "The AI provider could not be reached, so nothing was generated." };
+  }
+
+  return {
+    ok: true,
+    content: result.content,
+    rationale: result.rationale,
+    voiceProfileId: result.voiceProfileId,
+  };
+}
+
+/** An explicit rejection, which is a stronger signal than an edit and has no other way to be recorded. */
+async function discard(formData: FormData) {
+  "use server";
+  await requireAppSession();
+
+  const parsed = discardSchema.safeParse({
+    generatedText: formData.get("generatedText"),
+    voiceProfileId: formData.get("voiceProfileId"),
+  });
+  if (!parsed.success) return;
+
+  await recordCalibration({
+    voiceProfileId: parsed.data.voiceProfileId,
+    generatedText: parsed.data.generatedText,
+    verdict: "rejected",
+  });
+
+  revalidatePath("/app/composer");
+}
 
 async function compose(formData: FormData) {
   "use server";
@@ -29,6 +106,8 @@ async function compose(formData: FormData) {
     platforms: formData.get("platforms"),
     numbered: formData.get("numbered"),
     intent: formData.get("intent"),
+    generatedText: formData.get("generatedText") || undefined,
+    voiceProfileId: formData.get("voiceProfileId") || undefined,
   });
   if (!parsed.success) {
     redirect("/app/composer?error=Check+the+form+and+try+again");
@@ -38,12 +117,26 @@ async function compose(formData: FormData) {
     .split(",")
     .filter((value): value is ThreadPlatform => ALL_PLATFORMS.includes(value as ThreadPlatform));
 
+  // Recorded before the draft is written. The calibration is about the voice,
+  // not about whether the post saved, and a failed save would otherwise discard
+  // the most useful signal the user just produced.
+  if (parsed.data.generatedText && parsed.data.voiceProfileId) {
+    const unchanged = parsed.data.content.trim() === parsed.data.generatedText.trim();
+    await recordCalibration({
+      voiceProfileId: parsed.data.voiceProfileId,
+      generatedText: parsed.data.generatedText,
+      editedText: unchanged ? null : parsed.data.content,
+      verdict: unchanged ? "kept" : "edited",
+    });
+  }
+
   const draft = await createDraft({
     workspaceId: context.workspace.id,
     userId: session.userId,
     content: parsed.data.content,
     platforms,
     numbered: parsed.data.numbered === "true",
+    createdVia: parsed.data.voiceProfileId ? "voice_cloner" : "manual",
   });
 
   if (!draft.ok) {
@@ -77,7 +170,11 @@ export default async function ComposerPage({
 }) {
   const session = await requireAppSession();
   const context = await requireWorkspace(session);
-  const connected = await activeConnections(context.workspace.id);
+
+  const [connected, voice] = await Promise.all([
+    activeConnections(context.workspace.id),
+    activeProfile(context.workspace.id),
+  ]);
 
   const options: ComposerPlatformOption[] = ALL_PLATFORMS.map((platform) => {
     const account = connected.find((item) => item.platform === platform);
@@ -100,7 +197,15 @@ export default async function ComposerPage({
         </p>
       </section>
 
-      <ComposerForm options={options} action={compose} error={searchParams.error} />
+      <ComposerForm
+        options={options}
+        action={compose}
+        generate={generate}
+        discard={discard}
+        hasVoice={Boolean(voice)}
+        voiceName={voice ? `${voice.name} · v${voice.version}` : null}
+        error={searchParams.error}
+      />
     </div>
   );
 }

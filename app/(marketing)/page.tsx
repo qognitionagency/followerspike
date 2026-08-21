@@ -58,18 +58,18 @@ export const metadata: Metadata = {
 
 const workflow = [
   {
-    title: "Set your growth direction",
-    body: "Add your niche, ideal audience, target roles, and seed leaders once.",
+    title: "Teach it how you sound",
+    body: "Answer the voice interview, or import posts you already wrote. It builds a voice profile you can read and edit.",
     icon: Target,
   },
   {
-    title: "Review the daily queue",
-    body: "Approve posts, comments, connection requests, and follow-up DMs from one calm workspace.",
+    title: "Write once, review everywhere",
+    body: "One editor produces a native version for each platform, split into threads where they need it. Nothing leaves the queue unapproved.",
     icon: CalendarCheck,
   },
   {
-    title: "Turn on autopilot carefully",
-    body: "Pro can execute approved actions inside consent, timing, daily limits, and pause controls.",
+    title: "Let the follow-ups run",
+    body: "First comment, plug, cross-post relay, and keyword capture fire after a post goes out — inside consent, quiet hours, daily caps, and a global pause.",
     icon: ShieldCheck,
   },
 ] as const;
@@ -77,32 +77,32 @@ const workflow = [
 const features = [
   {
     title: "Posts in your voice",
-    body: "Turn customer lessons, ideas, and market opinions into LinkedIn posts that sound like you.",
+    body: "A voice profile built from your own writing, with the exemplars and corrections that shaped it visible to you.",
     icon: PenLine,
   },
   {
-    title: "Relevant engagement",
-    body: "Find conversations worth joining and draft useful comments without generic praise.",
-    icon: MessageCircle,
-  },
-  {
-    title: "Connection requests",
-    body: "Queue right-fit people from your roles, industries, ICP, and seed leaders.",
-    icon: UserPlus,
-  },
-  {
-    title: "Follow-up DMs",
-    body: "Prepare warm accepted-connection follow-ups without cold sequence behavior.",
+    title: "One editor, three platforms",
+    body: "Write once and see exactly what X, LinkedIn, and Bluesky will each publish, threaded where the platform allows it.",
     icon: Send,
   },
   {
+    title: "First comment and plug",
+    body: "Drop the comment you prepared under your own post, and the link hours later, when it has had time to travel.",
+    icon: MessageCircle,
+  },
+  {
+    title: "Keyword capture",
+    body: "Watch the replies on your own posts for a word, and email whoever asks for the thing you offered.",
+    icon: UserPlus,
+  },
+  {
     title: "Pause controls",
-    body: "Keep review mode, timing windows, caps, logs, and pause controls visible.",
+    body: "Quiet hours in your timezone, per-plan daily caps, auto-pause after repeated failures, and a stop that halts work already in flight.",
     icon: PauseCircle,
   },
   {
-    title: "Free growth tools",
-    body: "Run profile audits, headline checks, post generators, and ICP builders before signup.",
+    title: "Free profile scores",
+    body: "Score an X, Bluesky, or LinkedIn profile out of 100 before you sign up for anything.",
     icon: BadgeCheck,
   },
 ] as const;
@@ -111,8 +111,8 @@ const audiences = ["Founders", "Coaches", "Consultants", "SMB owners", "Creators
 
 const faqs = [
   {
-    question: "Is this only a LinkedIn post generator?",
-    answer: "No. Posts are one part of the loop. FollowerSpike also helps with relevant engagement, connection requests, and follow-up DMs.",
+    question: "Is this only a post generator?",
+    answer: "No. Posts are one part of the loop. What happens after a post goes out — the first comment, the plug, the mirror onto your other accounts, and capturing the people who reply — is the other part.",
   },
   {
     question: "Can I review everything first?",
@@ -120,7 +120,11 @@ const faqs = [
   },
   {
     question: "Does it run without consent?",
-    answer: "No. Live execution requires explicit consent, risk acknowledgement, plan access, timing windows, limits, and pause controls.",
+    answer: "No. Live execution requires explicit consent, risk acknowledgement, plan access, timing windows, limits, and pause controls. Every automation also simulates by default, so you can watch what it would do before it does anything.",
+  },
+  {
+    question: "Does it like, follow, or send connection requests?",
+    answer: "No. Those carry real account risk and are deliberately not built. FollowerSpike publishes and reads only through each platform's official API, and only under your own posts.",
   },
 ] as const;
 
@@ -141,7 +145,7 @@ function JsonLd() {
       operatingSystem: "Web",
       url: siteUrl,
       description:
-        "LinkedIn growth autopilot for posts, engagement queues, connection requests, accepted-connection follow-ups, review controls, and safety controls.",
+        "A publishing and voice tool for X, LinkedIn, and Bluesky: one composer, voice-modelled drafts, a review queue, post-publish automations, and profile scoring.",
       offers: PRICING.map((plan) => ({
         "@type": "Offer",
         name: plan.name,
@@ -170,15 +174,15 @@ function HeroMockup() {
       <div className="absolute inset-x-0 top-6 mx-auto h-[500px] max-w-3xl rounded-[2rem] border-[12px] border-slate-950 bg-white shadow-[0_38px_90px_rgba(15,23,42,0.20)]" />
       <div className="absolute inset-x-6 top-16 mx-auto h-[420px] max-w-2xl overflow-hidden rounded-lg border border-slate-200 bg-white">
         <div className="flex h-12 items-center justify-between border-b border-slate-100 px-5">
-          <span className="text-sm font-black text-slate-950">Daily queue</span>
+          <span className="text-sm font-black text-slate-950">Review queue</span>
           <span className="rounded-full bg-[#eaf3ff] px-3 py-1 text-xs font-black text-[#2f80ed]">Review first</span>
         </div>
         <div className="grid gap-3 p-5 sm:grid-cols-2">
           {[
-            ["Post", "Founder lesson on customer trust", "Ready"],
-            ["Comment", "Market conversation with 92% fit", "Approve"],
-            ["Connect", "SaaS founder in your ICP", "Review"],
-            ["Follow-up", "Accepted connection DM", "Draft"],
+            ["X", "Founder lesson on customer trust · 1/3", "Scheduled"],
+            ["LinkedIn", "Same lesson, long form, one post", "Scheduled"],
+            ["First comment", "The longer write-up, under the thread", "Queued"],
+            ["Plug", "Link, four hours after the post", "Waiting"],
           ].map(([label, body, status]) => (
             <div key={label} className="rounded-lg border border-slate-200 bg-[#fbfdff] p-4">
               <div className="flex items-center justify-between">
@@ -195,15 +199,15 @@ function HeroMockup() {
               <CheckCircle2 className="h-5 w-5" />
             </span>
             <div>
-              <p className="text-sm font-black text-slate-950">Autopilot is paused</p>
-              <p className="text-xs font-semibold text-slate-600">Nothing runs until you approve the mode.</p>
+              <p className="text-sm font-black text-slate-950">Automations are simulating</p>
+              <p className="text-xs font-semibold text-slate-600">They record what they would do until you switch that off.</p>
             </div>
           </div>
         </div>
       </div>
 
       <div className="absolute left-0 top-52 hidden w-56 rounded-lg border border-slate-200 bg-white p-4 shadow-[0_20px_55px_rgba(15,23,42,0.12)] sm:block">
-        <p className="text-xs font-black uppercase text-slate-500">Profile signal</p>
+        <p className="text-xs font-black uppercase text-slate-500">Spike Rank</p>
         <div className="mt-4 flex items-end gap-2">
           {[34, 48, 68, 88, 54].map((height, index) => (
             <div key={height} className="flex-1 rounded-t-lg bg-[#d8eaff]" style={{ height: `${height}px` }}>
@@ -211,12 +215,12 @@ function HeroMockup() {
             </div>
           ))}
         </div>
-        <p className="mt-4 text-sm font-black text-slate-950">65% ready</p>
+        <p className="mt-4 text-sm font-black text-slate-950">65 / 100</p>
       </div>
 
       <div className="absolute bottom-10 right-0 hidden w-60 rounded-lg border border-slate-200 bg-white p-4 shadow-[0_20px_55px_rgba(15,23,42,0.12)] md:block">
-        <p className="text-xs font-black uppercase text-[#2f80ed]">Connection note</p>
-        <p className="mt-3 text-sm leading-6 text-slate-700">Saw your post on founder-led GTM. Would be glad to follow what you are building.</p>
+        <p className="text-xs font-black uppercase text-[#2f80ed]">Captured</p>
+        <p className="mt-3 text-sm leading-6 text-slate-700">Nine people replied PLAYBOOK under your post. Six left an email, and each was sent the link once.</p>
         <div className="mt-4 h-2 rounded-full bg-slate-100">
           <div className="h-2 w-3/4 rounded-full bg-[#2f80ed]" />
         </div>
@@ -238,13 +242,13 @@ export default function MarketingPage() {
             <MotionReveal className="mx-auto max-w-4xl text-center">
               <div className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-[#cfe4ff] bg-white px-4 py-2 text-sm font-black text-[#2f80ed] shadow-sm">
                 <BadgeCheck className="h-4 w-4" />
-                LinkedIn growth autopilot for busy operators
+One voice, three platforms, no daily grind
               </div>
               <h1 className="mx-auto max-w-4xl text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
-                Grow on LinkedIn while you run the business.
+Post everywhere that matters while you run the business.
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-                FollowerSpike creates posts, finds relevant conversations, queues connection requests, and drafts follow-ups so your account keeps moving without daily manual work.
+FollowerSpike writes in your own voice, publishes native to X, LinkedIn, and Bluesky from one editor, and runs the follow-ups — first comment, plug, cross-post, keyword capture — after the post is live.
               </p>
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <SignupButton className="h-12 rounded-full bg-[#2f80ed] px-7 text-base font-black text-white shadow-[0_16px_40px_rgba(47,128,237,0.28)] hover:bg-[#176fd6]">
@@ -281,7 +285,7 @@ export default function MarketingPage() {
                 A simple daily system, not another dashboard to manage.
               </h2>
               <p className="mt-5 text-lg leading-8 text-slate-600">
-                Set your direction once. Review the queue daily. Turn on Pro autopilot only when the workflow is ready.
+Teach it your voice once. Review the queue. Let the automations run only when you have watched them simulate.
               </p>
             </MotionReveal>
             <div className="relative grid gap-6">
@@ -307,10 +311,10 @@ export default function MarketingPage() {
             <MotionReveal className="mx-auto max-w-3xl text-center">
               <p className="text-sm font-black uppercase tracking-wide text-[#2f80ed]">Features</p>
               <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
-                Everything needed for LinkedIn account growth.
+Everything between the idea and the follow-up.
               </h2>
               <p className="mt-5 text-lg leading-8 text-slate-600">
-                Content, engagement, connections, follow-ups, and controls in one clean workflow.
+Voice, publishing, post-publish automations, lead capture, and the controls around them.
               </p>
             </MotionReveal>
             <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -335,7 +339,7 @@ export default function MarketingPage() {
                 Give users value before signup.
               </h2>
               <p className="mt-5 text-lg leading-8 text-slate-600">
-                Run a profile audit, post generator, comment generator, ICP builder, and more. The tools are functional and return instant results.
+Score an X, Bluesky, or LinkedIn profile out of 100, split a post into a thread, rewrite it for another platform, or test a hook. Every tool runs for real and returns a result on the spot.
               </p>
               <Link href="/free-tools" className="mt-7 inline-flex h-12 items-center justify-center rounded-full bg-slate-950 px-7 text-base font-black text-white hover:bg-[#2f80ed]">
                 Browse free tools
@@ -358,10 +362,10 @@ export default function MarketingPage() {
             <MotionReveal className="mx-auto max-w-3xl text-center">
               <p className="text-sm font-black uppercase tracking-wide text-[#2f80ed]">Pricing</p>
               <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
-                Simple plans for LinkedIn growth.
+Simple plans for posting everywhere.
               </h2>
               <p className="mt-5 text-lg leading-8 text-slate-600">
-                Start with content, upgrade to a growth queue, and unlock live autopilot in Pro.
+Start with the composer and your voice, add the post-publish automations in Pro, and run several accounts on Agency.
               </p>
             </MotionReveal>
             <div className="mt-12 grid gap-5 lg:grid-cols-3">
@@ -403,7 +407,7 @@ export default function MarketingPage() {
                 Clear enough to try today.
               </h2>
               <p className="mt-5 text-lg leading-8 text-slate-600">
-                FollowerSpike is built for account growth, not spammy lead generation.
+FollowerSpike acts on your own posts and nobody else\u2019s.
               </p>
             </MotionReveal>
             <div className="grid gap-3">
@@ -422,10 +426,10 @@ export default function MarketingPage() {
             <div>
               <p className="text-sm font-black uppercase tracking-wide text-blue-100">Ready</p>
               <h2 className="mt-3 max-w-2xl text-4xl font-black tracking-tight sm:text-5xl">
-                Start with one free audit. Build the queue from there.
+Start with one free profile score. Build from there.
               </h2>
               <p className="mt-4 max-w-2xl text-base leading-7 text-blue-50">
-                No live LinkedIn action happens until the user explicitly enables the right mode and safety controls.
+Nothing publishes until you enable automation, accept the risk acknowledgement, and take an automation out of simulation.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
