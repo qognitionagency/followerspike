@@ -11,6 +11,7 @@
 import { db, databaseConfigured } from "@/lib/db";
 import { complete, defer, fail, type Job } from "@/lib/jobs/queue";
 import { getAutomationGlobalPause } from "@/lib/admin/settings";
+import { publishVariant } from "@/lib/jobs/publish";
 
 /**
  * A handler does the work and throws on failure. It does not touch job state:
@@ -70,8 +71,7 @@ export const jobHandlers: Record<JobKind, JobHandler | null> = {
   noop,
 
   // --- Publishing -----------------------------------------------------------
-  /** TODO(publishing wave): push one post_variant to its platform and record platform_post_id. */
-  publish_variant: null,
+  publish_variant: (job) => publishVariant(job),
   /** TODO(automation wave): post the plug reply once the parent post clears its threshold. */
   auto_plug: null,
   /** TODO(automation wave): drop the prepared first comment under a published post. */
