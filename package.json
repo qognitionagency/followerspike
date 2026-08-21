@@ -8,10 +8,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed:seo": "tsx scripts/seed-seo-pages.ts",
     "rank:smoke": "tsx scripts/rank-smoke.ts",
     "jobs:tick": "tsx scripts/run-jobs.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "db:status": "tsx scripts/migrate.ts --status"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.39.6",
