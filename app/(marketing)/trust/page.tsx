@@ -10,12 +10,12 @@ export default function TrustPage() {
   return (
     <LegalPage
       eyebrow="Trust Center"
-      title="LinkedIn growth works better with clear controls."
-      description="FollowerSpike is built for daily account growth, but the safety model is deliberately conservative: consent, review, rate limits, encrypted sessions, audit logs, and pause controls."
+      title="Publishing on your behalf works better with clear controls."
+      description="FollowerSpike publishes to X, LinkedIn, and Bluesky under your name, so the safety model is deliberately conservative: consent, review, rate limits, encrypted credentials, audit logs, and pause controls."
       sections={[
         {
           title: "Account-Safety Controls",
-          body: "The worker enforces human-speed delays, 9am-6pm user-timezone windows, tier-based daily limits, first-week review mode, and auto-pause after repeated errors or LinkedIn challenges.",
+          body: "Every automated action passes one gate before it runs. It enforces 9am-6pm windows in your own timezone, per-tier daily limits counted across your workspace, auto-pause after five consecutive failures, and a global stop that halts work already in flight. A post you scheduled yourself is exempt from the quiet-hours check, because honouring the time you picked is not the automation acting on its own.",
         },
         {
           title: "Consent-Based Automation",
@@ -23,7 +23,7 @@ export default function TrustPage() {
         },
         {
           title: "Security Foundations",
-          body: "Sensitive payloads are encrypted with AES-256-GCM, user records are reachable only through server-side code that scopes every query to the signed-in Clerk session, and webhooks are signature-verified.",
+          body: "Platform credentials are encrypted with AES-256-GCM, user records are reachable only through server-side code that scopes every query to the signed-in Clerk session, and webhooks are signature-verified. A post that has already been published is claimed in the database before it is sent, so a retry cannot post twice under your name.",
         },
         {
           title: "No Fake Certification Claims",

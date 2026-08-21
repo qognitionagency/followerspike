@@ -1,17 +1,26 @@
 import Link from "next/link";
 import { ClerkProvider } from "@clerk/nextjs";
-import { BarChart3, Link2, ListChecks, MessageSquareText, PenSquare, Settings, ShieldAlert, TrendingUp } from "lucide-react";
+import { BarChart3, Link2, ListChecks, MessageSquareText, PenSquare, Recycle, Settings, ShieldAlert, Target, TrendingUp } from "lucide-react";
 import { requireAppSession } from "@/lib/session";
 import { BRAND } from "@/lib/constants";
 
+/**
+ * The sidebar shows everything; the mobile bar shows only what is marked
+ * primary. A bottom bar wide enough for every page makes each target too narrow
+ * to hit, so the long tail lives in the sidebar and on the dashboard instead.
+ */
 const navItems = [
-  { href: "/app", label: "Dashboard", icon: BarChart3 },
-  { href: "/app/composer", label: "Composer", icon: PenSquare },
-  { href: "/app/queue", label: "Queue", icon: ListChecks },
-  { href: "/app/accounts", label: "Accounts", icon: Link2 },
-  { href: "/app/voice", label: "Voice", icon: MessageSquareText },
-  { href: "/app/settings", label: "Settings", icon: Settings },
+  { href: "/app", label: "Dashboard", icon: BarChart3, primary: true },
+  { href: "/app/composer", label: "Composer", icon: PenSquare, primary: true },
+  { href: "/app/queue", label: "Queue", icon: ListChecks, primary: true },
+  { href: "/app/growth", label: "Growth", icon: Target, primary: false },
+  { href: "/app/evergreen", label: "Evergreen", icon: Recycle, primary: false },
+  { href: "/app/accounts", label: "Accounts", icon: Link2, primary: false },
+  { href: "/app/voice", label: "Voice", icon: MessageSquareText, primary: true },
+  { href: "/app/settings", label: "Settings", icon: Settings, primary: true },
 ] as const;
+
+const mobileNavItems = navItems.filter((item) => item.primary);
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await requireAppSession();
@@ -64,8 +73,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
         <main className="flex-1 p-4 pb-24 sm:p-6 lg:p-8">{children}</main>
 
-        <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t border-[#D6D6D6] bg-white md:hidden">
-          {navItems.map((item) => (
+        <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-5 border-t border-[#D6D6D6] bg-white md:hidden">
+          {mobileNavItems.map((item) => (
             <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 px-2 py-2 text-[11px] font-bold text-[#666]">
               <item.icon className="h-5 w-5" />
               {item.label}

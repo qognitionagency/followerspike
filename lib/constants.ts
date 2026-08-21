@@ -78,7 +78,7 @@ export const PRICING = [
       "Voice Cloner trained on your best posts",
       "Growth Plans that write straight into your queue",
       "Auto-Plug, First Comment, Evergreen, and Cross-post Relay",
-      "Keyword Auto-DM on X and Bluesky, with hard caps",
+      "Keyword Auto-DM on X, with hard caps",
     ],
   },
   {

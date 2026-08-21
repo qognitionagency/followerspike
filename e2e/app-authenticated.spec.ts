@@ -7,7 +7,7 @@ import { test, expect } from "@playwright/test";
  */
 test.use({ storageState: "e2e/.auth/user.json" });
 
-const APP_PAGES = ["/app", "/app/queue", "/app/settings", "/app/voice"];
+const APP_PAGES = ["/app", "/app/queue", "/app/settings", "/app/voice", "/app/evergreen", "/app/growth", "/app/accounts", "/app/composer"];
 
 for (const path of APP_PAGES) {
   test(`renders signed-in: ${path}`, async ({ page }) => {
@@ -65,25 +65,73 @@ test("approval mode form writes to Neon and persists", async ({ page }) => {
   await expect(page.locator("input[name='approvalMode'][value='review']")).toBeChecked();
 });
 
-test("voice form saves the founder profile to Neon", async ({ page }) => {
+test("voice interview answers survive a failed synthesis", async ({ page }) => {
+  // The important guarantee on this page is negative: when no AI provider is
+  // configured, the answers are still saved and NO profile is written. A canned
+  // neutral profile would not look broken — it would just make every future post
+  // sound like somebody else, under the user's real name.
   await page.goto("/app/voice", { waitUntil: "domcontentloaded" });
 
-  const fullName = page.locator("input[name='fullName']");
-  await expect(fullName).toBeVisible();
+  const answer = page.locator("textarea[name='explain_product']");
+  await expect(answer).toBeVisible();
 
-  const marker = `E2E Tester ${Date.now()}`;
-  await fullName.fill(marker);
-  await page.locator("input[name='linkedinUrl']").fill("https://www.linkedin.com/in/e2e-tester/");
-  await page.locator("input[name='niche']").fill("B2B SaaS founders");
-  await page
-    .locator("textarea[name='icpDescription']")
-    .fill("Solo founders selling B2B SaaS who post inconsistently and want a repeatable cadence.");
-
-  await page.getByRole("button", { name: /save voice profile/i }).click();
+  const marker = `We build a posting tool for founders. Run ${Date.now()}.`;
+  await answer.fill(marker);
+  await page.getByRole("button", { name: /build my voice profile/i }).click();
   await page.waitForLoadState("networkidle");
 
+  // Answers are persisted to voice_interviews before synthesis is attempted, so
+  // they come back after a reload whether or not the model was reachable.
   await page.reload({ waitUntil: "domcontentloaded" });
-  await expect(page.locator("input[name='fullName']")).toHaveValue(marker);
+  await expect(page.locator("textarea[name='explain_product']")).toHaveValue(marker);
+
+  const body = (await page.locator("body").innerText()).toLowerCase();
+  const synthesized = body.includes("voice profile saved");
+  if (!synthesized) {
+    // No provider configured is the expected state until an API key is set. The
+    // page must say so rather than silently presenting an invented voice.
+    expect(body).toContain("your answers were saved");
+    expect(body).not.toContain("words you reach for");
+  }
+});
+
+test("evergreen library accepts an item and reports it as due", async ({ page }) => {
+  await page.goto("/app/evergreen", { waitUntil: "domcontentloaded" });
+
+  const content = page.locator("textarea[name='content']");
+  await expect(content).toBeVisible();
+
+  const marker = `Evergreen probe ${Date.now()} — still true in six months, which is the whole test.`;
+  await content.fill(marker);
+
+  // Platform checkboxes are disabled until an account is connected, so this
+  // asserts the guard rather than forcing a selection that cannot exist.
+  const enabled = page.locator("input[name='platforms']:not([disabled])");
+  if ((await enabled.count()) === 0) {
+    await expect(page.locator("input[name='platforms'][disabled]").first()).toBeVisible();
+    return;
+  }
+
+  await enabled.first().check();
+  await page.getByRole("button", { name: /add to library/i }).click();
+  await page.waitForLoadState("networkidle");
+
+  await expect(page.getByText(marker)).toBeVisible();
+});
+
+test("growth plan refuses to invent a plan without a score", async ({ page }) => {
+  await page.goto("/app/growth", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("h1").first()).toBeVisible();
+
+  const body = await page.locator("body").innerText();
+  // With no stored profile_scores row there is nothing to derive a plan from,
+  // and the page must send the user to run an audit instead of generating
+  // generic advice that is not grounded in anything observed.
+  if (body.includes("Run a Spike Rank audit")) {
+    await expect(page.getByRole("link", { name: /run a spike rank audit/i })).toBeVisible();
+  } else {
+    await expect(page.getByRole("button", { name: /build my plan|rebuild from latest score/i })).toBeVisible();
+  }
 });
 
 test("data export returns this user's rows as JSON", async ({ request }) => {

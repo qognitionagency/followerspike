@@ -1,22 +1,25 @@
-import {
-  CheckCircle2,
-  Clock3,
-  MessageSquareText,
-  PauseCircle,
-  Send,
-  ShieldCheck,
-  Sparkles,
-  UserPlus,
-} from "lucide-react";
+import Link from "next/link";
+import { Clock3, Link2, ListChecks, PenSquare, Recycle, ShieldCheck, Sparkles, Target } from "lucide-react";
 import { requireAppSession } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 import { db } from "@/lib/db";
+import { activeConnections } from "@/lib/platforms/connect";
+import { dueCount } from "@/lib/evergreen/store";
+import { activePlan, planProgress } from "@/lib/growth/plan";
+import { activeProfile } from "@/lib/voice/store";
+import { dailyLimitsForTier } from "@/lib/entitlements";
+import { platformLabel } from "@/lib/platforms/types";
 
-type UsageRow = {
-  posts: number;
-  comments: number;
-  invites: number;
-  likes: number;
-};
+/**
+ * The signed-in dashboard.
+ *
+ * Every number here has to be one something actually increments. The previous
+ * version reported comments, connections and likes against their per-day limits,
+ * which read as a working automation — but the retired LinkedIn engine was the
+ * only thing that had ever written those counters, so all three were permanently
+ * zero. `posts` is the one field `lib/jobs/publish.ts` increments, so it is the
+ * one usage figure shown; the rest of the tiles report state that is real.
+ */
 
 type LogRow = {
   id: string;
@@ -34,37 +37,41 @@ type PostRow = {
   scheduled_at: string | null;
 };
 
+/** The actual loop the product runs, in the order a founder meets it. */
 const growthSteps = [
   {
-    title: "Create today’s post",
-    body: "A founder-tone post drafted from your voice, niche, and audience.",
+    title: "Model your voice",
+    body: "Paste posts you have written or answer the interview, and everything generated afterwards sounds like you.",
     icon: Sparkles,
+    href: "/app/voice",
   },
   {
-    title: "Engage with relevant posts",
-    body: "Like and comment on conversations your target audience already reads.",
-    icon: MessageSquareText,
+    title: "Write once, fit every platform",
+    body: "The composer splits one piece of writing into per-platform posts and threads, inside each character limit.",
+    icon: PenSquare,
+    href: "/app/composer",
   },
   {
-    title: "Connect with the right people",
-    body: "Send connection requests to leaders, buyers, and peers that match your ICP.",
-    icon: UserPlus,
+    title: "Review before anything ships",
+    body: "Scheduled posts wait in the queue. Nothing reaches a platform that you have not approved.",
+    icon: ListChecks,
+    href: "/app/queue",
   },
   {
-    title: "Follow up after acceptance",
-    body: "Prepare light DMs for accepted connections without cold-message spam.",
-    icon: Send,
+    title: "Recycle what worked",
+    body: "Posts in your evergreen library come back around after their cooldown, instead of being written twice.",
+    icon: Recycle,
+    href: "/app/evergreen",
   },
 ];
 
 export default async function AppDashboardPage() {
   const session = await requireAppSession();
+  const context = await requireWorkspace(session);
   const sql = db();
 
-  // comments and connections belonged to the retired LinkedIn automation product
-  // and no longer exist; the dashboard now reports on posts only.
-  const [usageData, logsData, postsData] = await Promise.all([
-    sql`select * from user_daily_usage where user_id = ${session.userId} limit 1`,
+  const [usageData, logsData, postsData, connected, evergreenDue, plan, voice] = await Promise.all([
+    sql`select posts from user_daily_usage where user_id = ${session.userId} and usage_date = current_date limit 1`,
     sql`
       select id, action, outcome, reason, recipient_handle, created_at
       from automation_log
@@ -76,28 +83,39 @@ export default async function AppDashboardPage() {
       select p.id, v.content, p.status, p.scheduled_at
       from posts p
       left join post_variants v on v.post_id = p.id and v.thread_order = 0
-      where p.user_id = ${session.userId}
+      where p.workspace_id = ${context.workspace.id}
         and p.status in ('draft', 'scheduled')
       order by p.created_at desc
       limit 1
     `,
+    activeConnections(context.workspace.id),
+    dueCount(context.workspace.id),
+    activePlan(context.workspace.id),
+    activeProfile(context.workspace.id),
   ]);
 
-  const usage = (usageData[0] as UsageRow | undefined) ?? {
-    posts: 0,
-    comments: 0,
-    invites: 0,
-    likes: 0,
-  };
+  const postsToday = (usageData[0]?.posts as number | undefined) ?? 0;
+  const postLimit = dailyLimitsForTier(session.subscriptionTier).posts;
   const logs = logsData as unknown as LogRow[];
   const todayPost = postsData[0] as PostRow | undefined;
-  const autopilotActive = session.subscriptionTier === "pro" && session.profile.autopilot_enabled && !session.profile.autopilot_paused;
+  const progress = plan ? planProgress(plan) : null;
+
+  // "Autopilot" means the account has consented and is not paused — the same
+  // conditions lib/automation/safety.ts checks before it lets anything run.
+  const autopilotActive =
+    session.profile.autopilot_enabled &&
+    !session.profile.autopilot_paused &&
+    Boolean(session.profile.risk_acknowledged_at);
 
   const stats = [
-    { label: "Posts", value: `${usage.posts}/${session.profile.daily_post_limit}`, icon: Sparkles },
-    { label: "Comments", value: `${usage.comments}/${session.profile.daily_comment_limit}`, icon: MessageSquareText },
-    { label: "Connections", value: `${usage.invites}/${session.profile.daily_invite_limit}`, icon: UserPlus },
-    { label: "Likes", value: `${usage.likes}/${session.profile.daily_like_limit}`, icon: CheckCircle2 },
+    { label: "Posts today", value: `${postsToday}/${postLimit}`, icon: Sparkles },
+    { label: "Connected accounts", value: `${connected.length}`, icon: Link2 },
+    { label: "Evergreen due", value: `${evergreenDue}`, icon: Recycle },
+    {
+      label: "Plan progress",
+      value: progress ? `${progress.done}/${progress.total}` : "—",
+      icon: Target,
+    },
   ];
 
   return (
@@ -106,22 +124,27 @@ export default async function AppDashboardPage() {
         <div className="grid gap-px bg-white/10 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="bg-[#111827] p-6 lg:p-8">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-black text-cyan-200">
-              {autopilotActive ? <ShieldCheck className="h-4 w-4" /> : <PauseCircle className="h-4 w-4" />}
-              {autopilotActive ? "Autopilot active" : session.profile.approval_mode === "review" ? "Review mode active" : "Autopilot paused"}
+              <ShieldCheck className="h-4 w-4" />
+              {autopilotActive ? "Publishing enabled" : "Review mode — nothing publishes unapproved"}
             </div>
             <h1 className="mt-5 max-w-2xl text-4xl font-black leading-tight lg:text-5xl">
-              Your LinkedIn growth queue for today.
+              Post in your own voice, on every platform.
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
-              FollowerSpike prepares the daily work a smart LinkedIn assistant would do: post, engage, connect, follow up,
-              and pause when something needs your attention.
+              Write once. FollowerSpike shapes it for X, LinkedIn, and Bluesky, holds it for your approval, and
+              publishes on the schedule you set.
             </p>
           </div>
           <div className="grid gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-1">
             {[
-              ["Voice", session.profile.brand_voice ? "Trained" : "Needs setup"],
+              ["Voice", voice ? `Trained · v${voice.version}` : "Needs setup"],
               ["Audience", session.profile.icp_description ? "Defined" : "Add ICP"],
-              ["LinkedIn", session.profile.linkedin_url ? "Connected profile" : "Add profile"],
+              [
+                "Accounts",
+                connected.length > 0
+                  ? connected.map((account) => platformLabel(account.platform)).join(", ")
+                  : "None connected",
+              ],
             ].map(([label, value]) => (
               <div key={label} className="bg-[#111827] p-5">
                 <p className="text-xs font-black uppercase text-slate-400">{label}</p>
@@ -136,7 +159,7 @@ export default async function AppDashboardPage() {
         {stats.map((stat) => (
           <div key={stat.label} className="rounded-2xl border border-[#D6D6D6] bg-white p-5 shadow-sm">
             <stat.icon className="h-5 w-5 text-[#0A66C2]" />
-            <p className="mt-4 text-sm font-semibold text-[#666]">{stat.label} today</p>
+            <p className="mt-4 text-sm font-semibold text-[#666]">{stat.label}</p>
             <p className="mt-1 text-3xl font-black text-[#191919]">{stat.value}</p>
           </div>
         ))}
@@ -147,33 +170,43 @@ export default async function AppDashboardPage() {
           <article className="rounded-2xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-black uppercase text-[#0A66C2]">Today’s post</p>
+                <p className="text-sm font-black uppercase text-[#0A66C2]">Next up</p>
                 <h2 className="mt-1 text-2xl font-black text-[#191919]">Create the signal.</h2>
               </div>
               <span className="rounded-full bg-[#EEF3F8] px-3 py-1 text-xs font-black text-[#0A66C2]">
-                {todayPost?.status ?? "not generated"}
+                {todayPost?.status ?? "nothing queued"}
               </span>
             </div>
             <p className="mt-5 whitespace-pre-line rounded-xl bg-[#F8FAFC] p-4 text-sm leading-7 text-[#333]">
               {todayPost?.content ??
-                "No post is queued yet. Train your voice, add your audience, then generate a post that FollowerSpike can review or run."}
+                "No post is queued yet. Model your voice, connect an account, then write one piece in the composer."}
             </p>
+            <Link
+              href="/app/composer"
+              className="mt-4 inline-flex h-11 items-center rounded-full bg-[#0A66C2] px-5 font-black text-white hover:bg-[#004182]"
+            >
+              <PenSquare className="mr-2 h-4 w-4" />
+              Open the composer
+            </Link>
           </article>
-
         </div>
 
         <div className="space-y-4">
           <article className="rounded-2xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
-            <p className="text-sm font-black uppercase text-[#0A66C2]">Growth loop</p>
+            <p className="text-sm font-black uppercase text-[#0A66C2]">How it works</p>
             <div className="mt-5 grid gap-3">
               {growthSteps.map((step) => (
-                <div key={step.title} className="flex gap-3 rounded-xl border border-[#E2E2E2] bg-[#F8FAFC] p-4">
+                <Link
+                  key={step.title}
+                  href={step.href}
+                  className="flex gap-3 rounded-xl border border-[#E2E2E2] bg-[#F8FAFC] p-4 hover:border-[#0A66C2]"
+                >
                   <step.icon className="mt-0.5 h-5 w-5 shrink-0 text-[#0A66C2]" />
                   <div>
                     <h3 className="font-black text-[#191919]">{step.title}</h3>
                     <p className="mt-1 text-sm leading-6 text-[#666]">{step.body}</p>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </article>
@@ -184,7 +217,7 @@ export default async function AppDashboardPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-black uppercase text-[#0A66C2]">Recent activity</p>
-            <h2 className="mt-1 text-xl font-black text-[#191919]">What FollowerSpike inspected or ran.</h2>
+            <h2 className="mt-1 text-xl font-black text-[#191919]">Everything run on your behalf.</h2>
           </div>
           <Clock3 className="h-6 w-6 text-[#0A66C2]" />
         </div>
@@ -199,7 +232,9 @@ export default async function AppDashboardPage() {
               </div>
             ))
           ) : (
-            <p className="py-8 text-center text-sm text-[#666]">No activity yet. Configure voice, audience, and LinkedIn connection to begin.</p>
+            <p className="py-8 text-center text-sm text-[#666]">
+              No activity yet. Model your voice and connect an account to begin.
+            </p>
           )}
         </div>
       </section>

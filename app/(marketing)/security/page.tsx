@@ -23,7 +23,7 @@ export default function SecurityPage() {
         },
         {
           title: "Verified Integrations",
-          body: "Razorpay and QStash requests are verified before processing. Worker dispatch payloads are signed with a shared secret.",
+          body: "Clerk, Razorpay, and QStash requests are all signature-verified before processing, and every one of them fails closed: a missing header, an absent signing key, or a body that does not match is rejected rather than trusted. The job runner is reachable only with a valid QStash signature, so a deployment with no signing keys configured cannot be driven over HTTP at all.",
         },
         {
           title: "Audit Trail",

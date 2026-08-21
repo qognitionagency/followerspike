@@ -1,0 +1,87 @@
+name: CI
+
+# Pull requests and pushes to main. Nothing here deploys — Vercel owns that —
+# so this is purely the gate that says the branch is sound.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  # A new push supersedes the run already in flight for the same ref. Without
+  # this, a branch pushed three times in a minute pays for three full builds and
+  # reports the oldest result last.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      # Read once at job level so the e2e step can branch on whether the repo has
+      # secrets configured. A fork's pull request gets empty strings here, which
+      # is the case the conditional below exists for.
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.E2E_CLERK_PUBLISHABLE_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.E2E_CLERK_SECRET_KEY }}
+      DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm before node, so setup-node's pnpm cache has a store to point at.
+      # The version comes from package.json's packageManager field rather than
+      # being repeated here, which is what keeps CI on the same pnpm as local.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Matches the Vercel project's runtime (nodeVersion 24.x).
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # These three need no secrets and are the gate that must pass on every
+      # contribution, fork or not.
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+
+      - name: Lint
+        run: pnpm lint
+
+      # next.config.mjs sets `typescript.ignoreBuildErrors: false` but
+      # `eslint.ignoreDuringBuilds: true`, so the build re-checks types and does
+      # not re-check lint. Both steps above therefore earn their place.
+      - name: Build
+        run: pnpm build
+
+      - name: Install Playwright browsers
+        if: env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY != ''
+        run: pnpm exec playwright install --with-deps chromium
+
+      # Signed-out only, and only when the repo has secrets.
+      #
+      # The suite cannot run unauthenticated even for public pages: the Clerk
+      # middleware refuses to boot without a publishable key, so the test server
+      # never starts. The free-tool specs additionally assert their Spike Rank
+      # snapshot reached Neon, which needs DATABASE_URL.
+      #
+      # The signed-in and admin projects are deliberately not run here. They need
+      # a Clerk test user and they write to the database they point at, which is
+      # not something CI should be doing on every push.
+      - name: End-to-end tests
+        if: env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY != ''
+        run: pnpm exec playwright test --project="signed-out"
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

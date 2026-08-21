@@ -129,7 +129,7 @@ export default async function QueuePage() {
           <div className="rounded-xl border border-[#D6D6D6] bg-white p-10 text-center shadow-sm">
             <h2 className="text-2xl font-black text-[#191919]">Queue is clear.</h2>
             <p className="mt-2 text-sm text-[#666]">
-              Generated posts, relevant comments, likes, connection requests, and follow-up DMs will appear here for approval.
+              Drafts and scheduled posts appear here for approval before anything reaches a platform.
             </p>
           </div>
         )}
