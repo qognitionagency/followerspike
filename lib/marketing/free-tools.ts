@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { auditProfile, generateComment, generatePost, linkedinUrlSchema, scoreRelevance } from "@/lib/ai/generators";
 import { getFreeTool, type FreeToolResult, type FreeToolSection } from "@/lib/marketing/content";
 import { BlueskyNotFoundError } from "@/lib/platforms/bluesky";
 import { rankBlueskyProfile } from "@/lib/rank/bluesky";
@@ -7,6 +6,7 @@ import { rankLinkedInProfile } from "@/lib/rank/linkedin";
 import { rankXProfile } from "@/lib/rank/x";
 import { splitIntoThread, PLATFORM_LIMIT, type ThreadPlatform } from "@/lib/compose/thread";
 import { recordRankSnapshot } from "@/lib/rank/store";
+import { aiGeneratorFor } from "@/lib/marketing/free-tool-ai";
 import type { RankResult } from "@/lib/rank/types";
 
 export const freeToolRequestSchema = z.object({
@@ -352,51 +352,15 @@ export async function runFreeTool(slug: string, input: FreeToolRequest): Promise
     }
   }
 
-  try {
-    if (slug === "linkedin-profile-audit") {
-      const parsedUrl = linkedinUrlSchema.safeParse(input.primaryText);
-      if (!parsedUrl.success) return deterministicToolResult(slug, input);
-      const audit = await auditProfile({ linkedinUrl: parsedUrl.data, goal: input.context });
-      return {
-        title: "Profile audit generated.",
-        score: audit.score,
-        summary: audit.summary,
-        sections: [
-          { title: "Headline direction", body: audit.headlineSuggestion },
-          { title: "About section direction", body: audit.aboutSuggestion },
-          { title: "Checklist", body: "Start with these visible trust signals.", items: audit.photoBannerChecklist },
-          { title: "Content plan", body: "Use this as the first week of your queue.", items: audit.contentPlan },
-        ],
-        cta: tool.cta,
-      };
-    }
-
-    if (slug === "linkedin-post-generator") {
-      const generated = await generatePost({ profile: { niche: input.context, icp_description: input.context } }, input.primaryText);
-      return {
-        title: "Draft post ready for review.",
-        summary: generated.rationale,
-        sections: [{ title: "Generated post", body: generated.content }],
-        cta: tool.cta,
-      };
-    }
-
-    if (slug === "linkedin-comment-generator") {
-      const [relevance, generated] = await Promise.all([
-        scoreRelevance({ profile: { icp_description: input.context } }, input.primaryText),
-        generateComment({ profile: { icp_description: input.context } }, input.primaryText),
-      ]);
-      return {
-        title: "Comment draft ready.",
-        score: relevance.score * 10,
-        summary: relevance.reason,
-        sections: [{ title: "Comment", body: generated.comment }],
-        cta: tool.cta,
-      };
-    }
-  } catch {
-    return deterministicToolResult(slug, input);
+  // The generative tools. Every branch that used to live here keyed off a slug
+  // from the retired LinkedIn product, so the tools that actually exist fell
+  // through to the template below and returned a positioning checklist to
+  // somebody who had asked for a rewritten post.
+  const generate = aiGeneratorFor(slug);
+  if (generate) {
+    return generate({ primaryText: input.primaryText, context: input.context }, tool.cta);
   }
 
+  // Reached only by tools that are deterministic on purpose.
   return deterministicToolResult(slug, input);
 }
