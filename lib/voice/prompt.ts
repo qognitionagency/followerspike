@@ -139,7 +139,7 @@ export function renderExemplars(exemplars: string[]): string {
     .join("\n\n");
 
   return (
-    `Posts this person has actually written. Copy the VOICE — rhythm, sentence length, ` +
+    `Posts this person has actually written. Copy the VOICE: rhythm, sentence length, ` +
     `how they open and close. Do not reuse their subject matter, phrasing, or examples:\n\n${body}`
   );
 }

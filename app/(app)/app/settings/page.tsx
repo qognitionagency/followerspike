@@ -1,10 +1,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { AlertTriangle, PauseCircle, PlayCircle, ShieldCheck, Trash2 } from "lucide-react";
+import { AlertTriangle, PauseCircle, PlayCircle, ShieldCheck, Trash2 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { PRICING, BRAND } from "@/lib/constants";
-import { createRazorpaySubscription } from "@/lib/billing/razorpay";
+import { cancelRazorpaySubscription, createRazorpaySubscription } from "@/lib/billing/razorpay";
+import { currentSubscription, isCancellable } from "@/lib/billing/subscription";
+import { recordError } from "@/lib/observability/log";
 import { requireAppSession } from "@/lib/session";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
@@ -77,6 +79,45 @@ async function deleteAccount() {
   redirect("/");
 }
 
+/**
+ * Cancelling.
+ *
+ * One button, one click, no interstitial and no retention flow — deliberately
+ * fewer steps than signing up takes, because a subscription that is harder to
+ * leave than to join is a dark pattern regardless of how well it converts.
+ *
+ * Cancels at the end of the paid period: the member keeps everything they have
+ * already paid for and is simply not charged again. The local row is left
+ * alone; Razorpay sends a signed `subscription.cancelled` webhook and that
+ * handler is the only writer of subscription state.
+ */
+async function cancelSubscription() {
+  "use server";
+  const session = await requireAppSession();
+  const subscription = await currentSubscription(session.userId);
+  if (!isCancellable(subscription)) return;
+
+  try {
+    await cancelRazorpaySubscription({
+      subscriptionId: subscription.razorpay_subscription_id as string,
+      atCycleEnd: true,
+    });
+  } catch (error) {
+    // Reported rather than thrown: an unhandled server action shows the member
+    // an error page, which for a cancellation reads as "we would not let you".
+    await recordError(error, {
+      source: "app/settings",
+      kind: "cancel_failed",
+      userId: session.userId,
+      context: { subscriptionId: subscription.razorpay_subscription_id },
+    });
+    redirect("/app/settings?cancel=failed");
+  }
+
+  revalidatePath("/app/settings");
+  redirect("/app/settings?cancel=scheduled");
+}
+
 async function startCheckout(formData: FormData) {
   "use server";
   const session = await requireAppSession();
@@ -102,6 +143,8 @@ export default async function SettingsPage({
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
   const session = await requireAppSession();
+  const subscription = await currentSubscription(session.userId);
+  const cancelState = typeof searchParams.cancel === "string" ? searchParams.cancel : "";
   const selectedTier = typeof searchParams.plan === "string" ? searchParams.plan : typeof searchParams.tier === "string" ? searchParams.tier : "";
   const selectedBilling = searchParams.billing === "annual" ? "annual" : "monthly";
   const checkoutSuccess = searchParams.checkout === "success";
@@ -163,7 +206,7 @@ export default async function SettingsPage({
               Account control acknowledgement
             </div>
             Automations publish under your name only after consent. They run inside review mode, per-plan daily caps,
-            quiet hours in your timezone, an activity log, and a global stop — but cannot guarantee platform outcomes.
+            quiet hours in your timezone, an activity log, and a global stop. They cannot guarantee platform outcomes.
           </div>
           {!canUseAutopilot ? (
             <div className="mt-4 rounded-lg border border-[#D6D6D6] bg-[#F8FAFC] p-4 text-sm font-semibold text-[#555]">
@@ -193,13 +236,48 @@ export default async function SettingsPage({
         </section>
       </div>
 
+      {isCancellable(subscription) ? (
+        <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-black text-[#191919]">Current plan</h2>
+          <p className="mt-2 text-sm leading-6 text-[#666]">
+            You are on {subscription.tier}, billed {subscription.billing_cycle}, status{" "}
+            {subscription.status}.
+            {subscription.current_period_end
+              ? ` The current period ends on ${new Date(subscription.current_period_end).toLocaleDateString("en-US", { dateStyle: "long" })}.`
+              : ""}
+          </p>
+          <form action={cancelSubscription} className="mt-5">
+            <Button className="h-11 rounded-full bg-[#F4F2EE] px-6 font-bold text-[#191919] hover:bg-[#E6E2DA]">
+              Cancel subscription
+            </Button>
+          </form>
+          <p className="mt-3 text-sm leading-6 text-[#666]">
+            One click, no questions. You keep everything until the end of the period you have paid
+            for, and you are not charged again.
+          </p>
+        </section>
+      ) : null}
+
+      {cancelState === "scheduled" ? (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
+          Cancellation requested. Your plan stays active until the end of the current period and
+          will not renew. The change appears here once the signed webhook arrives.
+        </div>
+      ) : null}
+      {cancelState === "failed" ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
+          We could not reach Razorpay to cancel. Nothing changed, and you have not been charged
+          again in the meantime. Please try once more, or email support and we will cancel it by
+          hand.
+        </div>
+      ) : null}
       <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <p className="text-sm font-black uppercase text-[#0A66C2]">Plan and billing</p>
             <h2 className="mt-2 text-xl font-black text-[#191919]">Starter, Pro, or Agency</h2>
             <p className="mt-2 text-sm leading-6 text-[#666]">
-              Starter is the composer, your voice profile, and a weekly Spike Rank. Pro adds the post-publish automations —
+              Starter is the composer, your voice profile, and a weekly Spike Rank. Pro adds the post-publish automations:
               first comment, auto-plug, evergreen cadence, cross-post relay, and keyword capture. Agency runs several
               accounts, each with its own saved voice.
             </p>

@@ -1,7 +1,8 @@
+import { appUrl } from "@/lib/env";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "@/components/icons";
 import { FreeToolRunner } from "@/components/marketing/FreeToolRunner";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
@@ -28,7 +29,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
 function ToolJsonLd({ slug }: { slug: string }) {
   const tool = getFreeTool(slug);
   if (!tool) return null;
-  const siteUrl = process.env.APP_URL || "http://localhost:3000";
+  const siteUrl = appUrl();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",

@@ -1,11 +1,12 @@
+import { appUrl } from "@/lib/env";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "@/components/icons";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { getAllPublicRoutes, publicRouteGroups } from "@/lib/marketing/site-routes";
 
-const siteUrl = process.env.APP_URL || "http://localhost:3000";
+const siteUrl = appUrl();
 
 export const metadata: Metadata = {
   title: "All Public Pages",
@@ -41,7 +42,7 @@ export default function SiteMapPage() {
       <MarketingHeader />
       <main>
         <section className="relative overflow-hidden border-b border-slate-100">
-          <div className="absolute inset-x-0 top-0 h-full bg-[linear-gradient(90deg,rgba(47,128,237,0.10)_0%,rgba(47,128,237,0.03)_20%,transparent_50%,rgba(47,128,237,0.08)_100%)]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-[#D6D6D6]" />
           <div className="relative mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
             <p className="text-sm font-black uppercase tracking-wide text-[#2f80ed]">All pages</p>
             <h1 className="mx-auto mt-3 max-w-4xl text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl">
@@ -82,7 +83,7 @@ export default function SiteMapPage() {
                   >
                     <span className="flex items-start justify-between gap-3">
                       <span className="font-black text-slate-950">{route.label}</span>
-                      <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#2f80ed] transition group-hover:translate-x-1" />
+                      <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-[#2f80ed]" />
                     </span>
                     {route.description ? <span className="mt-2 line-clamp-2 block text-sm leading-6 text-slate-600">{route.description}</span> : null}
                   </Link>

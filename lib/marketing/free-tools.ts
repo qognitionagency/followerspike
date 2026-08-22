@@ -4,6 +4,7 @@ import { getFreeTool, type FreeToolResult, type FreeToolSection } from "@/lib/ma
 import { BlueskyNotFoundError } from "@/lib/platforms/bluesky";
 import { rankBlueskyProfile } from "@/lib/rank/bluesky";
 import { rankLinkedInProfile } from "@/lib/rank/linkedin";
+import { rankXProfile } from "@/lib/rank/x";
 import { splitIntoThread, PLATFORM_LIMIT, type ThreadPlatform } from "@/lib/compose/thread";
 import { recordRankSnapshot } from "@/lib/rank/store";
 import type { RankResult } from "@/lib/rank/types";
@@ -62,7 +63,7 @@ function deterministicToolResult(slug: string, input: FreeToolRequest): FreeTool
           body: `I help ${audience} solve [specific problem] with [method] so they can [outcome].`,
         },
       ],
-      cta: "Save this positioning and generate a full LinkedIn growth queue.",
+      cta: "Save this positioning and draft your next week of posts in FollowerSpike.",
     };
   }
 
@@ -88,54 +89,54 @@ function deterministicToolResult(slug: string, input: FreeToolRequest): FreeTool
     return {
       title: "Comment draft ready.",
       score,
-      summary: "A useful comment should add a layer to the post instead of repeating it.",
+      summary: "The first comment under your own post is where the detail that did not fit belongs.",
       sections: [
         {
           title: "Comment",
-          body: `This is a useful point. The part I would add is that ${audience} usually need a repeatable process more than another one-off tactic. The constraint is not knowing what to do. It is doing the right small actions consistently.`,
+          body: `The part that did not fit above: ${audience} usually need a repeatable process more than another one-off tactic. The constraint is not knowing what to do. It is doing the right small things consistently.`,
         },
         {
           title: "Use when",
-          body: "Use this when the target post is aligned with your market and your comment adds a real distinction.",
+          body: "Post this under your own post, as the place for the extra detail, the source, or the link.",
         },
       ],
-      cta: "Queue comments against relevant industry posts.",
+      cta: "Post this automatically as the first comment on your own posts.",
     };
   }
 
   if (slug === "connection-note-generator") {
     return {
-      title: "Connection note ready.",
-      summary: "Keep the request specific, low-pressure, and grounded in a real reason.",
+      title: "Profile intro line ready.",
+      summary: "One line that tells a first-time reader who you are and why your posts are worth following.",
       sections: [
         {
-          title: "Connection note",
-          body: `Hi, I came across your work around ${primary}. I am connecting with people thinking seriously about ${audience}. Would be glad to follow what you are building.`,
+          title: "Intro line",
+          body: `I work on ${primary}. Most of what I post here is what that keeps teaching me about ${audience}.`,
         },
         {
           title: "Why it works",
-          body: "It gives context without pitching, asking for time, or pretending there is already a relationship.",
+          body: "It names the work and the audience in one readable line, so a reader can decide to follow without opening anything else.",
         },
       ],
-      cta: "Find more right-fit profiles for your connection queue.",
+      cta: "Use this line across your X, LinkedIn, and Bluesky bios.",
     };
   }
 
   if (slug === "follow-up-dm-generator") {
     return {
-      title: "Accepted-connection follow-up ready.",
-      summary: "This keeps the first message conversational instead of turning the acceptance into a pitch.",
+      title: "Conversion path ready.",
+      summary: "This turns the end of a post into a reply, and a reply into an email subscriber, without messaging anyone who did not ask.",
       sections: [
         {
-          title: "Follow-up DM",
-          body: `Thanks for connecting. I noticed the context around ${primary} and it felt relevant to what I share about ${audience}. Curious what you are focused on this quarter?`,
+          title: "Closing call to action",
+          body: `I wrote up how I actually handle ${primary}, the version I would give another person working on ${audience}. Reply with GUIDE and your email address and I will send it over.`,
         },
         {
-          title: "Boundary",
-          body: "Use after a connection accepts. Avoid stacking this into a cold DM sequence.",
+          title: "What happens next",
+          body: "Keyword capture watches the replies on your own post for that word. When a reply contains an email address, the resource is emailed there. Nobody who did not reply hears from you.",
         },
       ],
-      cta: "Manage accepted-connection follow-ups in Pro.",
+      cta: "Set up keyword capture in FollowerSpike.",
     };
   }
 
@@ -143,7 +144,7 @@ function deterministicToolResult(slug: string, input: FreeToolRequest): FreeTool
     return {
       title: "ICP brief generated.",
       score,
-      summary: "Your LinkedIn ICP should be specific enough to choose posts, comments, and connection targets.",
+      summary: "Your ICP should be specific enough to decide what you post, what you offer, and which questions you answer in public.",
       sections: [
         {
           title: "Audience",
@@ -217,7 +218,7 @@ function deterministicToolResult(slug: string, input: FreeToolRequest): FreeTool
   }
 
   return {
-    title: "LinkedIn audit generated.",
+    title: "Positioning review generated.",
     score,
     summary: "Your fastest win is to make positioning, proof, audience, and posting rhythm obvious.",
     sections: [
@@ -228,7 +229,7 @@ function deterministicToolResult(slug: string, input: FreeToolRequest): FreeTool
       },
       {
         title: "7-day activation",
-        body: "Use one useful post, one relevant comment, and one right-fit connection each day to create early signal.",
+        body: "Publish one useful post a day for a week, reply to everyone who replies to you, and end two of those posts with a clear next step.",
       },
     ],
     cta: "Run the full profile audit and start a trial.",
@@ -254,7 +255,7 @@ function rankToToolResult(rank: RankResult, cta: string): FreeToolResult {
     body: rank.topFixes.length
       ? "Ordered by how many points each one is worth against how long it takes."
       : "Every check we run came back clean. Keep the cadence going.",
-    items: rank.topFixes.map((fix) => `${fix.label} — ${fix.fix}`),
+    items: rank.topFixes.map((fix) => `${fix.label}: ${fix.fix}`),
   };
 
   const evidenceSection: FreeToolSection = {
@@ -263,7 +264,7 @@ function rankToToolResult(rank: RankResult, cta: string): FreeToolResult {
     items: rank.pillars
       .flatMap((pillar) => pillar.checks)
       .filter((entry) => entry.status !== "unknown")
-      .map((entry) => `${entry.status === "pass" ? "OK" : entry.status === "warn" ? "Weak" : "Missing"} — ${entry.evidence}`),
+      .map((entry) => `${entry.status === "pass" ? "OK" : entry.status === "warn" ? "Weak" : "Missing"}: ${entry.evidence}`),
   };
 
   const failing = rank.topFixes.length;
@@ -306,6 +307,19 @@ export async function runFreeTool(slug: string, input: FreeToolRequest): Promise
     };
   }
 
+  // Scored from pasted text for the same reason LinkedIn is: X retired its
+  // unauthenticated profile endpoint, and this tool runs for people who have not
+  // signed up, so there is no token to read with. Before this branch existed the
+  // slug fell through to the generic writeup and returned prose that had never
+  // looked at the profile.
+  if (slug === "spike-rank-x") {
+    const rank = rankXProfile(input.primaryText);
+    const result = rankToToolResult(rank, tool.cta);
+    const snapshotId = await recordRankSnapshot(rank);
+    if (snapshotId) result.snapshotId = snapshotId;
+    return result;
+  }
+
   // Scored from text the member pastes; needs no API access and no key.
   if (slug === "spike-rank-linkedin") {
     const rank = rankLinkedInProfile(input.primaryText);
@@ -329,7 +343,7 @@ export async function runFreeTool(slug: string, input: FreeToolRequest): Promise
       if (error instanceof BlueskyNotFoundError) {
         return {
           title: "We could not find that account.",
-          summary: `No Bluesky profile matched "${input.primaryText}". Check the handle and try again — it usually looks like yourname.bsky.social.`,
+          summary: `No Bluesky profile matched "${input.primaryText}". Check the handle and try again. It usually looks like yourname.bsky.social.`,
           sections: [],
           cta: tool.cta,
         };

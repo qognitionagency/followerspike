@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp } from "@/components/icons";
 import { BRAND, ROUTES, TRUST_DISCLAIMER } from "@/lib/constants";
 import { blogPosts, featurePages, freeTools } from "@/lib/marketing/content";
 

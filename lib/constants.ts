@@ -1,7 +1,7 @@
 export const BRAND = {
   name: "FollowerSpike",
   promise:
-    "Post to X, LinkedIn, and Bluesky in your own voice — and turn the reach into subscribers.",
+    "Post to X, LinkedIn, and Bluesky in your own voice, and turn the reach into subscribers.",
   socialProof: "Built for solo founders, indie hackers, and one-person agencies",
   trialDays: 14,
   consentVersion: "2026-05-15",
@@ -60,10 +60,10 @@ export const PRICING = [
     description: "For the founder who wants to post consistently on all three channels without thinking about it.",
     limits: { posts: 2, comments: 5, invites: 0, likes: 0 },
     features: [
-      "3 connected accounts — one per platform",
+      "3 connected accounts, one per platform",
       "30 scheduled posts per month",
       "Unlimited AI rewriting, no credits",
-      "Voice Interview — build your voice with no posts to import",
+      "Voice Interview: build your voice with no posts to import",
       "Weekly Spike Rank audit with full report",
     ],
   },
@@ -195,4 +195,4 @@ export const ROLES = [
 ] as const;
 
 export const TRUST_DISCLAIMER =
-  "FollowerSpike is not affiliated with, endorsed by, or certified by X, LinkedIn, or Bluesky. FollowerSpike publishes and reads only through each platform's official API, under permissions you grant and can revoke at any time. Outbound messages require a keyword opt-in from the recipient and are subject to daily caps you control.";
+  "FollowerSpike is not affiliated with, endorsed by, or certified by X, LinkedIn, or Bluesky. FollowerSpike publishes and reads only through each platform's official API, under permissions you grant and can revoke at any time. Lead magnet delivery is by email only, sent to an address the recipient supplies in their own reply, and is subject to daily caps you control.";

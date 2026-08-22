@@ -64,7 +64,7 @@ export default async function AdminUsersPage() {
               {rows.map((row) => (
                 <tr key={row.id} className="border-b border-[#EEE] last:border-0">
                   <td className="px-5 py-3">
-                    <span className="font-bold text-[#191919]">{row.full_name || "—"}</span>
+                    <span className="font-bold text-[#191919]">{row.full_name || "None"}</span>
                     {row.is_admin ? (
                       <span className="ml-2 rounded-full bg-[#FEF2F2] px-2 py-0.5 text-xs font-black text-red-700">
                         admin

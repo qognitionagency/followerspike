@@ -41,7 +41,7 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
   {
     id: "recent_lesson",
     prompt: "What is something you learned the hard way in the last year?",
-    help: "A specific incident beats a general principle — the details are the voice.",
+    help: "A specific incident beats a general principle. The details are the voice.",
     long: true,
     required: true,
   },
@@ -76,7 +76,7 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
   {
     id: "signature_phrases",
     prompt: "Are there words or phrases you use constantly?",
-    help: "Comma-separated. Verbal tics count — they are often the most recognisable part.",
+    help: "Comma-separated. Verbal tics count, and they are often the most recognisable part.",
     long: false,
     required: false,
   },

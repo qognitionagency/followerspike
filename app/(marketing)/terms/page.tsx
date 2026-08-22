@@ -4,6 +4,7 @@ import { LegalPage } from "@/components/marketing/LegalPage";
 export const metadata: Metadata = {
   title: "Terms",
   description: "FollowerSpike terms and responsible automation boundaries.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

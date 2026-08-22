@@ -93,3 +93,46 @@ export async function createRazorpaySubscription(params: {
 
   return (await response.json()) as RazorpaySubscriptionResponse;
 }
+
+/**
+ * Cancels a subscription at Razorpay.
+ *
+ * Defaults to the end of the paid period, which is the honest default: the
+ * member has already paid for the current cycle, so ending access the instant
+ * they click cancel would be taking money for time they do not get. They keep
+ * everything until `current_period_end` and are not charged again.
+ *
+ * The local `subscriptions` row is not updated here. Razorpay answers this call
+ * and then sends a `subscription.cancelled` webhook, and that webhook is the
+ * single writer for subscription state — having two writers is how a cancelled
+ * subscription ends up still marked active, or the reverse.
+ */
+export async function cancelRazorpaySubscription(params: {
+  subscriptionId: string;
+  atCycleEnd?: boolean;
+}): Promise<{ id: string; status: string; ended_at?: number | null }> {
+  const keyId = requiredEnv("RAZORPAY_KEY_ID");
+  const keySecret = requiredEnv("RAZORPAY_KEY_SECRET");
+  const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+
+  const response = await fetch(
+    `https://api.razorpay.com/v1/subscriptions/${encodeURIComponent(params.subscriptionId)}/cancel`,
+    {
+      method: "POST",
+      headers: {
+        authorization: `Basic ${auth}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ cancel_at_cycle_end: params.atCycleEnd === false ? 0 : 1 }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "");
+    throw new Error(
+      `Razorpay subscription cancellation failed with ${response.status}${errorText ? `: ${errorText}` : ""}`
+    );
+  }
+
+  return (await response.json()) as { id: string; status: string; ended_at?: number | null };
+}

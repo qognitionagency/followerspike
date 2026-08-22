@@ -89,7 +89,7 @@ export default async function AdminLeadsPage() {
         <h2 className="border-b border-[#D6D6D6] px-6 py-4 text-lg font-black">Customer-captured leads</h2>
         {capturedLeads.length === 0 ? (
           <p className="p-6 text-sm text-[#666]">
-            No captured leads yet — lead-capture automations have not run.
+            No captured leads yet. Lead-capture automations have not run.
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -111,8 +111,8 @@ export default async function AdminLeadsPage() {
                       <span className="block text-xs text-[#666]">{row.email || `@${row.handle}`}</span>
                     </td>
                     <td className="px-6 py-3 capitalize text-[#555]">{row.platform}</td>
-                    <td className="px-6 py-3 text-[#555]">{row.keyword || "—"}</td>
-                    <td className="px-6 py-3 text-[#555]">{row.owner_email || "—"}</td>
+                    <td className="px-6 py-3 text-[#555]">{row.keyword || "None"}</td>
+                    <td className="px-6 py-3 text-[#555]">{row.owner_email || "None"}</td>
                     <td className="px-6 py-3 text-[#555]">{formatDate(row.captured_at)}</td>
                   </tr>
                 ))}

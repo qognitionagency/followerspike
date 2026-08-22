@@ -1,6 +1,7 @@
+import { appUrl } from "@/lib/env";
 import { BRAND, ROUTES, TRUST_DISCLAIMER } from "@/lib/constants";
 
-const siteUrl = process.env.APP_URL || "http://localhost:3000";
+const siteUrl = appUrl();
 
 export function GET() {
   const body = `# ${BRAND.name}
@@ -13,7 +14,7 @@ ${BRAND.name} is a founder growth tool for X, LinkedIn, and Bluesky. Founders wr
 - Spike Rank: a 0-100 score per profile across positioning, proof, cadence, engagement, and conversion path, with a ranked list of fixes
 - Growth plans that turn audit findings into scheduled posts
 - Automations through official platform APIs: auto-plug, first comment, evergreen recycling, and cross-post relay
-- Keyword-triggered lead capture that delivers a lead magnet and stores the lead
+- Keyword-triggered lead capture that watches replies on your own posts and emails the lead magnet to the address in the reply
 - Safety controls, daily caps, quiet hours, consent history, and full activity logs
 
 ## Best Pages
@@ -49,7 +50,7 @@ ${TRUST_DISCLAIMER}
 - Founder voice for AI writing with no post history
 - Social scheduling for solo founders
 - Turn social followers into email subscribers
-- Auto-DM a lead magnet on X
+- Capture email subscribers from post replies
 - Typefully alternative
 - Taplio alternative
 - Buffer alternative for founders

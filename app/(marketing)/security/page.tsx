@@ -4,6 +4,7 @@ import { LegalPage } from "@/components/marketing/LegalPage";
 export const metadata: Metadata = {
   title: "Security",
   description: "FollowerSpike security controls for sessions, data, webhooks, and automation logs.",
+  alternates: { canonical: "/security" },
 };
 
 export default function SecurityPage() {

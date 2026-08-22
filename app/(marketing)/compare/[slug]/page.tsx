@@ -1,13 +1,14 @@
+import { appUrl } from "@/lib/env";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "@/components/icons";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { comparisonPages, getComparisonPage } from "@/lib/marketing/content";
 import { ROUTES } from "@/lib/constants";
 
-const siteUrl = process.env.APP_URL || "http://localhost:3000";
+const siteUrl = appUrl();
 
 type PageProps = {
   params: { slug: string };

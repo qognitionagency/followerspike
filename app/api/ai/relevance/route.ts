@@ -3,6 +3,8 @@ import { isRedirectError } from "next/dist/client/components/redirect";
 import { z } from "zod";
 import { promptUserContext, scoreRelevanceResult } from "@/lib/ai/generators";
 import { requireAppSession } from "@/lib/session";
+import { checkRateLimit, rateLimitHeaders } from "@/lib/security/rate-limit";
+import { recordError } from "@/lib/observability/log";
 import { getWorkspace } from "@/lib/workspace";
 
 const RelevanceBodySchema = z.object({
@@ -12,6 +14,22 @@ const RelevanceBodySchema = z.object({
 export async function POST(request: Request) {
   try {
     const session = await requireAppSession();
+
+    // Authenticated, but still metered. Tier caps in lib/automation govern what
+    // may be published; nothing governed how often a generation could be asked
+    // for, so a client stuck in a retry loop billed straight through to the AI
+    // provider. Per user rather than per IP: the account is the payer.
+    const throttle = await checkRateLimit({
+      bucket: `ai-relevance:${session.userId}`,
+      limit: 90,
+      windowSeconds: 3600,
+    });
+    if (!throttle.allowed) {
+      return NextResponse.json(
+        { error: "Too many generations in the last hour.", retryAfterSeconds: throttle.retryAfterSeconds },
+        { status: 429, headers: rateLimitHeaders(throttle) }
+      );
+    }
     const body = RelevanceBodySchema.parse((await request.json()) as unknown);
 
     // Attribution only for the cost row; scoring works without a workspace.
@@ -44,6 +62,7 @@ export async function POST(request: Request) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.flatten() }, { status: 400 });
     }
+    await recordError(error, { source: "api/ai/relevance", requestPath: "/api/ai/relevance" });
     return NextResponse.json({ error: "Relevance scoring failed" }, { status: 500 });
   }
 }

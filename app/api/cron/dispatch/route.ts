@@ -16,6 +16,8 @@ import { z } from "zod";
 import { claimDue, publishJobMessage, qstashPublishConfigured, reapExpiredLeases, verifyQStashSignature, fail } from "@/lib/jobs/queue";
 import { runJob } from "@/lib/jobs/handlers";
 import { sweepRecurringWork } from "@/lib/jobs/schedule";
+import { pruneRateLimits } from "@/lib/security/rate-limit";
+import { pruneErrorLog, recordError } from "@/lib/observability/log";
 
 // Node, not edge: signature verification needs the crypto primitives, and the
 // handlers this can run inline are server-only throughout.
@@ -64,6 +66,15 @@ export async function POST(request: Request) {
     // every time costs two indexed queries and enqueues nothing.
     const swept = await sweepRecurringWork();
 
+    // Housekeeping for the two tables that only ever grow. Both delete by an
+    // indexed timestamp and match nothing on most ticks, so this is cheaper
+    // than a cron entry of its own would be. Neither is allowed to fail the
+    // tick: expired counters and stale error rows are untidy, not urgent.
+    const pruned = await Promise.all([
+      pruneRateLimits().catch(() => 0),
+      pruneErrorLog().catch(() => 0),
+    ]);
+
     const jobs = await claimDue(parsed.data.limit ?? DEFAULT_BATCH);
 
     if (!qstashPublishConfigured()) {
@@ -78,6 +89,7 @@ export async function POST(request: Request) {
         swept,
         claimed: jobs.length,
         succeeded: results.filter((result) => result.ok).length,
+        pruned,
       });
     }
 
@@ -93,8 +105,11 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ mode: "qstash", reaped, swept, claimed: jobs.length, dispatched });
-  } catch {
+    return NextResponse.json({ mode: "qstash", reaped, swept, claimed: jobs.length, dispatched, pruned });
+  } catch (error) {
+    // The scheduler is the one caller here and it only sees a status code, so
+    // an unrecorded failure means nothing published and nothing said why.
+    await recordError(error, { source: "cron/dispatch", requestPath: "/api/cron/dispatch" });
     return NextResponse.json({ error: "Dispatch failed" }, { status: 500 });
   }
 }

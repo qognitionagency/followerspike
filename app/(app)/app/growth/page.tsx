@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { CheckCircle2, Circle, PenSquare, Target } from "lucide-react";
+import { CheckCircle2, Circle, PenSquare, Target } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { requireAppSession } from "@/lib/session";
 import { requireWorkspace } from "@/lib/workspace";
@@ -119,7 +119,7 @@ export default async function GrowthPage() {
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#666]">
             {latest
               ? `Your latest score is ${latest.result.score}/100 on ${platformLabel(latest.result.platform)}. Build a plan and the highest-impact fixes become a checklist.`
-              : "Run a Spike Rank audit first — a plan is only built from things actually observed on your profile."}
+              : "Run a Spike Rank audit first. A plan is only built from things actually observed on your profile."}
           </p>
         )}
 

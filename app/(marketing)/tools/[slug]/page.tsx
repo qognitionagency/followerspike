@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, ShieldCheck } from "@/components/icons";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { SignupButton } from "@/components/marketing/SignupButton";
@@ -32,6 +32,9 @@ export function generateMetadata({ params }: PageProps): Metadata {
       absolute: page.meta_title,
     },
     description: page.meta_description,
+    // ~1,300 pages come out of one template, so without an explicit canonical
+    // they are the largest block of near-duplicate URLs on the site.
+    alternates: { canonical: `/tools/${page.slug}` },
   };
 }
 

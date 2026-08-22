@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { AlertTriangle, MessageSquarePlus, Radio, Recycle, Repeat2, Sparkles } from "lucide-react";
+import { AlertTriangle, MessageSquarePlus, MessageSquareText, Radio, Recycle, Repeat2 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -292,7 +292,7 @@ function Card({
   automation,
   children,
 }: {
-  icon: typeof Sparkles;
+  icon: typeof MessageSquareText;
   title: string;
   body: string;
   automation: Automation | null;
@@ -363,7 +363,7 @@ export default async function AutomationsPage() {
         title="First comment"
         body={`Posts the comment you wrote with the post, once the whole thread is up. Works on ${replyPlatforms
           .map(platformLabel)
-          .join(" and ")} — LinkedIn exposes no comment endpoint at the permissions we hold.`}
+          .join(" and ")}. LinkedIn exposes no comment endpoint at the permissions we hold.`}
         automation={firstCommentRow}
       >
         <form action={saveFirstComment} className="space-y-4">
@@ -381,7 +381,7 @@ export default async function AutomationsPage() {
       </Card>
 
       <Card
-        icon={Sparkles}
+        icon={MessageSquareText}
         title="Auto-plug"
         body="Replies to your own post with a link, hours later, once it has had time to travel. It cannot wait for a view or like threshold: no connected platform gives us post metrics, and an automation that pretended otherwise would be guessing under your name."
         automation={plugRow}
@@ -468,7 +468,7 @@ export default async function AutomationsPage() {
       <Card
         icon={Radio}
         title="Keyword capture"
-        body={`Watches the replies on your posts for a word and emails whoever asks. Replies do not carry email addresses, so only a reply that includes one can be delivered to — ask for both. Works on ${capturePlatforms
+        body={`Watches the replies on your posts for a word and emails whoever asks. Replies do not carry email addresses, so only a reply that includes one can be delivered to. Ask for both. Works on ${capturePlatforms
           .map(platformLabel)
           .join(" and ")}.`}
         automation={captureRow}
@@ -524,7 +524,7 @@ export default async function AutomationsPage() {
               name="body"
               required
               defaultValue={stringField(captureRow, "action", "body")}
-              placeholder="You asked for the playbook under my post — here it is."
+              placeholder="You asked for the playbook under my post, so here it is."
               className="mt-2 min-h-24 bg-white"
             />
           </label>

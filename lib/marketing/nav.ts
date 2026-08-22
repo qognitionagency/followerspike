@@ -16,7 +16,6 @@ export const marketingNav: MarketingNavGroup[] = [
   {
     title: "Product",
     items: [
-      { label: "Overview", href: ROUTES.home, description: "Clean product overview and demo." },
       { label: "How it works", href: "/how-it-works", description: "Three-step founder growth workflow." },
       { label: "Features", href: "/features", description: "Composer, voice, ranking, automations, and lead capture." },
       { label: "Multi-Platform Composer", href: "/features/multi-platform-composer", description: "One editor for X, LinkedIn, and Bluesky.", badge: "Core" },

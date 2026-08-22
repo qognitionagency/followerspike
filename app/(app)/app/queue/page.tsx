@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { Check, PenLine, RotateCw, X } from "lucide-react";
+import { Check, PenLine, RotateCw, X } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { requireAppSession } from "@/lib/session";
 import { db } from "@/lib/db";

@@ -97,7 +97,6 @@ export type VoiceProfile = {
 };
 
 export type AutomationKind =
-  | "auto_dm"
   | "comment_capture"
   | "auto_plug"
   | "first_comment"

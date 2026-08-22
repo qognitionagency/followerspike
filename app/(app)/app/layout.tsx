@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ClerkProvider } from "@clerk/nextjs";
-import { BarChart3, Link2, ListChecks, MessageSquareText, PenSquare, Recycle, Settings, ShieldAlert, Target, TrendingUp, Zap } from "lucide-react";
+import { BarChart3, Link2, ListChecks, MessageSquareText, PenSquare, Recycle, Settings, ShieldAlert, Target, TrendingUp, Zap } from "@/components/icons";
 import { requireAppSession } from "@/lib/session";
 import { BRAND } from "@/lib/constants";
 

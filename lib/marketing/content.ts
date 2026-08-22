@@ -10,20 +10,10 @@ import {
   Sparkles,
   Target,
   UserRoundCheck,
-} from "lucide-react";
-import { INDUSTRIES, ROLES, ROUTES } from "@/lib/constants";
+} from "@/components/icons";
+import { INDUSTRIES, ROLES } from "@/lib/constants";
 
-export type MarketingNavItem = {
-  label: string;
-  href: string;
-  description: string;
-  badge?: string;
-};
 
-export type MarketingNavGroup = {
-  title: string;
-  items: MarketingNavItem[];
-};
 
 export type FeaturePage = {
   slug: string;
@@ -116,12 +106,12 @@ export const featurePages: FeaturePage[] = [
     eyebrow: "Composer",
     title: "Write once. Publish native to X, LinkedIn, and Bluesky.",
     description:
-      "One editor with a live preview per platform, so a thread reads like a thread and a LinkedIn post reads like LinkedIn — not like a repost.",
+      "One editor with a live preview per platform, so a thread reads like a thread and a LinkedIn post reads like LinkedIn rather than like a repost.",
     icon: Layers3,
     highlights: ["Per-platform previews", "Thread builder", "Link preview control", "Drafts"],
     workflow: [
       { title: "Write it once", body: "Draft in a single editor while FollowerSpike tracks each platform's limits: 280 characters on X, 300 on Bluesky, 3,000 on LinkedIn." },
-      { title: "See it as they will", body: "Previews render the real thing — thread splits, truncation points, and where a link preview will appear." },
+      { title: "See it as they will", body: "Previews render the real thing: thread splits, truncation points, and where a link preview will appear." },
       { title: "Adapt, do not duplicate", body: "Rewrite for each platform in one click instead of pasting identical text into three boxes." },
     ],
     faq: [
@@ -134,16 +124,16 @@ export const featurePages: FeaturePage[] = [
     eyebrow: "Voice",
     title: "AI that writes like you, even before you have posts.",
     description:
-      "Pick a founder voice, answer ten questions, or clone your best posts. All three produce the same thing: a voice profile every draft is written through.",
+      "Answer eight questions, or clone the voice out of the posts you already wrote. Both produce the same thing: a versioned voice profile, with a per-platform override where you want one.",
     icon: BrainCircuit,
-    highlights: ["8 founder presets", "Voice Interview", "Voice Cloner", "Sounds-like-me score"],
+    highlights: ["Voice Interview", "Voice Cloner", "Versioned profiles", "Per-platform overrides"],
     workflow: [
-      { title: "Start from anywhere", body: "No posts yet? Take the Voice Interview. Already posting? Clone the voice from your twenty best posts." },
+      { title: "Start from anywhere", body: "No posts yet? Take the Voice Interview. Already posting? Clone the voice from your best existing posts." },
       { title: "Answer by ear, not by theory", body: "The interview shows you the same idea written two ways and asks which sounds more like you. Nobody has to describe their own tone." },
-      { title: "Correct it once", body: "Edit a draft and FollowerSpike learns the difference, so the next one starts closer." },
+      { title: "Keep the corrections", body: "Every edit you make to a draft is stored against the profile version it came from, so the record of how you actually write stays in one place." },
     ],
     faq: [
-      { question: "What if I have never posted?", answer: "That is what the Voice Interview is for. It builds a usable voice profile in about three minutes with no post history at all." },
+      { question: "What if I have never posted?", answer: "That is what the Voice Interview is for. Eight questions build a usable voice profile with no post history at all." },
       { question: "Does it invent metrics about my company?", answer: "No. The profile stores the real numbers and milestones you give it, and drafts are held to those." },
     ],
   },
@@ -152,17 +142,17 @@ export const featurePages: FeaturePage[] = [
     eyebrow: "Spike Rank",
     title: "Score your profile, then fix what is costing you followers.",
     description:
-      "A 0–100 score for each of your X, LinkedIn, and Bluesky profiles across positioning, proof, cadence, engagement, and conversion path.",
+      "A 0 to 100 score for each of your X, LinkedIn, and Bluesky profiles across positioning, proof, cadence, engagement, and conversion path.",
     icon: Gauge,
     highlights: ["Per-platform score", "Ranked fix list", "Score history", "Rewrites included"],
     workflow: [
-      { title: "Get ranked", body: "Five weighted pillars, each with checks that pass, warn, or fail — and a reason for every one." },
+      { title: "Get ranked", body: "Five weighted pillars, each with checks that pass, warn, or fail, and a reason for every one." },
       { title: "See the five that matter", body: "Fixes are ordered by impact against effort, so you know what to do this week rather than someday." },
       { title: "Fix it in the product", body: "Every finding comes with a rewrite you can apply, and the content ideas land straight in your queue." },
     ],
     faq: [
       { question: "How do you read my LinkedIn profile?", answer: "You paste it. LinkedIn does not give third-party apps access to your headline, About, or experience, so we ask for it directly rather than scraping." },
-      { question: "Does the score change on its own?", answer: "It is recomputed on a schedule, and the history shows what moved after each fix." },
+      { question: "Does the score change on its own?", answer: "Bluesky is rescored on a schedule. X and LinkedIn are scored when you run them, and the history shows what moved after each fix." },
     ],
   },
   {
@@ -170,11 +160,11 @@ export const featurePages: FeaturePage[] = [
     eyebrow: "Automations",
     title: "The posting chores, handled by rule.",
     description:
-      "Auto-plug a strong post, drop the link in the first comment, recycle evergreen work, and relay an X thread to LinkedIn — all through official APIs.",
+      "Auto-plug a strong post, drop the link in the first comment, recycle evergreen work, and relay an X thread to LinkedIn, all through official APIs.",
     icon: CalendarDays,
     highlights: ["Auto-Plug", "First Comment", "Evergreen recycling", "Cross-post relay"],
     workflow: [
-      { title: "Set the rule", body: "Each automation is a plain trigger and action: when this post passes 500 impressions, reply with the link." },
+      { title: "Set the rule", body: "Each automation is a plain trigger and action: four hours after this post goes live, reply to it with the link." },
       { title: "Stay inside the caps", body: "Daily limits, quiet hours in your timezone, and duplicate suppression are enforced before anything fires." },
       { title: "Check the log", body: "Every firing is recorded, including the ones a cap or quiet-hour rule blocked, so nothing happens invisibly." },
     ],
@@ -188,17 +178,17 @@ export const featurePages: FeaturePage[] = [
     eyebrow: "Lead capture",
     title: "Turn a good post into email subscribers.",
     description:
-      "When someone comments your keyword, they get the link — by DM on X and Bluesky, by tracked public reply on LinkedIn — and they land in your list.",
+      "When someone replies to your post with your keyword and an email address, the resource is emailed there. No direct messages, on any platform.",
     icon: Send,
-    highlights: ["Keyword opt-in", "Lead magnet delivery", "Mini-CRM", "Daily caps"],
+    highlights: ["Keyword opt-in", "Email delivery", "Saved lead list", "Daily caps"],
     workflow: [
-      { title: "Pick the keyword", body: "Ask for a comment to get the resource. The comment is the opt-in, so nobody is messaged out of the blue." },
-      { title: "Deliver automatically", body: "The link goes out within seconds, capped per day and never twice to the same person." },
-      { title: "Keep the lead", body: "Every recipient is saved with their handle and platform, ready for an email sequence." },
+      { title: "Pick the keyword", body: "Ask for a reply with the keyword and an email address. The reply is the opt-in, so nobody hears from you uninvited." },
+      { title: "Deliver by email", body: "FollowerSpike reads the replies under your own post and emails the resource to the address in the reply, capped per day and never twice to the same address." },
+      { title: "Keep the lead", body: "Every capture is saved with the handle, the platform, and the address it went to, ready for a sequence you run in your own email tool." },
     ],
     faq: [
-      { question: "Do you send LinkedIn DMs?", answer: "No. LinkedIn has no direct-message API for third parties, so LinkedIn capture uses a tracked public reply instead. We will not automate your LinkedIn inbox." },
-      { question: "Can someone opt out?", answer: "Yes. Opt-outs are honored automatically and that person is never messaged again." },
+      { question: "Do you send DMs?", answer: "No. FollowerSpike does not send direct messages on X, LinkedIn, or Bluesky. Capture reads replies on your own posts and delivers by email only." },
+      { question: "Can someone opt out?", answer: "Yes. An address that unsubscribes is recorded as such and is never emailed again." },
     ],
   },
   {
@@ -210,7 +200,7 @@ export const featurePages: FeaturePage[] = [
     icon: ShieldCheck,
     highlights: ["API-only access", "Daily caps", "Quiet hours", "Full activity log"],
     workflow: [
-      { title: "Connect by OAuth", body: "You authorize each account through the platform itself, and tokens are stored encrypted." },
+      { title: "Connect the account", body: "You authorize each account through the platform itself, with an app password on Bluesky, and the credential is stored encrypted and can be revoked from the platform at any time." },
       { title: "Set your ceilings", body: "Daily caps and quiet hours are yours to set, and they are enforced in code before any call is made." },
       { title: "Stop anything instantly", body: "One switch disables an automation, and another disables all of them across every account." },
     ],
@@ -226,10 +216,10 @@ export const freeTools: FreeToolDefinition[] = [
     slug: "spike-rank-x",
     name: "X Profile Score",
     title: "Score your X profile out of 100.",
-    description: "Bio, pinned post, cadence, reply ratio, and whether anything on your profile leads anywhere. Just enter your handle.",
+    description: "Display name, bio, pinned post, and whether anything on your profile leads anywhere. Paste your profile, because X exposes no public profile data to read it for you.",
     category: "Spike Rank",
-    inputLabel: "Your X handle",
-    inputPlaceholder: "@yourhandle",
+    inputLabel: "Your X profile",
+    inputPlaceholder: "Open your profile, select all, and paste it here: name, handle, bio, and pinned post.",
     contextLabel: "What are you growing toward?",
     contextPlaceholder: "Customers, investors, hiring, an audience for a launch...",
     resultLabel: "X profile score",
@@ -240,7 +230,7 @@ export const freeTools: FreeToolDefinition[] = [
     slug: "spike-rank-bluesky",
     name: "Bluesky Profile Score",
     title: "Score your Bluesky profile out of 100.",
-    description: "Handle, banner, description, posting rhythm, and conversation depth — read live from your public profile.",
+    description: "Handle, banner, description, posting rhythm, and conversation depth, read live from your public profile.",
     category: "Spike Rank",
     inputLabel: "Your Bluesky handle",
     inputPlaceholder: "yourname.bsky.social",
@@ -257,7 +247,7 @@ export const freeTools: FreeToolDefinition[] = [
     description: "Paste your profile and get positioning, proof, and conversion gaps with a rewritten headline and About.",
     category: "Spike Rank",
     inputLabel: "Paste your LinkedIn profile",
-    inputPlaceholder: "Open your profile, select all, and paste it here — headline, About, and experience.",
+    inputPlaceholder: "Open your profile, select all, and paste it here: headline, About, and experience.",
     contextLabel: "What are you growing toward?",
     contextPlaceholder: "Inbound leads, hiring, investor visibility...",
     resultLabel: "LinkedIn profile score",
@@ -296,7 +286,7 @@ export const freeTools: FreeToolDefinition[] = [
     slug: "cross-post-rewriter",
     name: "Cross-Post Rewriter",
     title: "Rewrite one post for all three platforms.",
-    description: "The same idea as a tight X post, a Bluesky post, and a LinkedIn post — adapted, not copy-pasted.",
+    description: "The same idea as a tight X post, a Bluesky post, and a LinkedIn post, adapted rather than copy-pasted.",
     category: "Composer",
     inputLabel: "Your post",
     inputPlaceholder: "Paste what you already wrote for one platform...",
@@ -324,7 +314,7 @@ export const freeTools: FreeToolDefinition[] = [
     slug: "founder-bio-generator",
     name: "Founder Bio Generator",
     title: "Write your bio for X, LinkedIn, and Bluesky at once.",
-    description: "One positioning statement, three native versions — inside each platform's limits and conventions.",
+    description: "One positioning statement, three native versions, inside each platform's limits and conventions.",
     category: "Profile",
     inputLabel: "What do you do and who for?",
     inputPlaceholder: "I build FollowerSpike, a posting tool for solo founders...",
@@ -338,13 +328,13 @@ export const freeTools: FreeToolDefinition[] = [
     slug: "lead-magnet-post-writer",
     name: "Lead Magnet Post Writer",
     title: "Write the post that turns comments into subscribers.",
-    description: "A keyword opt-in post plus the message it triggers, written so it reads like a person and not a funnel.",
+    description: "A keyword opt-in post plus the email it triggers, written so it reads like a person and not a funnel.",
     category: "Lead capture",
     inputLabel: "What are you giving away?",
     inputPlaceholder: "A Notion template, a teardown, a spreadsheet, a checklist...",
     contextLabel: "Who should want it?",
     contextPlaceholder: "Solo founders, indie hackers, agency owners...",
-    resultLabel: "Post and DM",
+    resultLabel: "Post and email",
     cta: "Automate the delivery",
     icon: Send,
   },
@@ -368,7 +358,7 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "linkedin-autopilot-for-founders",
     title: "LinkedIn Autopilot for Founders: What to Automate and What to Keep Human",
-    description: "A practical guide to using a review-first LinkedIn growth assistant without losing judgment or voice.",
+    description: "A practical guide to using a review-first publishing assistant without losing judgment or voice.",
     category: "Autopilot",
     date: "2026-05-16",
     readTime: "7 min read",
@@ -376,7 +366,7 @@ export const blogPosts: BlogPost[] = [
     sections: [
       { heading: "The founder problem", body: "Founders do not usually fail at LinkedIn because they lack ideas. They fail because the channel asks for small consistent actions on days that are already overloaded." },
       { heading: "The right automation boundary", body: "Drafting, scoring, queueing, reminding, and conservative execution can be assisted. Positioning, proof, sensitive replies, and relationship judgment still need the human owner." },
-      { heading: "A daily loop that compounds", body: "A useful post, a few relevant comments, a short list of right-fit connections, and light accepted-connection follow-up is enough to create momentum without turning LinkedIn into a second job." },
+      { heading: "A loop that compounds", body: "One useful post, the link in the first comment rather than in the post, a plug on the one that landed, and a proven post back in the evergreen rotation is enough to create momentum without turning LinkedIn into a second job." },
     ],
     faq: [
       { question: "Should founders fully automate LinkedIn?", answer: "No. The safest approach is review-first, then conservative autopilot for low-risk actions after trust is built." },
@@ -391,7 +381,7 @@ export const blogPosts: BlogPost[] = [
     readTime: "6 min read",
     author: "FollowerSpike Team",
     sections: [
-      { heading: "Risk is real", body: "Any platform automation can carry risk. The responsible move is to make consent, limits, logs, and pause behavior visible instead of hiding them." },
+      { heading: "Risk is real", body: "Any platform automation can carry risk. FollowerSpike works only through each platform's official API, never a browser driving your account, and makes consent, limits, logs, and pause behavior visible instead of hiding them." },
       { heading: "Review-first by default", body: "New workflows should start with user approval until voice, targeting, and timing feel predictable." },
       { heading: "No shortcuts", body: "CAPTCHA bypass, ban evasion, fake pods, and mass scraping do not belong in a professional growth product." },
     ],
@@ -402,18 +392,18 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "build-linkedin-icp",
     title: "How to Build an ICP for LinkedIn Growth",
-    description: "Turn a vague audience into specific roles, industries, pains, topics, and seed leaders.",
+    description: "Turn a vague audience into specific roles, industries, pains, and topics.",
     category: "Strategy",
     date: "2026-05-16",
     readTime: "8 min read",
     author: "FollowerSpike Team",
     sections: [
       { heading: "Start narrower than feels comfortable", body: "A good LinkedIn ICP should name the person, the context, the pain, and the reason they should care now." },
-      { heading: "Translate ICP into behavior", body: "Your ICP should decide what you post, which conversations you join, and who belongs in your connection queue." },
-      { heading: "Use seed leaders", body: "Seed leaders help the system understand the market map faster than broad keywords alone." },
+      { heading: "Translate ICP into behavior", body: "Your ICP should decide what you post, which questions are worth answering in public, and which proof is worth repeating." },
+      { heading: "Read what they read", body: "The accounts your buyers already follow tell you the vocabulary and the open questions of that market faster than a keyword list does." },
     ],
     faq: [
-      { question: "Can I target multiple ICPs?", answer: "Yes, but start with one primary audience per growth queue." },
+      { question: "Can I write for multiple ICPs?", answer: "Yes, but start with one primary audience per voice profile." },
     ],
   },
   {
@@ -427,44 +417,44 @@ export const blogPosts: BlogPost[] = [
     sections: [
       { heading: "Add one useful layer", body: "The best comments add a distinction, example, question, or tactical next step." },
       { heading: "Avoid empty praise", body: "Generic compliments rarely create memory. Specific comments create recognition." },
-      { heading: "Score before writing", body: "A relevance score keeps you out of conversations that are popular but commercially irrelevant." },
+      { heading: "Decide before you type", body: "If you cannot say in one line what the comment adds, skip it. Popular threads are not the same as threads your buyers read." },
     ],
     faq: [
-      { question: "Should comments include a CTA?", answer: "Usually no. Comments should earn attention first." },
+      { question: "Should comments include a CTA?", answer: "Usually no. Comments should earn attention first. FollowerSpike only ever comments on your own posts, as a first comment or a plug, so comments on other people's posts stay yours to write." },
     ],
   },
   {
     slug: "connection-requests-that-do-not-feel-spammy",
-    title: "Connection Requests That Do Not Feel Spammy",
-    description: "How to connect with right-fit people without sounding like a cold outbound sequence.",
-    category: "Network",
+    title: "Growing an Audience Without Sending a Single Request",
+    description: "Why a publishing cadence and one clear next step build a following faster than outbound ever did.",
+    category: "Audience",
     date: "2026-05-16",
     readTime: "5 min read",
     author: "FollowerSpike Team",
     sections: [
-      { heading: "Specific beats clever", body: "A good connection note says why this person, why now, and why it is low-pressure." },
-      { heading: "Keep daily volume conservative", body: "A small number of relevant requests beats large volumes that dilute reputation." },
-      { heading: "Use context", body: "Target role, recent topic, shared market, and seed leader proximity all make the request feel more natural." },
+      { heading: "Reach follows repetition", body: "People follow an account after they have seen it be useful more than once. That makes it a cadence problem rather than an outreach problem, and cadence is the part software can hold for you." },
+      { heading: "Stay on one recognisable subject", body: "An account about one subject gets remembered for it. An account about six starts from zero every post, because nobody can predict what the next one will be about." },
+      { heading: "Give the profile somewhere to go", body: "Spike Rank scores the conversion path as its own pillar for a reason. A bio with no link and a pinned post with no offer waste every visit the posts earn." },
     ],
     faq: [
-      { question: "Should every request include a note?", answer: "Not always. Sometimes a clean request is better than a forced note." },
+      { question: "Does FollowerSpike send connection requests, follows, or likes?", answer: "No. It publishes your posts, comments on your own posts, and scores your profile. Nothing it does touches anyone else's account." },
     ],
   },
   {
     slug: "follow-up-dms-after-acceptance",
-    title: "Follow-up DMs After Acceptance",
-    description: "A human way to continue the conversation after someone accepts your connection request.",
-    category: "DMs",
+    title: "Turning Post Replies Into Email Subscribers",
+    description: "How keyword capture works: someone asks for the resource under your post, leaves an address, and gets it by email.",
+    category: "Lead capture",
     date: "2026-05-16",
     readTime: "5 min read",
     author: "FollowerSpike Team",
     sections: [
-      { heading: "Do not pitch immediately", body: "The first follow-up should create context, not pressure." },
-      { heading: "Reference the reason", body: "Mention the topic, market, or reason you connected so the message feels grounded." },
-      { heading: "Keep replies reviewable", body: "Relationship moments should stay easy to approve, edit, or take over manually." },
+      { heading: "Ask for a reply, not an inbox", body: "The post names a keyword. Anyone who wants the resource replies with it and leaves an email address, which makes the request itself the opt-in." },
+      { heading: "Deliver by email", body: "FollowerSpike watches the replies under your own post and emails the resource to the address in the reply. There is no direct-message step, on any platform, and nobody who did not ask hears from you." },
+      { heading: "Cap it, log it, and let people leave", body: "Delivery is capped per day, never repeats to the same address, honours an unsubscribe permanently, and every decision, including the ones a cap blocked, lands in the activity log." },
     ],
     faq: [
-      { question: "Does FollowerSpike send cold DM blasts?", answer: "No. V1 focuses on accepted-connection follow-ups." },
+      { question: "Does FollowerSpike send DMs?", answer: "No. FollowerSpike does not send direct messages on any platform. Keyword capture delivers by email only." },
     ],
   },
   {
@@ -477,11 +467,11 @@ export const blogPosts: BlogPost[] = [
     author: "FollowerSpike Team",
     sections: [
       { heading: "Use customer proof", body: "SMB owners often have stronger proof than they realize. Turn customer questions, objections, and outcomes into posts." },
-      { heading: "Spend time where buyers already listen", body: "Engage with local leaders, industry operators, and buyer-adjacent conversations." },
+      { heading: "Answer the question before it is asked", body: "The questions buyers put to you on the phone are the posts. Answering them in public means the next buyer arrives already convinced." },
       { heading: "Keep it repeatable", body: "A small daily queue beats an ambitious plan that disappears after three days." },
     ],
     faq: [
-      { question: "Can SMB owners grow without posting daily?", answer: "Yes, but consistent posting plus targeted engagement compounds faster." },
+      { question: "Can SMB owners grow without posting daily?", answer: "Yes. Three useful posts a week on one subject beat a daily post you cannot sustain." },
     ],
   },
   {
@@ -495,7 +485,7 @@ export const blogPosts: BlogPost[] = [
     sections: [
       { heading: "Teach the problem", body: "Coaches grow faster when they make the hidden problem visible before offering a solution." },
       { heading: "Use client-safe examples", body: "Share anonymized patterns, not private client details." },
-      { heading: "Follow up lightly", body: "A thoughtful accepted-connection follow-up can open conversation without pressure." },
+      { heading: "Put the next step in the post", body: "A post that ends with somewhere to go, a reply keyword or the link in the first comment, lets an interested reader act without waiting to be contacted." },
     ],
     faq: [
       { question: "Should coaches use personal stories?", answer: "Yes, when the story serves a useful lesson for the audience." },
@@ -511,11 +501,11 @@ export const blogPosts: BlogPost[] = [
     author: "FollowerSpike Team",
     sections: [
       { heading: "Show your diagnostic lens", body: "Consultants should post the patterns they notice, not only the services they sell." },
-      { heading: "Comment where buying committees learn", body: "Engagement works best around operators, partners, and market educators." },
-      { heading: "Build a useful network", body: "Connection requests should support a market map, not vanity follower count." },
+      { heading: "Write where buying committees already read", body: "Consultants get found by people researching a problem, so the post has to name that problem in the words the buyer would use, not the words on your services page." },
+      { heading: "Measure the path, not the follower count", body: "Followers matter only where they lead. Spike Rank scores the conversion path separately for that reason: the bio, the pinned post, and whether either one goes anywhere." },
     ],
     faq: [
-      { question: "Can consultants use autopilot safely?", answer: "They can use review-first workflows and conservative execution once targeting is proven." },
+      { question: "Is it safe to let this publish for me?", answer: "Everything is review-first by default. Automations ship off and in simulation mode, and you take them live one at a time once you have read the log." },
     ],
   },
   {
@@ -527,7 +517,7 @@ export const blogPosts: BlogPost[] = [
     readTime: "7 min read",
     author: "FollowerSpike Team",
     sections: [
-      { heading: "Ghostwriters help with voice", body: "A ghostwriter can be useful for high-touch content, but usually does not handle daily engagement, connections, and follow-up." },
+      { heading: "Ghostwriters help with voice", body: "A ghostwriter can be useful for high-touch content, but the per-platform rewrite, the scheduling, and the first comment are usually still yours to run." },
       { heading: "Agencies add service", body: "Agencies can execute more broadly, but cost, control, and speed vary." },
       { heading: "Autopilot adds repeatability", body: "A review-first autopilot is best when you want software leverage and visible control." },
     ],
@@ -546,7 +536,7 @@ export const blogPosts: BlogPost[] = [
     sections: [
       { heading: "Use the company as the source", body: "Customer calls, product decisions, hiring lessons, and market shifts are enough for a useful calendar." },
       { heading: "Rotate post types", body: "Use lessons, frameworks, contrarian takes, proof, founder notes, and questions." },
-      { heading: "Connect content to action", body: "The best calendar also informs comments, connection targets, and follow-ups." },
+      { heading: "Connect content to action", body: "The best calendar also decides what goes in the first comment, which post is worth plugging a few hours later, and which one earns a place in the evergreen rotation." },
     ],
     faq: [
       { question: "How many posts should founders publish?", answer: "Start with three to five useful posts a week and increase only when the workflow is stable." },
@@ -555,14 +545,14 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "what-followerspike-automates",
     title: "What FollowerSpike Does and Does Not Automate",
-    description: "A transparent overview of the product boundaries for LinkedIn growth workflows.",
+    description: "A plain list of what the product does, and what it deliberately will not do.",
     category: "Product",
     date: "2026-05-16",
     readTime: "5 min read",
     author: "FollowerSpike Team",
     sections: [
-      { heading: "What it helps with", body: "FollowerSpike helps with posts, engagement queues, connection requests, accepted-connection follow-ups, reply drafts, review controls, and limits." },
-      { heading: "What it avoids", body: "It does not support CAPTCHA bypass, ban evasion, mass scraping, fake engagement pods, or spammy cold DM sequences." },
+      { heading: "What it helps with", body: "Drafting, a native variant per platform, scheduling and publishing through official APIs, the first comment on your own post, auto-plug, evergreen recycling, cross-post relay, keyword capture delivered by email, and the review queue and caps around all of it." },
+      { heading: "What it avoids", body: "It sends no direct messages on any platform. It does not like, follow, or send connection requests, does not act on anyone else's posts, and does not drive your account through a browser. No CAPTCHA bypass, ban evasion, mass scraping, or engagement pods." },
       { heading: "Why boundaries matter", body: "Professional accounts need growth that compounds reputation instead of risking it for short-term activity." },
     ],
     faq: [
@@ -572,30 +562,30 @@ export const blogPosts: BlogPost[] = [
 ];
 
 const roleFocus: Record<string, string> = {
-  Founder: "turn founder lessons, customer conversations, and market beliefs into consistent LinkedIn growth",
+  Founder: "turn founder lessons, customer conversations, and market beliefs into a publishing rhythm across X, LinkedIn, and Bluesky",
   "Small Business Owner": "turn customer proof, local expertise, and daily operator lessons into trust",
   "Executive Coach": "share coaching insights without exposing private client context",
   Consultant: "show diagnostic thinking and attract decision-makers around a clear problem",
-  "Content Creator": "convert attention into a more intentional professional network",
-  "Agency Owner": "build authority while keeping outreach and engagement focused",
+  "Content Creator": "publish once and land natively on every platform their audience already reads",
+  "Agency Owner": "build authority while running several founder accounts out of one queue",
 };
 
 export function buildRolePages(): AudiencePage[] {
   return ROLES.map((role) => {
-    const focus = roleFocus[role] ?? `build a sharper LinkedIn presence as a ${role}`;
+    const focus = roleFocus[role] ?? `build a sharper presence across X, LinkedIn, and Bluesky as a ${role}`;
     return {
       slug: slugifyMarketing(role),
       type: "role",
       name: role,
       eyebrow: "Role playbook",
-      title: `LinkedIn growth autopilot for ${role}s`,
-      description: `FollowerSpike helps ${role}s ${focus} with posts, engagement, connections, follow-ups, and review controls.`,
-      pain: `${role}s need consistent visibility, but daily posting, commenting, connecting, and follow-up often fall behind client work and operations.`,
-      workflow: ["Define the audience and seed leaders", "Generate the daily growth queue", "Review posts, comments, and connection requests", "Run conservative Pro autopilot when ready"],
-      features: ["Voice-aware posts", "Relevant engagement queue", "Right-fit connection requests", "Accepted-connection follow-up drafts"],
+      title: `Publishing system for ${role}s`,
+      description: `FollowerSpike helps ${role}s ${focus}, with one composer for three platforms, a voice profile built from their own writing, Spike Rank, and a review queue in front of everything.`,
+      pain: `${role}s need consistent visibility, but writing a post, adapting it per platform, and getting it scheduled falls behind client work and operations.`,
+      workflow: ["Score the profile with Spike Rank", "Build a voice profile from the interview or your own posts", "Draft once and preview what each platform will publish", "Review the queue, then let the automations out of simulation"],
+      features: ["Voice-aware drafts", "Per-platform previews", "First comment and auto-plug", "Review queue and daily caps"],
       faq: [
         { question: `Can ${role}s keep approval turned on?`, answer: "Yes. Review mode can stay on permanently." },
-        { question: "Does this replace human judgment?", answer: "No. FollowerSpike prepares the daily work and keeps sensitive moments reviewable." },
+        { question: "Does this replace human judgment?", answer: "No. FollowerSpike drafts and schedules, and you approve. Nothing it does touches anyone else's account." },
       ],
     };
   });
@@ -607,13 +597,13 @@ export function buildIndustryPages(): AudiencePage[] {
     type: "industry",
     name: industry,
     eyebrow: "Industry playbook",
-    title: `LinkedIn growth autopilot for ${industry}`,
-    description: `FollowerSpike helps ${industry} professionals build account growth around useful posts, relevant conversations, right-fit connections, and accepted-connection follow-ups.`,
-    pain: `${industry} audiences are specific. Generic content and random engagement rarely create trust with the right people.`,
-    workflow: ["Map the industry conversation", "Choose roles and seed leaders", "Draft posts from real expertise", "Queue comments, connections, and follow-ups"],
-    features: ["Industry-specific topics", "Audience relevance scoring", "Connection targeting", "Safety and pause controls"],
+    title: `Publishing system for ${industry}`,
+    description: `FollowerSpike helps ${industry} professionals publish useful posts to X, LinkedIn, and Bluesky from one composer, in a voice modelled on their own writing.`,
+    pain: `${industry} audiences are specific. Generic content posted at random rarely creates trust with the right people.`,
+    workflow: ["Map the industry conversation", "Score the profile with Spike Rank", "Draft posts from real expertise", "Review the queue and publish to all three platforms"],
+    features: ["Industry-specific topics", "Spike Rank profile scoring", "Native per-platform variants", "Safety and pause controls"],
     faq: [
-      { question: `Can FollowerSpike adapt to ${industry}?`, answer: "Yes. The workflow starts with niche, audience, seed leaders, and approved voice notes." },
+      { question: `Can FollowerSpike adapt to ${industry}?`, answer: "Yes. The workflow starts with your niche, your audience, and a voice profile built from your own writing." },
       { question: "Will generated pages be thin?", answer: "No. Each industry page includes unique context, workflow, features, FAQs, and internal links." },
     ],
   }));
@@ -640,7 +630,7 @@ export const icpPages: AudiencePage[] = [
   workflow: ["Build a voice profile from posts you already wrote", "Draft once and preview what each platform will publish", "Queue the first comment and the plug with it", "Review the queue, then let the automations out of simulation"],
   features: ["Voice profile", "Multi-platform composer", "First comment and auto-plug", "Keyword capture with email delivery"],
   faq: [
-    { question: "Can I change how it sounds later?", answer: "Yes. The voice profile is versioned, and every edit you make to a generated draft is recorded as a correction that shapes the next one." },
+    { question: "Can I change how it sounds later?", answer: "Yes. The voice profile is versioned, so you can revise it and see which version any draft was written against, and every edit you make to a generated draft is stored alongside it." },
     { question: "Does this create cold DM sequences?", answer: "No. Nothing here messages strangers. Capture only ever reads the replies under your own posts, and only emails someone who replied asking for something." },
   ],
 }));
@@ -648,43 +638,43 @@ export const icpPages: AudiencePage[] = [
 export const comparisonPages: ComparisonPage[] = [
   {
     slug: "ghostwriter-vs-linkedin-autopilot",
-    title: "Ghostwriter vs LinkedIn Autopilot",
-    description: "Compare high-touch content help with a daily growth workflow that also covers comments, connections, and follow-ups.",
+    title: "Ghostwriter vs FollowerSpike",
+    description: "Compare high-touch writing help with software that adapts one post for three platforms and publishes it on a schedule.",
     competitor: "Ghostwriter",
     rows: [
-      { capability: "Posts in your voice", followerSpike: "AI drafts with review and reusable voice rules", alternative: "High-touch writing support" },
-      { capability: "Engagement", followerSpike: "Relevant comments and likes in the queue", alternative: "Usually outside the writing scope" },
-      { capability: "Connections", followerSpike: "Targeted requests with daily caps", alternative: "Usually manual or separate service" },
+      { capability: "Posts in your voice", followerSpike: "Drafts written against a saved voice profile, reviewed before anything publishes", alternative: "High-touch writing support" },
+      { capability: "Three platforms", followerSpike: "One draft, native variants for X, LinkedIn, and Bluesky", alternative: "Usually one platform per engagement" },
+      { capability: "Publishing", followerSpike: "Scheduled and posted through each platform's official API", alternative: "Usually handed back for you to post" },
       { capability: "Control", followerSpike: "Pauseable software workflow", alternative: "Depends on the retainer process" },
     ],
     faq: [
-      { question: "Should I fire my ghostwriter?", answer: "Not necessarily. FollowerSpike is strongest when you need repeatable daily execution around the content." },
+      { question: "Should I fire my ghostwriter?", answer: "Not necessarily. FollowerSpike is strongest when the writing exists and the repeatable part, adapting it and getting it out, is what keeps slipping." },
     ],
   },
   {
     slug: "linkedin-agency-vs-followerspike",
     title: "LinkedIn Agency vs FollowerSpike",
-    description: "Compare agency execution with a lower-cost product workflow for daily LinkedIn account growth.",
+    description: "Compare agency execution with software you run yourself across X, LinkedIn, and Bluesky.",
     competitor: "LinkedIn agency",
     rows: [
-      { capability: "Cost", followerSpike: "$9, $29, or $49 plans", alternative: "Typically custom monthly retainers" },
+      { capability: "Cost", followerSpike: "$19, $39, and $79 plans", alternative: "Typically custom monthly retainers" },
       { capability: "Speed", followerSpike: "Self-serve queue and tools", alternative: "Depends on account manager cadence" },
       { capability: "Transparency", followerSpike: "Visible queue, logs, limits, and pause", alternative: "Depends on reporting quality" },
-      { capability: "Execution", followerSpike: "Software-assisted posts, engagement, connections, and follow-up", alternative: "Potentially broader done-for-you service" },
+      { capability: "Execution", followerSpike: "Drafting, per-platform variants, scheduling, and post-publish automations on your own posts", alternative: "Potentially broader done-for-you service" },
     ],
     faq: [
-      { question: "Can agencies use FollowerSpike?", answer: "Yes, but the current pricing is oriented around one LinkedIn profile." },
+      { question: "Can agencies use FollowerSpike?", answer: "Yes. The Agency plan carries 15 connected accounts across client workspaces, with a separate saved voice per client." },
     ],
   },
   {
     slug: "manual-linkedin-vs-autopilot",
-    title: "Manual LinkedIn vs Autopilot",
-    description: "Compare doing everything yourself with a review-first queue for daily growth actions.",
-    competitor: "Manual LinkedIn",
+    title: "Posting by Hand vs FollowerSpike",
+    description: "Compare doing everything yourself with a review-first queue that adapts the post per platform and schedules it.",
+    competitor: "Manual posting",
     rows: [
-      { capability: "Consistency", followerSpike: "Daily queue reduces blank-page friction", alternative: "Depends on your calendar" },
-      { capability: "Targeting", followerSpike: "ICP, seed leaders, and relevance scoring", alternative: "Often reactive and random" },
-      { capability: "Follow-up", followerSpike: "Accepted-connection DMs and reply drafts", alternative: "Easy to forget" },
+      { capability: "Consistency", followerSpike: "A queue of drafts reduces blank-page friction", alternative: "Depends on your calendar" },
+      { capability: "Profile", followerSpike: "Spike Rank scores positioning, proof, cadence, engagement, and conversion path", alternative: "Guesswork, or a second opinion" },
+      { capability: "After the post", followerSpike: "First comment, auto-plug, and evergreen recycling on your own posts", alternative: "Easy to forget" },
       { capability: "Safety", followerSpike: "Consent, caps, logs, and pause controls", alternative: "Fully manual control" },
     ],
     faq: [
@@ -693,52 +683,6 @@ export const comparisonPages: ComparisonPage[] = [
   },
 ];
 
-export const marketingNav: MarketingNavGroup[] = [
-  {
-    title: "Product",
-    items: [
-      { label: "Overview", href: ROUTES.home, description: "Interactive product-led overview." },
-      ...featurePages.map((feature) => ({
-        label: feature.eyebrow === "Autopilot" ? "LinkedIn Autopilot" : feature.eyebrow,
-        href: `/features/${feature.slug}`,
-        description: feature.description,
-        badge: feature.slug === "linkedin-autopilot" ? "Core" : undefined,
-      })),
-    ],
-  },
-  {
-    title: "Solutions",
-    items: [
-      { label: "For founders", href: "/roles/founder", description: "Founder visibility without daily LinkedIn work." },
-      { label: "For SMB owners", href: "/roles/small-business-owner", description: "Turn customer proof into account growth." },
-      { label: "For coaches", href: "/roles/executive-coach", description: "Teach expertise and follow up tastefully." },
-      { label: "For consultants", href: "/roles/consultant", description: "Build authority around your diagnostic lens." },
-      { label: "Roles hub", href: "/roles", description: "Browse all role-based playbooks." },
-      { label: "Industries hub", href: "/industries", description: "Browse industry-specific growth pages." },
-    ],
-  },
-  {
-    title: "Free Tools",
-    items: [
-      { label: "All free tools", href: "/free-tools", description: "Functional LinkedIn growth tools." },
-      ...freeTools.slice(0, 8).map((tool) => ({
-        label: tool.name,
-        href: `/free-tools/${tool.slug}`,
-        description: tool.description,
-      })),
-    ],
-  },
-  {
-    title: "Resources",
-    items: [
-      { label: "Blog", href: "/blog", description: "Guides on LinkedIn autopilot, ICP, safety, and growth." },
-      { label: "Comparisons", href: "/compare/ghostwriter-vs-linkedin-autopilot", description: "Compare software, agencies, ghostwriters, and manual work." },
-      { label: "Trust center", href: ROUTES.trust, description: "Safety, consent, platform risk, and controls." },
-      { label: "Security", href: ROUTES.security, description: "Privacy and security foundations." },
-      { label: "Pricing", href: ROUTES.pricing, description: "$9, $29, and $49 plans." },
-    ],
-  },
-];
 
 export function getFeaturePage(slug: string) {
   return featurePages.find((page) => page.slug === slug);

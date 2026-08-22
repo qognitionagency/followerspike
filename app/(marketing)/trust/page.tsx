@@ -4,6 +4,7 @@ import { LegalPage } from "@/components/marketing/LegalPage";
 export const metadata: Metadata = {
   title: "Trust Center",
   description: "FollowerSpike trust, safety, privacy, and automation controls.",
+  alternates: { canonical: "/trust" },
 };
 
 export default function TrustPage() {

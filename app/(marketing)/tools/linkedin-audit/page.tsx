@@ -1,17 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import {
-  AlertTriangle,
-  ArrowRight,
-  BrainCircuit,
-  CheckCircle2,
-  LockKeyhole,
-  Mail,
-  MailCheck,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+import { AlertTriangle, ArrowRight, BrainCircuit, CheckCircle2, LockKeyhole, Mail, MailCheck, ShieldCheck } from "@/components/icons";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { Button } from "@/components/ui/button";
@@ -25,6 +15,7 @@ export const metadata: Metadata = {
   title: "Free LinkedIn Profile Audit",
   description:
     "Get a free LinkedIn audit with a score, profile rebuild plan, and founder content prompts. Works even if your profile is empty.",
+  alternates: { canonical: "/tools/linkedin-audit" },
 };
 
 const auditFormSchema = z.object({
@@ -155,7 +146,7 @@ export default async function LinkedInAuditPage({
         <section className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8 lg:py-20">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-[#BFD7F0] bg-white px-3 py-1 text-sm font-bold text-[#0A66C2]">
-              <Sparkles className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4" />
               Free LinkedIn audit
             </div>
             <h1 className="mt-5 max-w-3xl text-5xl font-black text-[#191919] lg:text-6xl">

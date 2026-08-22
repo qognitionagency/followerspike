@@ -99,6 +99,23 @@ test account), and it **writes to whatever database it points at**.
 - Middleware redirects unauthenticated traffic explicitly rather than via
   `auth.protect()`, and the redirect target must stay relative (there is an
   e2e test asserting no open redirect).
+- **Never read `process.env.APP_URL` directly. Use `appUrl()` from `lib/env.ts`.**
+  Fourteen files each had their own `process.env.APP_URL || "http://localhost:3000"`,
+  and APP_URL is not set in production, so every canonical tag, Open Graph url,
+  sitemap entry, robots host and JSON-LD id told the world the site lived at
+  localhost. `appUrl()` falls back through `VERCEL_PROJECT_PRODUCTION_URL` and
+  `VERCEL_URL` before localhost, so a Vercel deployment is right with no
+  configuration at all.
+- Icons come from `components/icons.tsx`, not a package. It is generated from
+  lucide's own path data, so the glyphs are unchanged; `lucide-react` and
+  `motion` are no longer dependencies and should not come back.
+- Anything public that costs money passes `lib/security/rate-limit.ts` first.
+  `/api/free-tools/[slug]` is unauthenticated and runs an AI generation per
+  call, which had no ceiling at all before. The limiter is Postgres-backed and
+  fails open, so a database outage degrades limits rather than the tools.
+- Failures are recorded with `recordError` from `lib/observability/log.ts`
+  before a handler returns a generic status. There was no error tracking of any
+  kind; every catch block returned a 502 and dropped the detail.
 - Voice profiles are never written from a failed AI call. `lib/voice/synthesize.ts`
   returns the typed failure instead of a neutral profile on purpose: a canned
   profile does not look broken, it just makes every future post sound like
@@ -122,8 +139,9 @@ branch before the user count is above one.
   splitter, LinkedIn profile audit from pasted text, lead capture + email
 - Signed-in shell at `/app`: dashboard, composer, queue, accounts, voice,
   evergreen, growth plan, settings incl. Razorpay checkout
-- Account connection: Bluesky connects for real with an app password; X and
-  LinkedIn show as unavailable until an OAuth app exists
+- Account connection: Bluesky with an app password; X and LinkedIn over OAuth
+  2 at `/api/connect/[platform]/start` and `/callback` (PKCE on X, state-cookie
+  CSRF check on both). Both stay hidden until their client id and secret exist
 - Publishing: composer → per-platform variants → queue → `publish_variant`
 - Job queue: Postgres-backed, QStash-signed dispatch, lease reaping, backoff
 - Safety gate: global pause, account pause, consent, error streak, quiet hours,
@@ -136,7 +154,10 @@ branch before the user count is above one.
 - Cadences: `lib/jobs/schedule.ts` sweeps on every dispatcher tick and enqueues
   evergreen refills and a weekly Spike Rank refresh, keyed per period
 - `/admin`: kill switch, users, leads, activity log
-- Privacy: data export and account deletion routes
+- Privacy: data export, account deletion, and one-click subscription cancel
+  at the end of the paid period (`lib/billing/subscription.ts`)
+- Rate limiting and an error log, both in Postgres, pruned on the dispatcher
+  tick. `/admin/errors` is the read side
 - Webhooks: Clerk (user sync) and Razorpay (signature-verified)
 
 ## Todo
@@ -144,7 +165,19 @@ branch before the user count is above one.
 Roughly priority-ordered. Check items off here as they land.
 
 ### Correctness / hygiene
-- [ ] Reconcile the *rest* of the marketing copy with the retired engine. Done:
+- [x] ~~Reconcile the rest of the marketing copy with the retired engine~~ — done
+      across `/pricing`, `/linkedin-ghostwriter`, `/free-tools`, `/blog`,
+      `/blog/[slug]`, `app/llms.txt`, `lib/marketing/content.ts` and
+      `lib/marketing/free-tools.ts`. Every surviving mention of likes, follows,
+      connection requests or DMs is now an explicit denial. Two blog posts were
+      repurposed rather than deleted, keeping their slugs. Found on the way: the
+      pricing hero was quoting $9/$29/$49 for the three deleted tiers against a
+      real ladder of $19/$39/$79.
+- [x] ~~Nav "Overview"~~ — removed; it pointed where the logo already points.
+      `lib/marketing/content.ts` also carried a second, unimported copy of
+      `marketingNav` that had already drifted (different prices). Deleted.
+      `lib/marketing/nav.ts` is the only nav.
+- Historical, for context. Previously done:
       `/trust`, `/security`, `README.md`, the homepage, `/linkedin-autopilot`,
       `/tools/[slug]` (via `lib/seo.ts`, which generates ~1,300 pages from one
       template) and `/icp`. Still selling likes, comments, connection requests
@@ -152,9 +185,8 @@ Roughly priority-ordered. Check items off here as they land.
       `/linkedin-ghostwriter`, `/free-tools`, `/blog` and `/blog/[slug]`,
       `app/llms.txt`, and the `featurePages`/`comparisonPages`/blog entries in
       `lib/marketing/content.ts` plus `lib/marketing/free-tools.ts`.
-- [ ] `next.config.mjs` sets `output: "standalone"`, which Vercel does not need
-      and which makes `pnpm start` warn that it is not serving the standalone
-      build. Harmless today; drop it unless something deploys by container.
+- [x] ~~`next.config.mjs` `output: "standalone"`~~ — dropped, along with the
+      `picsum.photos` remote image pattern and the `motion` transpile entry.
 - [ ] Nav "Overview" still points at the homepage. Fine as-is, but if it should
       be a distinct page, that is the last anchor-style entry in the menu.
 
@@ -172,11 +204,14 @@ Roughly priority-ordered. Check items off here as they land.
       which schedules through the composer rather than publishing itself
 - [x] ~~`growth_plan_items`~~ — `/app/growth` builds a plan from the latest
       `profile_scores` row and nothing else
-- [ ] Voice calibration is recorded but never consumed. `recentEdits()` exists to
-      feed a regeneration; nothing calls it yet, so the profile does not actually
-      improve from corrections.
-- [ ] The composer does not use the voice profile. `similarExemplars()` is built
-      and indexed but no generator passes a voice into its prompt.
+- [x] ~~Voice calibration is never consumed~~ — it always was:
+      `lib/voice/generate.ts` calls `recentEdits()` and `renderCorrections()`
+      puts the edits in the prompt. It only *looked* unconsumed because nothing
+      could reach `generateInVoice` until the composer panel was rendered.
+- [x] ~~The composer does not use the voice profile~~ — `generateInVoice` and the
+      discard/calibration actions were already wired server-side; only the panel
+      was missing from `ComposerForm`'s JSX, which is why `pnpm lint` was failing
+      on twelve unused symbols. The panel now renders.
 - [x] ~~Job kinds with null handlers~~ — all six run: `first_comment` and
       `auto_plug` in `lib/jobs/reply.ts`, `cross_post_relay` in
       `lib/jobs/relay.ts`, `lead_poll` and `deliver_lead_email` in
@@ -184,12 +219,26 @@ Roughly priority-ordered. Check items off here as they land.
       `/app/automations`, backed by `lib/automations/store.ts`
 - [x] ~~Nothing schedules `evergreen_refill` on a cadence~~ —
       `lib/jobs/schedule.ts`, swept by the dispatcher and by `pnpm jobs:tick`
-- [ ] `auto_dm`, `thread_drip`, `source_watcher` and `lead_followup` are still
-      values of `automations.kind` with nothing behind them.
-      `IMPLEMENTED_AUTOMATION_KINDS` is what keeps them out of the UI; an e2e
-      test asserts they stay out.
-- [ ] `rank_refresh` only scores Bluesky. X has no scorer at all, and LinkedIn's
-      needs pasted profile text, so neither can be refreshed on a schedule.
+- [x] ~~`auto_dm` is a value of `automations.kind`~~ — dropped from the check
+      constraint in `20260822140000_drop_auto_dm_kind.sql` and from
+      `AutomationKind`. The product promises on /trust and /pricing that it never
+      sends a DM, so the kind was a schema-level contradiction of a published
+      claim. **`lib/platforms/x.ts` still carries a working `sendDm` with no
+      caller.** It is unreachable, but if you want the code to match the promise
+      structurally rather than behaviourally, remove it and the optional
+      `sendDm` on `PlatformAdapter`.
+- [ ] `thread_drip`, `source_watcher` and `lead_followup` remain values of
+      `automations.kind` with nothing behind them.
+      `IMPLEMENTED_AUTOMATION_KINDS` keeps them out of the UI; an e2e test
+      asserts they stay out.
+- [x] ~~X has no scorer at all~~ — `lib/rank/x.ts` scores a pasted X profile on
+      the same five pillars, with cadence and engagement reported `unknown` and
+      excluded from the total. This was not just a gap: `spike-rank-x` had a
+      slug, a page and a nav entry badged "New", but `runFreeTool` had no branch
+      for it, so it silently returned the generic positioning writeup with no
+      score. Three e2e tests now cover it.
+- [ ] `rank_refresh` still only scores Bluesky on a schedule. X and LinkedIn both
+      need pasted text, so neither can be refreshed unattended.
 
 ### Not configured in production
 Checked against `vercel env`: production has `DATABASE_URL`, Clerk, and

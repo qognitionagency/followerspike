@@ -1,7 +1,8 @@
+import { appUrl } from "@/lib/env";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "@/components/icons";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { blogPosts, getBlogPost } from "@/lib/marketing/content";
@@ -28,7 +29,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
 function BlogJsonLd({ slug }: { slug: string }) {
   const post = getBlogPost(slug);
   if (!post) return null;
-  const siteUrl = process.env.APP_URL || "http://localhost:3000";
+  const siteUrl = appUrl();
   const jsonLd = [
     {
       "@context": "https://schema.org",
@@ -93,7 +94,7 @@ export default function BlogPostPage({ params }: PageProps) {
         <section className="mt-8 rounded-lg border border-[#d8d2c4] bg-[#111827] p-6 text-white shadow-sm">
           <h2 className="text-2xl font-black">Turn this strategy into a daily queue.</h2>
           <p className="mt-3 text-sm leading-6 text-slate-300">
-            FollowerSpike helps convert positioning, ICP, content, comments, connection requests, and follow-ups into one reviewable workflow.
+            FollowerSpike turns positioning, voice, and content into one reviewable workflow: write a post once, publish it to X, LinkedIn, and Bluesky, and approve everything before it goes out.
           </p>
           <Link href={ROUTES.signup} className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-md bg-white px-5 text-sm font-black text-[#111827]">
             Start for free

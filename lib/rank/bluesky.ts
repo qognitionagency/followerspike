@@ -59,7 +59,7 @@ function buildChecks(profile: BlueskyProfile, posts: BlueskyPost[]): RankCheck[]
       label: "Display name is set",
       status: profile.displayName && profile.displayName.trim().length > 1 ? "pass" : "fail",
       weight: 0.15,
-      evidence: profile.displayName ? `Display name is "${profile.displayName}".` : "No display name — you show up as just a handle.",
+      evidence: profile.displayName ? `Display name is "${profile.displayName}".` : "No display name, so you show up as just a handle.",
       fix: "Set a display name. Your real name works best if you are building a founder audience.",
       effort: "S",
     }),
@@ -84,7 +84,7 @@ function buildChecks(profile: BlueskyProfile, posts: BlueskyPost[]): RankCheck[]
       evidence: AUDIENCE_MARKERS.test(description)
         ? "Your bio names an audience."
         : "Your bio describes what you are, not who you are for.",
-      fix: 'Add the audience explicitly — "for solo founders", "helping indie hackers ship" — so a stranger knows in one line whether this is for them.',
+      fix: 'Add the audience explicitly, as in "for solo founders" or "helping indie hackers ship", so a stranger knows in one line whether this is for them.',
       effort: "S",
     }),
     check({
@@ -117,7 +117,7 @@ function buildChecks(profile: BlueskyProfile, posts: BlueskyPost[]): RankCheck[]
       label: "Banner is set",
       status: profile.banner ? "pass" : "fail",
       weight: 0.2,
-      evidence: profile.banner ? "You have a banner image." : "No banner — the top of your profile is empty space.",
+      evidence: profile.banner ? "You have a banner image." : "No banner, so the top of your profile is empty space.",
       fix: "Add a banner showing the product or a one-line statement of what you do.",
       effort: "S",
     }),
@@ -128,7 +128,7 @@ function buildChecks(profile: BlueskyProfile, posts: BlueskyPost[]): RankCheck[]
       status: profile.hasPinnedPost ? "pass" : "fail",
       weight: 0.3,
       evidence: profile.hasPinnedPost ? "You have a pinned post." : "Nothing is pinned, so new visitors land on whatever you posted last.",
-      fix: "Pin your best post — ideally one that explains what you are building and links to it.",
+      fix: "Pin your best post, ideally one that explains what you are building and links to it.",
       effort: "S",
     }),
     check({
@@ -221,7 +221,7 @@ function buildChecks(profile: BlueskyProfile, posts: BlueskyPost[]): RankCheck[]
       evidence: LINK_PATTERN.test(description)
         ? "Your bio links somewhere."
         : "Your bio has no link, so there is nowhere for an interested reader to go.",
-      fix: "Put one link in your bio — the product, or a page that captures an email.",
+      fix: "Put one link in your bio: the product, or a page that captures an email.",
       effort: "S",
     }),
     check({

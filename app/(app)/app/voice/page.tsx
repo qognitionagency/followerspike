@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { AlertTriangle, CheckCircle2, Sparkles } from "lucide-react";
+import { AlertTriangle, CheckCircle2, PenLine } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -113,8 +113,8 @@ const ERROR_COPY: Record<string, string> = {
   empty: "Answer at least one question or paste a post before building a voice.",
   no_provider_configured:
     "No AI provider is configured, so a voice cannot be built yet. Your answers were saved.",
-  all_providers_failed: "The AI provider could not be reached. Your answers were saved — try again shortly.",
-  invalid_response: "The model returned an unusable profile. Your answers were saved — try again.",
+  all_providers_failed: "The AI provider could not be reached. Your answers were saved, so try again shortly.",
+  invalid_response: "The model returned an unusable profile. Your answers were saved, so try again.",
 };
 
 function SliderBar({ name, value }: { name: keyof VoiceSliders; value: number }) {
@@ -241,7 +241,7 @@ export default async function VoicePage({
           </div>
 
           <Button className="h-12 w-full rounded-full bg-[#0A66C2] font-black text-white hover:bg-[#004182]">
-            <Sparkles className="mr-2 h-4 w-4" />
+            <PenLine className="mr-2 h-4 w-4" />
             Build my voice profile
           </Button>
         </form>

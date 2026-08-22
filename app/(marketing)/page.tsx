@@ -1,3 +1,4 @@
+import { appUrl } from "@/lib/env";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -13,15 +14,14 @@ import {
   ShieldCheck,
   Target,
   UserPlus,
-} from "lucide-react";
+} from "@/components/icons";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
-import { MotionReveal } from "@/components/marketing/MotionReveal";
 import { SignupButton } from "@/components/marketing/SignupButton";
 import { BRAND, PRICING, ROUTES, TRUST_DISCLAIMER } from "@/lib/constants";
 import { blogPosts, freeTools } from "@/lib/marketing/content";
 
-const siteUrl = process.env.APP_URL || "http://localhost:3000";
+const siteUrl = appUrl();
 
 export const metadata: Metadata = {
   title: {
@@ -69,7 +69,7 @@ const workflow = [
   },
   {
     title: "Let the follow-ups run",
-    body: "First comment, plug, cross-post relay, and keyword capture fire after a post goes out — inside consent, quiet hours, daily caps, and a global pause.",
+    body: "First comment, plug, cross-post relay, and keyword capture fire after a post goes out, inside consent, quiet hours, daily caps, and a global pause.",
     icon: ShieldCheck,
   },
 ] as const;
@@ -112,7 +112,7 @@ const audiences = ["Founders", "Coaches", "Consultants", "SMB owners", "Creators
 const faqs = [
   {
     question: "Is this only a post generator?",
-    answer: "No. Posts are one part of the loop. What happens after a post goes out — the first comment, the plug, the mirror onto your other accounts, and capturing the people who reply — is the other part.",
+    answer: "No. Posts are one part of the loop. What happens after a post goes out is the other part: the first comment, the plug, the mirror onto your other accounts, and capturing the people who reply.",
   },
   {
     question: "Can I review everything first?",
@@ -237,9 +237,9 @@ export default function MarketingPage() {
 
       <main>
         <section className="relative overflow-hidden border-b border-slate-100">
-          <div className="absolute inset-x-0 top-0 h-full bg-[linear-gradient(90deg,rgba(47,128,237,0.12)_0%,rgba(47,128,237,0.03)_18%,transparent_34%,transparent_66%,rgba(47,128,237,0.08)_100%)]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-[#D6D6D6]" />
           <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-14 sm:px-6 lg:px-8 lg:pb-20 lg:pt-20">
-            <MotionReveal className="mx-auto max-w-4xl text-center">
+            <div className="mx-auto max-w-4xl text-center">
               <div className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-[#cfe4ff] bg-white px-4 py-2 text-sm font-black text-[#2f80ed] shadow-sm">
                 <BadgeCheck className="h-4 w-4" />
 One voice, three platforms, no daily grind
@@ -248,7 +248,7 @@ One voice, three platforms, no daily grind
 Post everywhere that matters while you run the business.
               </h1>
               <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-FollowerSpike writes in your own voice, publishes native to X, LinkedIn, and Bluesky from one editor, and runs the follow-ups — first comment, plug, cross-post, keyword capture — after the post is live.
+FollowerSpike writes in your own voice, publishes native to X, LinkedIn, and Bluesky from one editor, and runs the follow-ups after the post is live: first comment, plug, cross-post, and keyword capture.
               </p>
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <SignupButton className="h-12 rounded-full bg-[#2f80ed] px-7 text-base font-black text-white shadow-[0_16px_40px_rgba(47,128,237,0.28)] hover:bg-[#176fd6]">
@@ -263,7 +263,7 @@ FollowerSpike writes in your own voice, publishes native to X, LinkedIn, and Blu
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
-            </MotionReveal>
+            </div>
 
             <HeroMockup />
 
@@ -279,7 +279,7 @@ FollowerSpike writes in your own voice, publishes native to X, LinkedIn, and Blu
 
         <section id="how-it-works" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
-            <MotionReveal>
+            <div>
               <p className="text-sm font-black uppercase tracking-wide text-[#2f80ed]">How it works</p>
               <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
                 A simple daily system, not another dashboard to manage.
@@ -287,11 +287,11 @@ FollowerSpike writes in your own voice, publishes native to X, LinkedIn, and Blu
               <p className="mt-5 text-lg leading-8 text-slate-600">
 Teach it your voice once. Review the queue. Let the automations run only when you have watched them simulate.
               </p>
-            </MotionReveal>
+            </div>
             <div className="relative grid gap-6">
               <div className="absolute left-5 top-8 hidden h-[calc(100%-4rem)] w-px bg-[#2f80ed]/25 sm:block" />
               {workflow.map((item, index) => (
-                <MotionReveal key={item.title} delay={index * 0.06} className="relative grid gap-4 sm:grid-cols-[auto_1fr]">
+                <div key={item.title} className="relative grid gap-4 sm:grid-cols-[auto_1fr]">
                   <span className="grid h-10 w-10 place-items-center rounded-full bg-[#2f80ed] text-sm font-black text-white shadow-[0_12px_26px_rgba(47,128,237,0.24)]">
                     {index + 1}
                   </span>
@@ -300,7 +300,7 @@ Teach it your voice once. Review the queue. Let the automations run only when yo
                     <h3 className="mt-4 text-xl font-black text-slate-950">{item.title}</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
                   </div>
-                </MotionReveal>
+                </div>
               ))}
             </div>
           </div>
@@ -308,7 +308,7 @@ Teach it your voice once. Review the queue. Let the automations run only when yo
 
         <section id="features" className="border-y border-slate-100 bg-[#f8fbff] py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <MotionReveal className="mx-auto max-w-3xl text-center">
+            <div className="mx-auto max-w-3xl text-center">
               <p className="text-sm font-black uppercase tracking-wide text-[#2f80ed]">Features</p>
               <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
 Everything between the idea and the follow-up.
@@ -316,16 +316,16 @@ Everything between the idea and the follow-up.
               <p className="mt-5 text-lg leading-8 text-slate-600">
 Voice, publishing, post-publish automations, lead capture, and the controls around them.
               </p>
-            </MotionReveal>
+            </div>
             <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature, index) => (
-                <MotionReveal key={feature.title} delay={index * 0.04} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
+              {features.map((feature) => (
+                <div key={feature.title} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm hover:border-[#0A66C2]">
                   <span className="grid h-11 w-11 place-items-center rounded-lg bg-[#eef6ff] text-[#2f80ed]">
                     <feature.icon className="h-5 w-5" />
                   </span>
                   <h3 className="mt-5 text-xl font-black text-slate-950">{feature.title}</h3>
                   <p className="mt-3 text-sm leading-6 text-slate-600">{feature.body}</p>
-                </MotionReveal>
+                </div>
               ))}
             </div>
           </div>
@@ -333,7 +333,7 @@ Voice, publishing, post-publish automations, lead capture, and the controls arou
 
         <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
-            <MotionReveal>
+            <div>
               <p className="text-sm font-black uppercase tracking-wide text-[#2f80ed]">Free tools</p>
               <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
                 Give users value before signup.
@@ -344,7 +344,7 @@ Score an X, Bluesky, or LinkedIn profile out of 100, split a post into a thread,
               <Link href="/free-tools" className="mt-7 inline-flex h-12 items-center justify-center rounded-full bg-slate-950 px-7 text-base font-black text-white hover:bg-[#2f80ed]">
                 Browse free tools
               </Link>
-            </MotionReveal>
+            </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {freeTools.slice(0, 4).map((tool) => (
                 <Link key={tool.slug} href={`/free-tools/${tool.slug}`} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-[#2f80ed]/40 hover:shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
@@ -359,7 +359,7 @@ Score an X, Bluesky, or LinkedIn profile out of 100, split a post into a thread,
 
         <section id="pricing" className="border-y border-slate-100 bg-[#f8fbff] py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <MotionReveal className="mx-auto max-w-3xl text-center">
+            <div className="mx-auto max-w-3xl text-center">
               <p className="text-sm font-black uppercase tracking-wide text-[#2f80ed]">Pricing</p>
               <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
 Simple plans for posting everywhere.
@@ -367,7 +367,7 @@ Simple plans for posting everywhere.
               <p className="mt-5 text-lg leading-8 text-slate-600">
 Start with the composer and your voice, add the post-publish automations in Pro, and run several accounts on Agency.
               </p>
-            </MotionReveal>
+            </div>
             <div className="mt-12 grid gap-5 lg:grid-cols-3">
               {PRICING.map((plan) => (
                 <div
@@ -401,7 +401,7 @@ Start with the composer and your voice, add the post-publish automations in Pro,
 
         <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-            <MotionReveal>
+            <div>
               <p className="text-sm font-black uppercase tracking-wide text-[#2f80ed]">FAQ</p>
               <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
                 Clear enough to try today.
@@ -409,7 +409,7 @@ Start with the composer and your voice, add the post-publish automations in Pro,
               <p className="mt-5 text-lg leading-8 text-slate-600">
 FollowerSpike acts on your own posts and nobody else\u2019s.
               </p>
-            </MotionReveal>
+            </div>
             <div className="grid gap-3">
               {faqs.map((faq) => (
                 <div key={faq.question} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">

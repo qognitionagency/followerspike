@@ -250,7 +250,7 @@ async function sendDm(
     throw new PlatformUnsupportedError(
       "x",
       "messaging by handle",
-      "a numeric user id is required — resolve the handle first"
+      "a numeric user id is required, so resolve the handle first"
     );
   }
 

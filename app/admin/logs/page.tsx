@@ -46,7 +46,7 @@ export default async function AdminLogsPage() {
       <section className="mt-6 overflow-x-auto rounded-xl border border-[#D6D6D6] bg-white shadow-sm">
         {rows.length === 0 ? (
           <p className="p-6 text-sm text-[#666]">
-            Nothing logged yet — no automation has run.
+            Nothing logged yet. No automation has run.
           </p>
         ) : (
           <table className="w-full min-w-[760px] text-left text-sm">
@@ -63,7 +63,7 @@ export default async function AdminLogsPage() {
               {rows.map((row) => (
                 <tr key={row.id} className="border-b border-[#EEE] last:border-0">
                   <td className="whitespace-nowrap px-6 py-3 text-[#555]">{formatDate(row.created_at)}</td>
-                  <td className="px-6 py-3 text-[#555]">{row.user_email || "—"}</td>
+                  <td className="px-6 py-3 text-[#555]">{row.user_email || "None"}</td>
                   <td className="px-6 py-3 font-bold capitalize text-[#191919]">{row.action}</td>
                   <td className="px-6 py-3">
                     <span
@@ -75,7 +75,7 @@ export default async function AdminLogsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-3 text-[#555]">
-                    {row.reason || row.recipient_handle || "—"}
+                    {row.reason || row.recipient_handle || "None"}
                   </td>
                 </tr>
               ))}

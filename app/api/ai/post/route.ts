@@ -4,6 +4,8 @@ import { z } from "zod";
 import { generatePostResult, promptUserContext } from "@/lib/ai/generators";
 import { attachAiGenerationToPost } from "@/lib/ai/usage";
 import { requireAppSession } from "@/lib/session";
+import { checkRateLimit, rateLimitHeaders } from "@/lib/security/rate-limit";
+import { recordError } from "@/lib/observability/log";
 import { requireWorkspace } from "@/lib/workspace";
 import { db } from "@/lib/db";
 
@@ -17,6 +19,22 @@ const PostBodySchema = z.object({
 export async function POST(request: Request) {
   try {
     const session = await requireAppSession();
+
+    // Authenticated, but still metered. Tier caps in lib/automation govern what
+    // may be published; nothing governed how often a generation could be asked
+    // for, so a client stuck in a retry loop billed straight through to the AI
+    // provider. Per user rather than per IP: the account is the payer.
+    const throttle = await checkRateLimit({
+      bucket: `ai-post:${session.userId}`,
+      limit: 60,
+      windowSeconds: 3600,
+    });
+    if (!throttle.allowed) {
+      return NextResponse.json(
+        { error: "Too many generations in the last hour.", retryAfterSeconds: throttle.retryAfterSeconds },
+        { status: 429, headers: rateLimitHeaders(throttle) }
+      );
+    }
     const { workspace } = await requireWorkspace(session);
     const body = PostBodySchema.parse((await request.json()) as unknown);
 
@@ -82,6 +100,7 @@ export async function POST(request: Request) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.flatten() }, { status: 400 });
     }
+    await recordError(error, { source: "api/ai/post", requestPath: "/api/ai/post" });
     return NextResponse.json({ error: "Post generation failed" }, { status: 500 });
   }
 }

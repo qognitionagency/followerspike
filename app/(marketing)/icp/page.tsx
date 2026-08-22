@@ -17,7 +17,7 @@ export default function IcpHubPage() {
       <AudienceHub
         eyebrow="ICP"
         title="Publishing systems by ideal customer profile."
-        description="Choose the audience you want to attract, then use FollowerSpike to shape what you publish — and what happens under each post — around that market."
+        description="Choose the audience you want to attract, then use FollowerSpike to shape what you publish, and what happens under each post, around that market."
         pages={icpPages}
         basePath="/icp"
       />

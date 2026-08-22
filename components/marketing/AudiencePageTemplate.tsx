@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "@/components/icons";
 import { ROUTES } from "@/lib/constants";
 import type { AudiencePage } from "@/lib/marketing/content";
 

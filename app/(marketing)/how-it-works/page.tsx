@@ -1,6 +1,7 @@
+import { appUrl } from "@/lib/env";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Gauge, PenLine, Repeat2, ShieldCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, Gauge, PenLine, Repeat2, ShieldCheck } from "@/components/icons";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { ROUTES } from "@/lib/constants";
@@ -16,25 +17,25 @@ const steps = [
   {
     icon: Gauge,
     title: "Score where you actually stand",
-    body: "Spike Rank reads your public profile and grades it out of 100 — bio, proof, posting cadence, and the gaps costing you followers. You get a baseline before changing anything, and the score is tracked over time so you can see whether the work is landing.",
+    body: "Spike Rank reads your public profile and grades it out of 100 on bio, proof, posting cadence, and the gaps costing you followers. You get a baseline before changing anything, and the score is tracked over time so you can see whether the work is landing.",
     points: ["Runs on public data, no password", "Tracked as history, not a one-off number", "Same engine as the free tool"],
   },
   {
     icon: PenLine,
     title: "Teach it how you write",
-    body: "The voice engine builds a model from your niche, audience, and the way you already talk about your work — so drafts come back sounding like you, not like a language model doing LinkedIn. If you have no posts worth cloning, a short interview gets there instead.",
+    body: "The voice engine builds a model from your niche, audience, and the way you already talk about your work, so drafts come back sounding like you rather than like a language model doing LinkedIn. If you have no posts worth cloning, a short interview gets there instead.",
     points: ["Works with zero existing posts", "Tuned by your niche and audience", "You approve every draft"],
   },
   {
     icon: Repeat2,
     title: "Compose once, publish native",
-    body: "One editor, three platforms. The composer tracks each platform's limits as you type — 280 characters on X, 300 on Bluesky, 3,000 on LinkedIn — and previews the real thing: thread splits, truncation points, and where a link preview lands. Approved posts go to a schedule you control.",
+    body: "One editor, three platforms. The composer tracks each platform's limits as you type, 280 characters on X, 300 on Bluesky and 3,000 on LinkedIn, then previews the real thing: thread splits, truncation points, and where a link preview lands. Approved posts go to a schedule you control.",
     points: ["Per-platform previews", "Thread builder", "Review queue before anything ships"],
   },
 ];
 
 function HowItWorksJsonLd() {
-  const siteUrl = process.env.APP_URL || "http://localhost:3000";
+  const siteUrl = appUrl();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "HowTo",

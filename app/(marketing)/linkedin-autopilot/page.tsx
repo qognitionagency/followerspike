@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "LinkedIn Autopilot for Founders and Experts",
   description:
     "What can honestly be automated on LinkedIn: voice-modelled drafts, scheduled publishing through the official API, a review queue, quiet hours, and daily caps. No likes, no connection requests, no DMs.",
+  alternates: { canonical: "/linkedin-autopilot" },
 };
 
 /**
@@ -21,7 +22,7 @@ export default function LinkedInAutopilotPage() {
     <PillarPage
       eyebrow="LinkedIn autopilot"
       title="The part of LinkedIn worth automating is the publishing."
-      description="FollowerSpike drafts in your own voice, shows you exactly what LinkedIn will receive, and publishes it on a schedule through LinkedIn's official Posts API. Everything else people sell as autopilot — likes, connection requests, follow-up DMs — is browser automation against LinkedIn's terms, and it is deliberately not here."
+      description="FollowerSpike drafts in your own voice, shows you exactly what LinkedIn will receive, and publishes it on a schedule through LinkedIn's official Posts API. Everything else people sell as autopilot, meaning likes, connection requests and follow-up DMs, is browser automation against LinkedIn's terms, and it is deliberately not here."
       bullets={[
         "Posts shaped by a voice profile built from your own writing, not a generic tone setting.",
         "A review queue where every scheduled post can be edited or cancelled before it goes out.",
@@ -45,7 +46,7 @@ export default function LinkedInAutopilotPage() {
         {
           question: "Is LinkedIn autopilot safe?",
           answer:
-            "Publishing through the official API on a schedule is ordinary use. The unsafe version is a tool driving a logged-in browser to like, follow, and message on your behalf — that is what gets accounts restricted, and it is not what this does.",
+            "Publishing through the official API on a schedule is ordinary use. The unsafe version is a tool driving a logged-in browser to like, follow, and message on your behalf. That is what gets accounts restricted, and it is not what this does.",
         },
         {
           question: "Will it send connection requests or DMs for me?",

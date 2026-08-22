@@ -4,6 +4,7 @@ import { LegalPage } from "@/components/marketing/LegalPage";
 export const metadata: Metadata = {
   title: "Data Processing Addendum",
   description: "FollowerSpike DPA summary for GDPR-ready customers.",
+  alternates: { canonical: "/dpa" },
 };
 
 export default function DpaPage() {

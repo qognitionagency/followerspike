@@ -1,7 +1,8 @@
+import { appUrl } from "@/lib/env";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "@/components/icons";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { featurePages, getFeaturePage } from "@/lib/marketing/content";
@@ -28,7 +29,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
 function FeatureJsonLd({ slug }: { slug: string }) {
   const page = getFeaturePage(slug);
   if (!page) return null;
-  const siteUrl = process.env.APP_URL || "http://localhost:3000";
+  const siteUrl = appUrl();
   const jsonLd = [
     {
       "@context": "https://schema.org",

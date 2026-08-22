@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { AlertTriangle, PauseCircle, PlayCircle } from "lucide-react";
+import { AlertTriangle, PauseCircle, PlayCircle } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import { getAppSession } from "@/lib/session";

@@ -1,6 +1,7 @@
+import { appUrl } from "@/lib/env";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "@/components/icons";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { featurePages } from "@/lib/marketing/content";
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 function FeaturesJsonLd() {
-  const siteUrl = process.env.APP_URL || "http://localhost:3000";
+  const siteUrl = appUrl();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -88,7 +89,7 @@ export default function FeaturesIndexPage() {
               </div>
               <span className="mt-6 inline-flex items-center gap-2 text-sm font-black text-[#0a66c2]">
                 Read more
-                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                <ArrowRight className="h-4 w-4" />
               </span>
             </Link>
           ))}

@@ -1,13 +1,15 @@
+/**
+ * Shown while a signed-in page resolves its data. Deliberately not a skeleton:
+ * the dashboard's shape depends on what is connected and what the plan allows,
+ * so placeholder cards would routinely settle into a different layout than the
+ * one they implied.
+ */
 export default function AppLoading() {
   return (
-    <div className="space-y-6">
-      <div className="h-10 w-64 animate-pulse rounded-lg bg-white" />
-      <div className="grid gap-4 md:grid-cols-4">
-        {[1, 2, 3, 4].map((item) => (
-          <div key={item} className="h-32 animate-pulse rounded-xl border border-[#D6D6D6] bg-white" />
-        ))}
-      </div>
-      <div className="h-80 animate-pulse rounded-xl border border-[#D6D6D6] bg-white" />
+    <div className="flex min-h-64 items-center justify-center">
+      <p className="text-sm font-bold text-[#666]" role="status">
+        Loading
+      </p>
     </div>
   );
 }

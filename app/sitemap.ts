@@ -1,8 +1,9 @@
+import { appUrl } from "@/lib/env";
 import type { MetadataRoute } from "next";
 import { ROUTES } from "@/lib/constants";
 import { getAllPublicRoutes as getSiteRoutes } from "@/lib/marketing/site-routes";
 
-const siteUrl = process.env.APP_URL || "http://localhost:3000";
+const siteUrl = appUrl();
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

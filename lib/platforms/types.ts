@@ -272,7 +272,7 @@ export class PlatformUnsupportedError extends PlatformError {
 /** The stored token is rejected. The account needs reconnecting; retrying will not help. */
 export class PlatformAuthError extends PlatformError {
   constructor(platform: Platform, detail = "the connection needs to be re-authorised") {
-    super(platform, "auth", `${platformLabel(platform)} rejected the stored credentials — ${detail}`);
+    super(platform, "auth", `${platformLabel(platform)} rejected the stored credentials: ${detail}`);
     this.name = "PlatformAuthError";
   }
 }
@@ -282,7 +282,7 @@ export class PlatformRateLimitError extends PlatformError {
   readonly retryAfterSeconds: number | null;
 
   constructor(platform: Platform, retryAfterSeconds: number | null) {
-    super(platform, "rate_limited", `${platformLabel(platform)} rate limit reached — try again later`);
+    super(platform, "rate_limited", `${platformLabel(platform)} rate limit reached, so try again later`);
     this.name = "PlatformRateLimitError";
     this.retryAfterSeconds = retryAfterSeconds;
   }

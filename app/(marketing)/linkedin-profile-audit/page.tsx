@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "LinkedIn Profile Audit Tool",
   description:
     "Use FollowerSpike's LinkedIn profile audit workflow to find positioning gaps, headline fixes, keyword gaps, and a 7-day activation plan.",
+  alternates: { canonical: "/linkedin-profile-audit" },
 };
 
 export default function LinkedInProfileAuditPage() {

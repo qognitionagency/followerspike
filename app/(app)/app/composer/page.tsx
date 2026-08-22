@@ -64,7 +64,7 @@ async function generate(input: { topic: string; platform?: Platform }): Promise<
     // Both failures are the user's to act on, and neither is recoverable by
     // retrying the same call, so they are reported rather than swallowed.
     return result.reason === "no_profile"
-      ? { ok: false, error: "Build a voice profile first — the composer will not guess at how you sound." }
+      ? { ok: false, error: "Build a voice profile first. The composer will not guess at how you sound." }
       : { ok: false, error: "The AI provider could not be reached, so nothing was generated." };
   }
 

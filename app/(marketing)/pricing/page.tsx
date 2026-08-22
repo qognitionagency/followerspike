@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CheckCircle2, LockKeyhole, PauseCircle, ShieldCheck, UserRoundCheck } from "lucide-react";
+import { CheckCircle2, LockKeyhole, PauseCircle, ShieldCheck, UserRoundCheck } from "@/components/icons";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { PricingCards } from "@/components/marketing/PricingCards";
@@ -9,31 +9,37 @@ import { ROUTES, TRUST_DISCLAIMER } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "FollowerSpike pricing for founders, SMB owners, coaches, consultants, and personal brands who want LinkedIn posts, engagement, connections, and follow-up DMs on autopilot.",
+    "FollowerSpike pricing for founders, SMB owners, coaches, consultants, and personal brands who publish to X, LinkedIn, and Bluesky from one composer, with drafts in their own voice and a review queue in front of everything.",
+  alternates: { canonical: "/pricing" },
 };
 
 const trustItems = [
-  { icon: LockKeyhole, label: "Encrypted sessions" },
+  { icon: LockKeyhole, label: "Encrypted credentials" },
   { icon: UserRoundCheck, label: "Review queue" },
   { icon: PauseCircle, label: "Pause anytime" },
   { icon: ShieldCheck, label: "Consent first" },
 ] as const;
 
 const proBoundaries = [
-  "Posts, likes, comments, connection requests, and accepted-connection follow-ups",
-  "Daily caps, local timing windows, activity logs, and auto-pause behavior",
-  "No cold DM blasts, challenge bypass, fake engagement pods, or mass scraping",
-  "Independent product, not affiliated with or endorsed by LinkedIn",
+  "Posts and threads published to X, LinkedIn, and Bluesky through each platform's official API",
+  "Post-publish automations that only ever act on your own posts: first comment, auto-plug, cross-post relay, evergreen recycling, and keyword capture",
+  "Daily caps, quiet hours in your timezone, an activity log of every automated action, and auto-pause on repeated errors",
+  "No likes, follows, connection requests, or DMs. Keyword capture answers by email, never by direct message",
+  "Independent product, not affiliated with or endorsed by X, LinkedIn, or Bluesky",
 ] as const;
 
 const pricingFaqs = [
   {
     question: "Which plan should I start with?",
-    answer: "Start with Essentials if you only need posts. Choose Growth for a review-first growth queue. Choose Pro when you want conservative live autopilot after consent.",
+    answer: "Start with Starter if you mainly want to post consistently on all three platforms. Choose Pro when you want your voice cloned from your best posts, growth plans written into your queue, and the post-publish automations. Choose Agency when you run several founder accounts.",
   },
   {
     question: "Can I review content before anything happens?",
-    answer: "Yes. Review mode is the default and can stay on for posts, comments, connection requests, and follow-up DMs.",
+    answer: "Yes. The review queue is the default. Drafts and scheduled posts wait for your approval, and every automation ships turned off and in simulation mode until you turn it on.",
+  },
+  {
+    question: "Does any plan send DMs or connection requests?",
+    answer: "No. FollowerSpike does not send direct messages, connection requests, follows, or likes on any plan. Automations act only on your own posts, and a keyword capture sends the lead magnet by email to an address the person replies with.",
   },
   {
     question: "How does annual billing work?",
@@ -41,7 +47,7 @@ const pricingFaqs = [
   },
   {
     question: "Can I pause or cancel?",
-    answer: "You can pause autopilot inside the app at any time. Subscription cancellation follows the active Razorpay billing flow for your account.",
+    answer: "You can pause a single account or stop everything with the global switch inside the app at any time. Subscription cancellation follows the active Razorpay billing flow for your account.",
   },
 ] as const;
 
@@ -52,15 +58,15 @@ export default function PricingPage() {
 
       <main>
         <section className="relative overflow-hidden border-b border-slate-100">
-          <div className="absolute inset-x-0 top-0 h-full bg-[linear-gradient(90deg,rgba(47,128,237,0.10)_0%,rgba(47,128,237,0.03)_20%,transparent_50%,rgba(47,128,237,0.08)_100%)]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-[#D6D6D6]" />
           <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
             <div className="mx-auto max-w-4xl text-center">
               <p className="text-sm font-black uppercase tracking-wide text-[#2f80ed]">Pricing</p>
               <h1 className="mt-3 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl">
-                Simple pricing for LinkedIn growth.
+                Simple pricing for three platforms.
               </h1>
               <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-                Start with posts, upgrade to a review-first growth queue, and unlock live autopilot in Pro.
+                One composer for X, LinkedIn, and Bluesky. Drafts in your own modelled voice, a Spike Rank audit that names the fixes, and a review queue in front of everything.
               </p>
               <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
                 <Link
@@ -76,7 +82,7 @@ export default function PricingPage() {
                   Compare options
                 </Link>
               </div>
-              <p className="mt-4 text-sm font-semibold text-slate-500">Essentials $9. Growth $29. Pro $49. Monthly or annual USD billing.</p>
+              <p className="mt-4 text-sm font-semibold text-slate-500">Starter $19. Pro $39. Agency $79. Monthly or annual USD billing.</p>
             </div>
           </div>
         </section>
@@ -97,12 +103,12 @@ export default function PricingPage() {
         <section className="border-y border-slate-100 bg-[#f8fbff] py-16">
           <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:px-8">
             <div>
-              <p className="text-sm font-black uppercase tracking-wide text-[#2f80ed]">Autopilot boundaries</p>
+              <p className="text-sm font-black uppercase tracking-wide text-[#2f80ed]">What is in scope</p>
               <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950">
-                Powerful enough to save time. Conservative enough to stay in control.
+                Enough automation to save time. Narrow enough to stay yours.
               </h2>
               <p className="mt-5 text-lg leading-8 text-slate-600">
-                FollowerSpike is built for visible account growth, not spammy lead generation. Live actions need consent, limits, logs, and pause controls.
+                FollowerSpike publishes and reads through the official API of each platform. Nothing runs on a post that is not yours, and every live action needs your consent, stays inside daily caps, and lands in the activity log.
               </p>
               <Link href={ROUTES.trust} className="mt-7 inline-flex h-12 items-center justify-center rounded-full bg-slate-950 px-7 text-base font-black text-white hover:bg-[#2f80ed]">
                 Read Trust Center

@@ -168,13 +168,18 @@ test.describe("triggers we cannot measure", () => {
 
 test.describe("what the UI may offer", () => {
   test("only kinds with a handler are offerable", () => {
-    // `automations.kind` allows nine values; four of them have no handler and
+    // `automations.kind` allows eight values; three of them have no handler and
     // must not appear in the UI as something a user can switch on.
     expect(isImplementedKind("auto_plug")).toBe(true);
     expect(isImplementedKind("comment_capture")).toBe(true);
-    expect(isImplementedKind("auto_dm")).toBe(false);
     expect(isImplementedKind("thread_drip")).toBe(false);
     expect(isImplementedKind("source_watcher")).toBe(false);
     expect(isImplementedKind("lead_followup")).toBe(false);
+
+    // auto_dm is not merely unimplemented, it was removed from the schema in
+    // 20260822140000_drop_auto_dm_kind.sql. The product promises on /trust and
+    // /pricing that it never sends direct messages, and no adapter has a DM
+    // method; keeping the kind offerable would have contradicted that.
+    expect(isImplementedKind("auto_dm")).toBe(false);
   });
 });

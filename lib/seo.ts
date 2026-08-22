@@ -46,10 +46,10 @@ function page(seed: {
   const introByType: Record<string, string> = {
     industry: `<p>${seed.keyword} is mostly a publishing problem: subject-matter expertise that never gets written down on a regular day. FollowerSpike learns how ${seed.industry} operators actually write, drafts in that voice, and publishes to X, LinkedIn, and Bluesky from one editor with every post reviewable first.</p>`,
     city: `<p>${seed.keyword} need a way to stay visible without spending every morning in three apps. FollowerSpike gives professionals in ${seed.city} one composer for X, LinkedIn, and Bluesky, a voice profile built from their own posts, and a review queue nothing leaves unapproved.</p>`,
-    role: `<p>${seed.keyword} should protect voice and reputation while making consistency easier. FollowerSpike helps ${seed.role}s turn their own writing into a voice profile, publish it natively to each platform, and let the follow-ups — first comment, plug, cross-post, keyword capture — run inside caps they set.</p>`,
+    role: `<p>${seed.keyword} should protect voice and reputation while making consistency easier. FollowerSpike helps ${seed.role}s turn their own writing into a voice profile, publish it natively to each platform, and let the follow-ups run inside caps they set: first comment, plug, cross-post, and keyword capture.</p>`,
     industry_city: `<p>${seed.h1} starts with cadence: a point of view, published often enough to be remembered. FollowerSpike helps ${context} write once, see exactly what each platform will receive, and schedule it with quiet hours and daily caps applied.</p>`,
     role_city: `<p>${seed.h1} need a clear expert point of view and the discipline to publish it. FollowerSpike helps ${context} keep a steady presence with voice-modelled drafts, per-platform previews, and an approval queue.</p>`,
-    comparison: `<p>${seed.keyword} comes down to control, consistency, and cost. FollowerSpike is a review-first publishing tool for people who want software leverage without pretending platform risk does not exist — which is why it publishes and reads only through official APIs, and never automates likes, follows, or connection requests.</p>`,
+    comparison: `<p>${seed.keyword} comes down to control, consistency, and cost. FollowerSpike is a review-first publishing tool for people who want software leverage without pretending platform risk does not exist, which is why it publishes and reads only through official APIs, and never automates likes, follows, or connection requests.</p>`,
   };
 
   return {

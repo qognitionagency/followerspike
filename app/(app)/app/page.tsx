@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock3, Link2, ListChecks, PenSquare, Recycle, ShieldCheck, Sparkles, Target } from "lucide-react";
+import { Clock3, Link2, ListChecks, PenSquare, Recycle, ShieldCheck, Target } from "@/components/icons";
 import { requireAppSession } from "@/lib/session";
 import { requireWorkspace } from "@/lib/workspace";
 import { db } from "@/lib/db";
@@ -42,7 +42,7 @@ const growthSteps = [
   {
     title: "Model your voice",
     body: "Paste posts you have written or answer the interview, and everything generated afterwards sounds like you.",
-    icon: Sparkles,
+    icon: PenSquare,
     href: "/app/voice",
   },
   {
@@ -108,12 +108,12 @@ export default async function AppDashboardPage() {
     Boolean(session.profile.risk_acknowledged_at);
 
   const stats = [
-    { label: "Posts today", value: `${postsToday}/${postLimit}`, icon: Sparkles },
+    { label: "Posts today", value: `${postsToday}/${postLimit}`, icon: PenSquare },
     { label: "Connected accounts", value: `${connected.length}`, icon: Link2 },
     { label: "Evergreen due", value: `${evergreenDue}`, icon: Recycle },
     {
       label: "Plan progress",
-      value: progress ? `${progress.done}/${progress.total}` : "—",
+      value: progress ? `${progress.done}/${progress.total}` : "None yet",
       icon: Target,
     },
   ];
@@ -125,7 +125,7 @@ export default async function AppDashboardPage() {
           <div className="bg-[#111827] p-6 lg:p-8">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-black text-cyan-200">
               <ShieldCheck className="h-4 w-4" />
-              {autopilotActive ? "Publishing enabled" : "Review mode — nothing publishes unapproved"}
+              {autopilotActive ? "Publishing enabled" : "Review mode, nothing publishes unapproved"}
             </div>
             <h1 className="mt-5 max-w-2xl text-4xl font-black leading-tight lg:text-5xl">
               Post in your own voice, on every platform.

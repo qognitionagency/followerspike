@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { AlertTriangle, Send, Sparkles, X } from "lucide-react";
+import { AlertTriangle, PenLine, Send, X } from "@/components/icons";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -136,6 +136,73 @@ export function ComposerForm({
 
       <div className="space-y-4">
         <div className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
+          <label htmlFor="composer-topic" className="text-sm font-black uppercase text-[#0A66C2]">
+            Write in your voice
+          </label>
+          {hasVoice ? (
+            <p className="mt-2 text-sm leading-6 text-[#666]">
+              Drafted against {voiceName}. Everything it produces is editable before it goes
+              anywhere, and your edits are what the profile learns from.
+            </p>
+          ) : (
+            <p className="mt-2 text-sm leading-6 text-[#666]">
+              No voice profile yet.{" "}
+              <a href="/app/voice" className="font-bold text-[#0A66C2] underline">
+                Build one
+              </a>{" "}
+              and the composer can draft as you rather than guessing.
+            </p>
+          )}
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <Input
+              id="composer-topic"
+              value={topic}
+              onChange={(event) => setTopic(event.target.value)}
+              placeholder="What should this post be about?"
+              disabled={!hasVoice}
+              className="h-11 bg-white"
+            />
+            <Button
+              type="button"
+              onClick={runGenerate}
+              disabled={!hasVoice || pending || topic.trim().length === 0}
+              className="h-11 shrink-0 rounded-full bg-[#0A66C2] px-6 font-bold text-white hover:bg-[#004182] disabled:opacity-60"
+            >
+              <PenLine className="h-4 w-4" />
+              {pending ? "Drafting" : "Draft it"}
+            </Button>
+          </div>
+
+          {generateError ? (
+            <p className="mt-4 flex items-start gap-2 rounded-lg bg-[#FEF2F2] p-3 text-sm font-bold text-red-700">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              {generateError}
+            </p>
+          ) : null}
+
+          {generated ? (
+            <div className="mt-4 rounded-lg border border-[#D6D6D6] bg-[#F8FAFC] p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <p className="text-sm font-black text-[#191919]">Drafted in your voice</p>
+                <Button
+                  name="generatedText"
+                  value={generated.text}
+                  formAction={discard}
+                  onClick={clearGeneration}
+                  className="h-8 rounded-full bg-white px-3 text-xs font-bold text-[#555] hover:bg-[#EEE]"
+                >
+                  <X className="h-3 w-3" />
+                  Discard
+                </Button>
+              </div>
+              {rationale ? (
+                <p className="mt-2 text-sm leading-6 text-[#666]">{rationale}</p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
           <label htmlFor="composer-body" className="text-sm font-black uppercase text-[#0A66C2]">
             Write once
           </label>
@@ -231,7 +298,7 @@ export function ComposerForm({
 
             {preview.overLimit ? (
               <p className="mt-3 rounded-lg bg-[#FEF2F2] p-3 text-sm font-bold text-red-700">
-                Too long, and {preview.platform} has no threads — trim it to {preview.limit.toLocaleString()}{" "}
+                Too long, and {preview.platform} has no threads, so trim it to {preview.limit.toLocaleString()}{" "}
                 characters.
               </p>
             ) : null}

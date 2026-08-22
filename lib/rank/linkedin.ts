@@ -94,7 +94,7 @@ function buildChecks(parsed: Parsed): RankCheck[] {
       evidence: AUDIENCE_MARKERS.test(headline)
         ? "Your headline names who you are for."
         : "Your headline does not say who you are for.",
-      fix: 'Add the audience directly — "helping B2B founders…", "for early-stage SaaS teams…".',
+      fix: 'Add the audience directly, as in "helping B2B founders…" or "for early-stage SaaS teams…".',
       effort: "S",
     }),
     check({
@@ -132,7 +132,7 @@ function buildChecks(parsed: Parsed): RankCheck[] {
       evidence: METRIC_PATTERN.test(searchable)
         ? "Your profile cites specific numbers."
         : "No concrete numbers appear in your headline or About section.",
-      fix: "Add the specifics you already have — revenue, customers served, years, team size. Numbers do the persuading that adjectives cannot.",
+      fix: "Add the specifics you already have: revenue, customers served, years, team size. Numbers do the persuading that adjectives cannot.",
       effort: "S",
     }),
     check({
@@ -143,7 +143,7 @@ function buildChecks(parsed: Parsed): RankCheck[] {
       weight: 0.15,
       evidence: parsed.hasExperienceSection
         ? "An Experience section is present."
-        : "No Experience section in the pasted text — paste more of your profile to score this.",
+        : "No Experience section in the pasted text. Paste more of your profile to score this.",
       fix: "Include your current role with a description that repeats your positioning.",
       effort: "M",
     }),
@@ -190,7 +190,7 @@ function buildChecks(parsed: Parsed): RankCheck[] {
       evidence: LINK_PATTERN.test(raw)
         ? "Your profile contains a link."
         : "No link found, so an interested reader has nowhere to go.",
-      fix: "Put a link in your Featured section and in the website field — the product, or a page that captures an email.",
+      fix: "Put a link in your Featured section and in the website field: the product, or a page that captures an email.",
       effort: "S",
     }),
     check({
@@ -202,7 +202,7 @@ function buildChecks(parsed: Parsed): RankCheck[] {
       evidence: CTA_MARKERS.test(searchable)
         ? "Your profile includes a call to action."
         : "Your profile explains who you are but never says what to do next.",
-      fix: 'End your About section with one specific instruction — "DM me the word AUDIT and I will send the checklist."',
+      fix: 'End your About section with one specific instruction, such as "DM me the word AUDIT and I will send the checklist."',
       effort: "S",
     }),
   ];

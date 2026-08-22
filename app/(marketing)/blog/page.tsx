@@ -1,15 +1,16 @@
+import { appUrl } from "@/lib/env";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "@/components/icons";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { blogPosts } from "@/lib/marketing/content";
 
-const siteUrl = process.env.APP_URL || "http://localhost:3000";
+const siteUrl = appUrl();
 
 export const metadata: Metadata = {
   title: "LinkedIn Growth Blog",
-  description: "FollowerSpike guides for LinkedIn autopilot, safety, ICP, comments, connections, follow-up DMs, and growth workflows.",
+  description: "FollowerSpike guides on founder positioning, writing in your own voice, publishing to X, LinkedIn, and Bluesky, profile scores, and review-first posting.",
   alternates: { canonical: "/blog" },
 };
 
@@ -36,7 +37,7 @@ export default function BlogHubPage() {
           <p className="text-sm font-black uppercase text-[#0a66c2]">Blog</p>
           <h1 className="mt-3 text-5xl font-black sm:text-6xl">LinkedIn growth guides for serious operators.</h1>
           <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-[#4b5563]">
-            Practical articles on review-first automation, ICP, posts, engagement, connections, DMs, and account growth systems.
+            Practical articles on positioning, voice, posting cadence, profile scores, and review-first publishing across X, LinkedIn, and Bluesky.
           </p>
         </section>
         <section className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">

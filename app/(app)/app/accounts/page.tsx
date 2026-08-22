@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { AlertTriangle, CheckCircle2, Link2, Unlink } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Link2, Unlink } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { requireAppSession } from "@/lib/session";
@@ -10,8 +10,7 @@ import { activeConnections, disconnectAccount, listConnections, saveConnection }
 import { verifyAppPassword } from "@/lib/platforms/bluesky-write";
 import { ALL_PLATFORMS, platformCapabilities } from "@/lib/platforms/registry";
 import { platformLabel } from "@/lib/platforms/types";
-import { optionalEnv } from "@/lib/env";
-import type { Platform } from "@/lib/types/db";
+import { oauthConfigured } from "@/lib/platforms/oauth";
 
 export const metadata = { title: "Accounts" };
 
@@ -21,18 +20,6 @@ const connectBlueskySchema = z.object({
 });
 
 const disconnectSchema = z.object({ accountId: z.string().uuid() });
-
-/**
- * Bluesky is the one platform that connects with no OAuth app behind it: the
- * member generates an app password and hands it over. X and LinkedIn need a
- * registered application, so they stay unavailable until those exist rather
- * than offering a button that throws.
- */
-function oauthConfigured(platform: Platform): boolean {
-  if (platform === "bluesky") return true;
-  if (platform === "x") return Boolean(optionalEnv("X_CLIENT_ID") && optionalEnv("X_CLIENT_SECRET"));
-  return Boolean(optionalEnv("LINKEDIN_CLIENT_ID") && optionalEnv("LINKEDIN_CLIENT_SECRET"));
-}
 
 async function connectBluesky(formData: FormData) {
   "use server";
@@ -81,9 +68,44 @@ async function disconnect(formData: FormData) {
   revalidatePath("/app/accounts");
 }
 
-export default async function AccountsPage() {
+/**
+ * What the OAuth round trip can come back as.
+ *
+ * The callback cannot render anything itself — it is a redirect target for
+ * the platform — so it reports through a query parameter and this is where
+ * that becomes something the member can read.
+ */
+const connectMessages: Record<string, { tone: "ok" | "warn"; text: string }> = {
+  connected: { tone: "ok", text: "Account connected. It is ready to publish through." },
+  declined: { tone: "warn", text: "You declined the permission request, so nothing was connected." },
+  no_seats: {
+    tone: "warn",
+    text: "Every account seat on your plan is in use. Disconnect one, or upgrade, and try again.",
+  },
+  invalid_state: {
+    tone: "warn",
+    text: "That sign-in link had expired. Start the connection again from this page.",
+  },
+  unconfigured: {
+    tone: "warn",
+    text: "That platform has no registered application yet, so there is nothing to authorize against.",
+  },
+  unsupported: { tone: "warn", text: "That platform does not connect this way." },
+  error: {
+    tone: "warn",
+    text: "The connection did not complete. Nothing was saved, and the details are in the admin error log.",
+  },
+};
+
+export default async function AccountsPage({
+  searchParams = {},
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   const session = await requireAppSession();
   const context = await requireWorkspace(session);
+  const connectState = typeof searchParams.connect === "string" ? searchParams.connect : "";
+  const connectMessage = connectMessages[connectState];
 
   const [accounts, active] = await Promise.all([
     listConnections(context.workspace.id),
@@ -104,6 +126,18 @@ export default async function AccountsPage() {
           {active.length} of {limit} seats used on the {session.subscriptionTier} plan
         </p>
       </section>
+
+      {connectMessage ? (
+        <div
+          className={
+            connectMessage.tone === "ok"
+              ? "rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800"
+              : "rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900"
+          }
+        >
+          {connectMessage.text}
+        </div>
+      ) : null}
 
       {accounts.length > 0 ? (
         <section className="rounded-xl border border-[#D6D6D6] bg-white shadow-sm">
@@ -170,7 +204,7 @@ export default async function AccountsPage() {
                   />
                   <p className="text-xs leading-5 text-[#666]">
                     This is an <strong>app password</strong> from Bluesky Settings → Privacy and
-                    security → App passwords — never your account password. It can be revoked from
+                    security → App passwords, never your account password. It can be revoked from
                     there at any time without changing your login.
                   </p>
                   <Button className="h-11 w-full rounded-full bg-[#0A66C2] font-bold text-white hover:bg-[#004182]">
@@ -190,7 +224,7 @@ export default async function AccountsPage() {
                 <div className="mt-5 flex items-start gap-2 rounded-lg bg-[#FEF9EC] p-4 text-sm leading-6 text-[#7A5B00]">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                   <span>
-                    Not available yet — {platformLabel(platform)} needs a registered application
+                    Not available yet. {platformLabel(platform)} needs a registered application
                     before an account can be authorized.
                   </span>
                 </div>

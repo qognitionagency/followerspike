@@ -3,6 +3,8 @@ import { isRedirectError } from "next/dist/client/components/redirect";
 import { z } from "zod";
 import { auditProfileResult, linkedinUrlSchema } from "@/lib/ai/generators";
 import { requireAppSession } from "@/lib/session";
+import { checkRateLimit, rateLimitHeaders } from "@/lib/security/rate-limit";
+import { recordError } from "@/lib/observability/log";
 import { getWorkspace } from "@/lib/workspace";
 import { db } from "@/lib/db";
 
@@ -16,6 +18,22 @@ const AuditBodySchema = z.object({
 export async function POST(request: Request) {
   try {
     const session = await requireAppSession();
+
+    // Authenticated, but still metered. Tier caps in lib/automation govern what
+    // may be published; nothing governed how often a generation could be asked
+    // for, so a client stuck in a retry loop billed straight through to the AI
+    // provider. Per user rather than per IP: the account is the payer.
+    const throttle = await checkRateLimit({
+      bucket: `ai-audit:${session.userId}`,
+      limit: 20,
+      windowSeconds: 3600,
+    });
+    if (!throttle.allowed) {
+      return NextResponse.json(
+        { error: "Too many generations in the last hour.", retryAfterSeconds: throttle.retryAfterSeconds },
+        { status: 429, headers: rateLimitHeaders(throttle) }
+      );
+    }
     const body = AuditBodySchema.parse((await request.json()) as unknown);
 
     // Attribution only — profile_audits is keyed by user, but the AI cost row is
@@ -72,6 +90,7 @@ export async function POST(request: Request) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.flatten() }, { status: 400 });
     }
+    await recordError(error, { source: "api/ai/audit", requestPath: "/api/ai/audit" });
     return NextResponse.json({ error: "Audit failed" }, { status: 500 });
   }
 }

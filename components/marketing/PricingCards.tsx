@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Sparkles } from "lucide-react";
+import { CheckCircle2 } from "@/components/icons";
 import Link from "next/link";
 import { useState } from "react";
 import { PRICING, ROUTES } from "@/lib/constants";
@@ -52,7 +52,7 @@ export function PricingCards() {
           >
             {plan.popular ? (
               <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-[#2f80ed] px-3 py-1 text-xs font-bold uppercase text-white">
-                <Sparkles className="h-3.5 w-3.5" />
+                <CheckCircle2 className="h-3.5 w-3.5" />
                 Most Popular
               </div>
             ) : null}

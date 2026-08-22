@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ClerkProvider } from "@clerk/nextjs";
-import { ArrowLeft, ScrollText, ShieldAlert, Users2, UserPlus2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ScrollText, ShieldAlert, Users2, UserPlus2 } from "@/components/icons";
 import { getAppSession } from "@/lib/session";
 import { BRAND } from "@/lib/constants";
 
@@ -12,6 +12,7 @@ const adminNav = [
   { href: "/admin/users", label: "Users", icon: Users2 },
   { href: "/admin/leads", label: "Leads", icon: UserPlus2 },
   { href: "/admin/logs", label: "Activity log", icon: ScrollText },
+  { href: "/admin/errors", label: "Errors", icon: AlertTriangle },
 ] as const;
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, ChevronDown, Menu, TrendingUp } from "lucide-react";
+import { ArrowRight, ChevronDown, Menu, TrendingUp } from "@/components/icons";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SignupButton } from "@/components/marketing/SignupButton";
 import { BRAND, ROUTES } from "@/lib/constants";
@@ -25,16 +25,16 @@ export function MarketingHeader() {
             <div key={group.title} className="group relative">
               <button
                 type="button"
-                className="inline-flex h-10 items-center gap-1 rounded-full px-3 text-sm font-black text-slate-700 transition hover:bg-[#eef6ff] hover:text-[#2f80ed]"
+                className="inline-flex h-10 items-center gap-1 rounded-full px-3 text-sm font-black text-slate-700 hover:bg-[#eef6ff] hover:text-[#2f80ed]"
               >
                 {group.title}
                 <ChevronDown className="h-4 w-4" />
               </button>
-              <div className="pointer-events-none absolute left-0 top-11 w-[min(560px,calc(100vw-2rem))] opacity-0 transition duration-150 group-hover:pointer-events-auto group-hover:opacity-100">
+              <div className="pointer-events-none absolute left-0 top-11 w-[min(560px,calc(100vw-2rem))] hidden group-hover:block">
                 <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-[0_24px_70px_rgba(15,23,42,0.14)]">
                   <div className="grid gap-1 sm:grid-cols-2">
                     {group.items.map((item) => (
-                      <Link key={item.href} href={item.href} className="rounded-lg p-3 transition hover:bg-[#f6faff]">
+                      <Link key={item.href} href={item.href} className="rounded-lg p-3 hover:bg-[#f6faff]">
                         <div className="flex items-center justify-between gap-3">
                           <span className="text-sm font-black text-slate-950">{item.label}</span>
                           {item.badge ? (

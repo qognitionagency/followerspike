@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ArrowRight, CheckCircle2, Mail, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, Mail } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,7 +55,7 @@ export function FreeToolRunner({ tool }: FreeToolRunnerProps) {
     <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
       <form action={onSubmit} className="rounded-lg border border-[#d8d2c4] bg-white p-5 shadow-sm">
         <div className="flex items-center gap-2 text-sm font-black uppercase text-[#0a66c2]">
-          <Sparkles className="h-4 w-4" />
+          <ArrowRight className="h-4 w-4" />
           {tool.category}
         </div>
         <h2 className="mt-3 text-2xl font-black text-[#111827]">Run the tool</h2>
