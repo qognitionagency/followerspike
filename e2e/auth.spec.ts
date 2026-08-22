@@ -41,6 +41,48 @@ test("login redirect target stays relative (no open redirect from middleware)", 
   expect(target?.startsWith("http"), "must never be absolute").toBe(false);
 });
 
+/**
+ * Both of these shipped broken. The middleware treated any path not on the
+ * public allowlist as protected, so a URL that simply did not exist answered
+ * 307 to /login rather than 404, and `/opengraph-image` did the same, which
+ * meant every social unfurl of this site fetched a login page instead of a card.
+ */
+test("an unknown URL renders the 404 page instead of redirecting to login", async ({ request }) => {
+  const res = await request.get("/definitely-not-a-real-page-98713", {
+    maxRedirects: 0,
+    failOnStatusCode: false,
+  });
+
+  expect(res.status(), "a dead link must 404, not redirect").toBe(404);
+  expect(await res.text()).toContain("This page does not exist");
+});
+
+test("the social card is fetchable without a session", async ({ request }) => {
+  const res = await request.get("/opengraph-image", { maxRedirects: 0, failOnStatusCode: false });
+
+  expect(res.status(), "crawlers have no session and must still get the image").toBe(200);
+  expect(res.headers()["content-type"] ?? "").toContain("image");
+});
+
+test("protected routes still redirect a signed-out visitor", async ({ request }) => {
+  // The counterpart to the two above: loosening the middleware must not have
+  // loosened what it actually guards.
+  for (const path of ["/app", "/app/settings", "/admin"]) {
+    const res = await request.get(path, { maxRedirects: 0, failOnStatusCode: false });
+    expect(res.status(), `${path} must not be public`).toBe(307);
+    expect(res.headers()["location"] ?? "", `${path} redirects to login`).toContain("/login");
+  }
+});
+
+test("protected API routes answer 401 rather than redirecting", async ({ request }) => {
+  const res = await request.post("/api/ai/post", {
+    data: { topicSeed: "anything" },
+    maxRedirects: 0,
+    failOnStatusCode: false,
+  });
+  expect(res.status()).toBe(401);
+});
+
 test("deleted cron endpoint is gone, not silently public", async ({ request }) => {
   const res = await request.post("/api/cron/dispatch", { data: {}, failOnStatusCode: false, maxRedirects: 0 });
   // 404 (removed) or 401 (protected) are both fine; 200 would mean it runs unauthenticated.

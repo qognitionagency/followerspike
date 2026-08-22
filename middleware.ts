@@ -2,8 +2,14 @@ import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 /**
- * Everything the marketing site and the free tools need to serve to a signed-out
- * visitor. Anything not listed here requires a Clerk session.
+ * Everything the marketing site and the free tools serve to a signed-out visitor.
+ *
+ * This list no longer decides what is *protected*, only what is definitely
+ * public. Protection is decided by `isProtectedRoute` below, and the difference
+ * matters: while an unlisted path meant "send them to login", every URL that did
+ * not exist answered 307 to /login instead of 404, and so did
+ * `/opengraph-image`, which meant every social unfurl of this site fetched a
+ * login page instead of the card.
  */
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -24,6 +30,12 @@ const isPublicRoute = createRouteMatcher([
   "/robots.txt",
   "/sitemap.xml",
   "/llms.txt",
+  // Next generates these from app/opengraph-image.tsx and app/icon.svg. They are
+  // fetched by crawlers with no session, and are the whole point of having a
+  // social card.
+  "/opengraph-image",
+  "/icon.svg",
+  "/apple-icon.svg",
   "/tools(.*)",
   "/features(.*)",
   "/free-tools(.*)",
@@ -41,8 +53,29 @@ const isPublicRoute = createRouteMatcher([
   "/api/jobs(.*)",
 ]);
 
+/**
+ * The routes that actually require a session.
+ *
+ * Every page underneath these re-authorizes on its own: `/app` through
+ * `requireAppSession` in its layout, `/admin` through the `is_admin` check in
+ * its own, and every server action independently of either. Middleware is
+ * defence in depth and the thing that produces a friendly redirect, not the only
+ * gate, which is what makes it safe for anything unmatched to fall through to
+ * Next rather than being swept into /login.
+ */
+const isProtectedRoute = createRouteMatcher(["/app(.*)", "/dashboard(.*)", "/admin(.*)"]);
+
 export default clerkMiddleware(async (auth, request) => {
   if (isPublicRoute(request)) {
+    return;
+  }
+
+  const isApi = request.nextUrl.pathname.startsWith("/api/");
+
+  // Not protected and not an API route: a marketing page, a generated metadata
+  // route, or a URL that does not exist. Let Next answer, so a dead link gets
+  // the 404 page instead of a redirect to a login form it never needed.
+  if (!isProtectedRoute(request) && !isApi) {
     return;
   }
 
