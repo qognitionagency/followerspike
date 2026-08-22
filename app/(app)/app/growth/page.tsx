@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { CheckCircle2, Circle, PenSquare, Target } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,9 @@ import {
 import { platformLabel } from "@/lib/platforms/types";
 import { activeConnections } from "@/lib/platforms/connect";
 import { rankBlueskyProfile } from "@/lib/rank/bluesky";
+import { rankXProfile } from "@/lib/rank/x";
+import { rankLinkedInProfile } from "@/lib/rank/linkedin";
+import { Textarea } from "@/components/ui/textarea";
 import { recordRankSnapshot } from "@/lib/rank/store";
 import { recordError } from "@/lib/observability/log";
 
@@ -32,6 +36,51 @@ export const metadata = { title: "Growth plan" };
  */
 
 const itemSchema = z.object({ itemId: z.string().uuid(), complete: z.enum(["true", "false"]) });
+
+const pasteSchema = z.object({
+  platform: z.enum(["x", "linkedin"]),
+  profileText: z.string().min(60).max(8000),
+});
+
+/**
+ * Scores X and LinkedIn from pasted profile text, in the app.
+ *
+ * Neither platform exposes a profile read at the scopes we hold: X retired its
+ * unauthenticated endpoint, and LinkedIn's headline and About are Partner-only
+ * fields. That is why the weekly refresh skips both. It is not a reason to
+ * leave them unscorable, though, which is what they were: the only scorer a
+ * member could reach for either was on the public marketing site, and it asked
+ * them to paste the same text there instead.
+ *
+ * Same scorers, same five pillars, same `profile_scores` table, so a plan built
+ * from an X score is built the same way as one from Bluesky.
+ */
+async function runRankFromPaste(formData: FormData) {
+  "use server";
+  const session = await requireAppSession();
+  const context = await requireWorkspace(session);
+
+  const parsed = pasteSchema.safeParse({
+    platform: formData.get("platform"),
+    profileText: formData.get("profileText"),
+  });
+  if (!parsed.success) {
+    redirect("/app/growth?rank=too_short");
+  }
+
+  const result =
+    parsed.data.platform === "x"
+      ? rankXProfile(parsed.data.profileText)
+      : rankLinkedInProfile(parsed.data.profileText);
+
+  await recordRankSnapshot(result, {
+    userId: session.userId,
+    workspaceId: context.workspace.id,
+  });
+
+  revalidatePath("/app/growth");
+  redirect("/app/growth?rank=scored");
+}
 
 /**
  * Scores a connected profile without leaving the app.
@@ -127,7 +176,11 @@ const KIND_LABEL: Record<GrowthPlanItem["kind"], string> = {
   cadence_target: "Cadence",
 };
 
-export default async function GrowthPage() {
+export default async function GrowthPage({
+  searchParams = {},
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   const session = await requireAppSession();
   const context = await requireWorkspace(session);
 
@@ -138,6 +191,13 @@ export default async function GrowthPage() {
   ]);
 
   const rankable = accounts.find((account) => account.platform === "bluesky") ?? null;
+  // X and LinkedIn cannot be read, but they can be pasted. Offered for every
+  // member, connected or not: the score is about the profile, not the token.
+  const pasteable = [
+    { platform: "x" as const, label: "X" },
+    { platform: "linkedin" as const, label: "LinkedIn" },
+  ];
+  const rankFlash = typeof searchParams.rank === "string" ? searchParams.rank : "";
 
   const progress = plan ? planProgress(plan) : null;
 
@@ -209,6 +269,48 @@ export default async function GrowthPage() {
               Connect an account to get scored
             </Link>
           )}
+        </div>
+
+        {rankFlash === "scored" ? (
+          <p className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">
+            Scored. Build a plan and the highest-impact fixes become a checklist.
+          </p>
+        ) : null}
+        {rankFlash === "too_short" ? (
+          <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-900">
+            That was not enough to score. Paste your name, handle, bio, and headline at minimum.
+          </p>
+        ) : null}
+
+        {/*
+          X and LinkedIn expose no profile read at the scopes we hold, so they
+          are scored from text instead of skipped. Same scorers, same pillars,
+          same table as Bluesky.
+        */}
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {pasteable.map((entry) => (
+            <details key={entry.platform} className="rounded-lg border border-[#D6D6D6] bg-[#F8FAFC] p-4">
+              <summary className="cursor-pointer list-none text-sm font-black text-[#0A66C2]">
+                Score my {entry.label} profile
+              </summary>
+              <form action={runRankFromPaste} className="mt-3 space-y-3">
+                <input type="hidden" name="platform" value={entry.platform} />
+                <p className="text-xs leading-5 text-[#666]">
+                  {entry.label} exposes no profile data we can read, so paste it: open your profile,
+                  select all, and paste. Nothing is stored except the score.
+                </p>
+                <Textarea
+                  name="profileText"
+                  required
+                  placeholder={`Paste your ${entry.label} profile here`}
+                  className="min-h-28 bg-white"
+                />
+                <Button className="h-10 w-full rounded-full bg-[#191919] font-bold text-white hover:bg-[#0A66C2]">
+                  Score it
+                </Button>
+              </form>
+            </details>
+          ))}
         </div>
       </section>
 

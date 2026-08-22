@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Clock3, Link2, ListChecks, PenSquare, Recycle, ShieldCheck, Target } from "@/components/icons";
+import { CheckCircle2, Clock3, Link2, ListChecks, PenSquare, Recycle, ShieldCheck, Target } from "@/components/icons";
 import { requireAppSession } from "@/lib/session";
 import { requireWorkspace } from "@/lib/workspace";
 import { db } from "@/lib/db";
+import { onboardingState } from "@/lib/onboarding";
 import { activeConnections } from "@/lib/platforms/connect";
 import { dueCount } from "@/lib/evergreen/store";
 import { activePlan, planProgress } from "@/lib/growth/plan";
@@ -70,7 +71,7 @@ export default async function AppDashboardPage() {
   const context = await requireWorkspace(session);
   const sql = db();
 
-  const [usageData, logsData, postsData, connected, evergreenDue, plan, voice] = await Promise.all([
+  const [usageData, logsData, postsData, connected, evergreenDue, plan, voice, postCountData] = await Promise.all([
     sql`select posts from user_daily_usage where user_id = ${session.userId} and usage_date = current_date limit 1`,
     sql`
       select id, action, outcome, reason, recipient_handle, created_at
@@ -92,6 +93,7 @@ export default async function AppDashboardPage() {
     dueCount(context.workspace.id),
     activePlan(context.workspace.id),
     activeProfile(context.workspace.id),
+    sql`select count(*)::int as n from posts where workspace_id = ${context.workspace.id}`,
   ]);
 
   const postsToday = (usageData[0]?.posts as number | undefined) ?? 0;
@@ -99,6 +101,12 @@ export default async function AppDashboardPage() {
   const logs = logsData as unknown as LogRow[];
   const todayPost = postsData[0] as PostRow | undefined;
   const progress = plan ? planProgress(plan) : null;
+
+  const setup = onboardingState({
+    connectedAccounts: connected.length,
+    hasVoiceProfile: Boolean(voice),
+    hasAnyPost: ((postCountData[0]?.n as number | undefined) ?? 0) > 0,
+  });
 
   // "Autopilot" means the account has consented and is not paused — the same
   // conditions lib/automation/safety.ts checks before it lets anything run.
@@ -120,6 +128,66 @@ export default async function AppDashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/*
+        Setup comes first, and only the current step is actionable.
+        A dashboard of six equal nav items and four zeroed stat cards is a menu,
+        and every item on it is a dead end until an account is connected.
+      */}
+      {!setup.complete ? (
+        <section className="rounded-2xl border border-[#D6D6D6] bg-white p-6 shadow-sm lg:p-8">
+          <p className="text-sm font-black uppercase text-[#0A66C2]">Get set up</p>
+          <h1 className="mt-2 text-3xl font-black text-[#191919]">
+            {setup.doneCount === 0
+              ? "Three steps and you are posting."
+              : `${3 - setup.doneCount} step${3 - setup.doneCount === 1 ? "" : "s"} to go.`}
+          </h1>
+
+          <ol className="mt-6 space-y-3">
+            {setup.steps.map((step, index) => {
+              const isCurrent = setup.current?.id === step.id;
+              return (
+                <li
+                  key={step.id}
+                  className={`rounded-xl border p-5 ${
+                    isCurrent ? "border-[#0A66C2] bg-[#F8FBFF]" : "border-[#E2E2E2] bg-white"
+                  }`}
+                >
+                  <div className="flex items-start gap-4">
+                    <span
+                      className={`mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full text-sm font-black ${
+                        step.done
+                          ? "bg-emerald-600 text-white"
+                          : isCurrent
+                            ? "bg-[#0A66C2] text-white"
+                            : "bg-[#EEF3F8] text-[#666]"
+                      }`}
+                    >
+                      {step.done ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
+                    </span>
+
+                    <div className="min-w-0 flex-1">
+                      <p className={`font-black ${step.done ? "text-[#666] line-through" : "text-[#191919]"}`}>
+                        {step.title}
+                      </p>
+                      {isCurrent ? (
+                        <>
+                          <p className="mt-1 text-sm leading-6 text-[#666]">{step.body}</p>
+                          <Link
+                            href={step.href}
+                            className="mt-4 inline-flex h-11 items-center rounded-full bg-[#0A66C2] px-6 font-black text-white hover:bg-[#004182]"
+                          >
+                            {step.cta}
+                          </Link>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+      ) : (
       <section className="overflow-hidden rounded-2xl border border-[#D6D6D6] bg-[#111827] text-white shadow-sm">
         <div className="grid gap-px bg-white/10 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="bg-[#111827] p-6 lg:p-8">
@@ -154,6 +222,7 @@ export default async function AppDashboardPage() {
           </div>
         </div>
       </section>
+      )}
 
       <section className="grid gap-4 md:grid-cols-4">
         {stats.map((stat) => (
