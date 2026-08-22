@@ -15,6 +15,10 @@ import {
   type GrowthPlanItem,
 } from "@/lib/growth/plan";
 import { platformLabel } from "@/lib/platforms/types";
+import { activeConnections } from "@/lib/platforms/connect";
+import { rankBlueskyProfile } from "@/lib/rank/bluesky";
+import { recordRankSnapshot } from "@/lib/rank/store";
+import { recordError } from "@/lib/observability/log";
 
 export const metadata = { title: "Growth plan" };
 
@@ -28,6 +32,51 @@ export const metadata = { title: "Growth plan" };
  */
 
 const itemSchema = z.object({ itemId: z.string().uuid(), complete: z.enum(["true", "false"]) });
+
+/**
+ * Scores a connected profile without leaving the app.
+ *
+ * This page used to send a signed-in member to `/free-tools/spike-rank-bluesky`,
+ * the public lead-capture tool, and then ask them to come back. That tool exists
+ * to convert strangers; somebody who has already paid and already connected an
+ * account should not be sent through it, retype a handle they have already
+ * given us, and be pitched the product they are inside.
+ *
+ * The scorer is the same one the free tool and the weekly refresh use, so the
+ * number here is the number everywhere.
+ */
+async function runRankNow() {
+  "use server";
+  const session = await requireAppSession();
+  const context = await requireWorkspace(session);
+
+  const accounts = await activeConnections(context.workspace.id);
+  // Bluesky only, and that is a fact about the platforms rather than a gap here:
+  // its AppView is public, while X and LinkedIn expose no profile read at the
+  // scopes we hold. `lib/jobs/rank.ts` skips them for the same reason.
+  const target = accounts.find((account) => account.platform === "bluesky");
+  if (!target) return;
+
+  try {
+    const result = await rankBlueskyProfile(target.handle);
+    await recordRankSnapshot(result, {
+      userId: session.userId,
+      workspaceId: context.workspace.id,
+    });
+  } catch (error) {
+    // A rank that cannot be read is not worth failing the page over; the member
+    // still sees the plan they already have.
+    await recordError(error, {
+      source: "app/growth",
+      kind: "rank_run_failed",
+      userId: session.userId,
+      workspaceId: context.workspace.id,
+      context: { handle: target.handle },
+    });
+  }
+
+  revalidatePath("/app/growth");
+}
 
 async function buildPlan() {
   "use server";
@@ -82,10 +131,13 @@ export default async function GrowthPage() {
   const session = await requireAppSession();
   const context = await requireWorkspace(session);
 
-  const [plan, latest] = await Promise.all([
+  const [plan, latest, accounts] = await Promise.all([
     activePlan(context.workspace.id),
     latestRankResult(context.workspace.id),
+    activeConnections(context.workspace.id),
   ]);
+
+  const rankable = accounts.find((account) => account.platform === "bluesky") ?? null;
 
   const progress = plan ? planProgress(plan) : null;
 
@@ -119,24 +171,42 @@ export default async function GrowthPage() {
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#666]">
             {latest
               ? `Your latest score is ${latest.result.score}/100 on ${platformLabel(latest.result.platform)}. Build a plan and the highest-impact fixes become a checklist.`
-              : "Run a Spike Rank audit first. A plan is only built from things actually observed on your profile."}
+              : rankable
+                ? `Score @${rankable.handle} and the highest-impact fixes become a checklist. A plan is only built from things actually observed on your profile.`
+                : "Connect an account and we score it here. A plan is only built from things actually observed on your profile."}
           </p>
         )}
 
         <div className="mt-5 flex flex-wrap gap-3">
           {latest ? (
-            <form action={buildPlan}>
+            <>
+              <form action={buildPlan}>
+                <Button className="h-11 rounded-full bg-[#0A66C2] font-black text-white hover:bg-[#004182]">
+                  <Target className="mr-2 h-4 w-4" />
+                  {plan ? "Rebuild from latest score" : "Build my plan"}
+                </Button>
+              </form>
+              {rankable ? (
+                <form action={runRankNow}>
+                  <Button className="h-11 rounded-full bg-[#F4F2EE] px-5 font-bold text-[#191919] hover:bg-[#E6E2DA]">
+                    Re-score @{rankable.handle}
+                  </Button>
+                </form>
+              ) : null}
+            </>
+          ) : rankable ? (
+            <form action={runRankNow}>
               <Button className="h-11 rounded-full bg-[#0A66C2] font-black text-white hover:bg-[#004182]">
                 <Target className="mr-2 h-4 w-4" />
-                {plan ? "Rebuild from latest score" : "Build my plan"}
+                Score @{rankable.handle} now
               </Button>
             </form>
           ) : (
             <Link
-              href="/free-tools/spike-rank-bluesky"
+              href="/app/accounts"
               className="inline-flex h-11 items-center rounded-full bg-[#0A66C2] px-5 font-black text-white hover:bg-[#004182]"
             >
-              Run a Spike Rank audit
+              Connect an account to get scored
             </Link>
           )}
         </div>

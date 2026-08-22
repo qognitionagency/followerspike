@@ -6,21 +6,32 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { requireAppSession } from "@/lib/session";
 import { requireWorkspace } from "@/lib/workspace";
-import { INTERVIEW_QUESTIONS, completionRatio, isComplete, normalizeAnswers } from "@/lib/voice/interview";
+import { INTERVIEW_QUESTIONS, isComplete, normalizeAnswers } from "@/lib/voice/interview";
 import { activeProfile, calibrationSummary, latestInterview, saveInterview, saveProfile } from "@/lib/voice/store";
 import { synthesizeVoice } from "@/lib/voice/synthesize";
 import { embeddingCount, embeddingsConfigured, replaceEmbeddings } from "@/lib/voice/embeddings";
 import { SLIDER_LABELS, SLIDER_MAX, type VoiceSliders } from "@/lib/voice/types";
+import { canBuildFromPosts, samplesFrom, voiceSources } from "@/lib/voice/import";
+import { platformLabel } from "@/lib/platforms/types";
 
 export const metadata = { title: "Voice" };
 
 /**
  * The voice page.
  *
- * Two ways in, because founders arrive in two states. Someone with a posting
- * history pastes it and gets a profile cloned from real writing; someone with
- * none answers the interview, which is what Starter sells as "build your voice
- * with no posts to import". Both land in the same `voice_profiles` row.
+ * Three ways in, in the order they cost the member anything.
+ *
+ * If an account is connected, its posts are read and modelled directly: one
+ * button, no typing. That is the whole point of connecting an account, and it
+ * used to be missing. `synthesizeVoice` always accepted samples; the only way
+ * to supply them was to go and paste them in by hand, so the fastest route to a
+ * profile was answering eight questions about how you write rather than showing
+ * the model what you had already written.
+ *
+ * Failing that, a three-question interview, with the optional five folded away
+ * until somebody wants them. Failing that, paste posts manually.
+ *
+ * All three land in the same `voice_profiles` row.
  *
  * What this page will not do is save a profile when the model was unavailable.
  * A neutral placeholder profile would not look broken — it would just quietly
@@ -33,6 +44,55 @@ function splitSamples(raw: string): string[] {
     .split(/\n\s*\n/)
     .map((sample) => sample.trim())
     .filter((sample) => sample.length > 40);
+}
+
+/**
+ * Builds a profile from the writing already on a connected account.
+ *
+ * No form fields: everything it needs is the connection. Reads the accounts,
+ * pools what is long enough to learn from, and models it.
+ */
+async function buildFromAccounts() {
+  "use server";
+  const session = await requireAppSession();
+  const context = await requireWorkspace(session);
+
+  const sources = await voiceSources(context.workspace.id);
+  const samples = samplesFrom(sources);
+
+  if (samples.length === 0) {
+    redirect("/app/voice?error=no_posts");
+  }
+
+  const result = await synthesizeVoice(
+    { samples },
+    { workspaceId: context.workspace.id, userId: session.userId }
+  );
+
+  if (!result.ok) {
+    redirect(`/app/voice?error=${result.reason}`);
+  }
+
+  const profile = await saveProfile({
+    workspaceId: context.workspace.id,
+    userId: session.userId,
+    profile: result.value,
+    source: "import",
+  });
+
+  // Embedded from the real posts, not the model's paraphrase of them: the point
+  // of retrieval is to surface what this person actually wrote.
+  if (profile) {
+    await replaceEmbeddings({
+      userId: session.userId,
+      voiceProfileId: profile.id,
+      contents: samples,
+      context: { workspaceId: context.workspace.id, userId: session.userId },
+    });
+  }
+
+  revalidatePath("/app/voice");
+  redirect("/app/voice?saved=1");
 }
 
 async function buildVoice(formData: FormData) {
@@ -111,6 +171,8 @@ async function buildVoice(formData: FormData) {
 
 const ERROR_COPY: Record<string, string> = {
   empty: "Answer at least one question or paste a post before building a voice.",
+  no_posts:
+    "We could not read enough posts from your connected accounts. Answer the three questions below instead.",
   no_provider_configured:
     "No AI provider is configured, so a voice cannot be built yet. Your answers were saved.",
   all_providers_failed: "The AI provider could not be reached. Your answers were saved, so try again shortly.",
@@ -152,23 +214,31 @@ export default async function VoicePage({
     latestInterview(session.userId),
   ]);
 
-  const [calibration, exemplarCount] = await Promise.all([
+  const [calibration, exemplarCount, sources] = await Promise.all([
     profile ? calibrationSummary(profile.id) : Promise.resolve(null),
     profile ? embeddingCount(profile.id) : Promise.resolve(0),
+    voiceSources(context.workspace.id),
   ]);
 
+  const readableSamples = samplesFrom(sources).length;
+  const autoReady = canBuildFromPosts(sources);
+  const requiredQuestions = INTERVIEW_QUESTIONS.filter((question) => question.required);
+  const optionalQuestions = INTERVIEW_QUESTIONS.filter((question) => !question.required);
+
   const answers = interview?.answers ?? {};
-  const progress = Math.round(completionRatio(answers) * 100);
   const errorKey = typeof params.error === "string" ? params.error : null;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
       <section className="rounded-xl border border-[#D6D6D6] bg-white p-6 shadow-sm">
-        <p className="text-sm font-black uppercase text-[#0A66C2]">Voice modelling</p>
-        <h1 className="mt-2 text-3xl font-black text-[#191919]">Teach FollowerSpike how you sound.</h1>
+        <p className="text-sm font-black uppercase text-[#0A66C2]">Voice</p>
+        <h1 className="mt-2 text-3xl font-black text-[#191919]">
+          {autoReady ? "Your writing is already here." : "Teach FollowerSpike how you sound."}
+        </h1>
         <p className="mt-2 text-sm leading-6 text-[#666]">
-          Paste posts you have already written, answer the interview, or do both. Pasted writing is the strongest
-          signal; the interview exists so you can start with none.
+          {autoReady
+            ? "We can read your posts from a connected account and model your voice from them. Nothing to type."
+            : "Connect an account and we read your posts automatically. Until then, three questions is enough to start."}
         </p>
 
         {params.saved ? (
@@ -185,66 +255,134 @@ export default async function VoicePage({
           </div>
         ) : null}
 
-        <div className="mt-5">
-          <div className="flex items-center justify-between text-xs font-bold text-[#666]">
-            <span>Interview progress</span>
-            <span>{progress}%</span>
-          </div>
-          <div className="mt-1.5 h-2 rounded-full bg-[#E2E8F0]">
-            <div className="h-2 rounded-full bg-[#0A66C2]" style={{ width: `${progress}%` }} />
-          </div>
-        </div>
+        {sources.length > 0 ? (
+          <div className="mt-5 rounded-lg border border-[#D6D6D6] bg-[#F8FAFC] p-4">
+            <ul className="space-y-2">
+              {sources.map((source) => (
+                <li key={`${source.platform}:${source.handle}`} className="flex items-center justify-between gap-3 text-sm">
+                  <span className="font-bold text-[#191919]">
+                    {platformLabel(source.platform)}
+                    <span className="ml-2 font-normal text-[#666]">@{source.handle}</span>
+                  </span>
+                  {source.unavailable ? (
+                    <span className="text-xs font-semibold text-[#666]">{source.unavailable}</span>
+                  ) : (
+                    <span className="text-xs font-black text-emerald-700">{source.samples.length} posts readable</span>
+                  )}
+                </li>
+              ))}
+            </ul>
 
-        <form action={buildVoice} className="mt-6 space-y-5">
-          <input type="hidden" name="interviewId" value={interview?.id ?? ""} />
-
-          <div>
-            <label htmlFor="samples" className="text-sm font-black text-[#191919]">
-              Posts you have written
-            </label>
-            <p className="mt-1 text-xs leading-5 text-[#666]">
-              Separate each post with a blank line. Anything shorter than a couple of sentences is ignored.
-            </p>
-            <Textarea
-              id="samples"
-              name="samples"
-              placeholder="Paste a few of your best posts here…"
-              className="mt-2 min-h-40 bg-white"
-            />
+            {autoReady ? (
+              <form action={buildFromAccounts} className="mt-4">
+                <Button className="h-12 w-full rounded-full bg-[#0A66C2] font-black text-white hover:bg-[#004182]">
+                  <PenLine className="mr-2 h-4 w-4" />
+                  Build my voice from {readableSamples} posts
+                </Button>
+              </form>
+            ) : null}
           </div>
+        ) : (
+          <div className="mt-5 rounded-lg border border-[#D6D6D6] bg-[#F8FAFC] p-4 text-sm leading-6 text-[#666]">
+            No account connected yet.{" "}
+            <a href="/app/accounts" className="font-bold text-[#0A66C2] underline">
+              Connect one
+            </a>{" "}
+            and we read your posts for you. Bluesky takes about a minute and needs no approval.
+          </div>
+        )}
 
-          <div className="space-y-4 border-t border-[#E2E2E2] pt-5">
-            {INTERVIEW_QUESTIONS.map((question) => (
-              <div key={question.id}>
-                <label htmlFor={question.id} className="text-sm font-black text-[#191919]">
-                  {question.prompt}
-                  {question.required ? <span className="ml-1 text-[#0A66C2]">*</span> : null}
-                </label>
-                <p className="mt-1 text-xs leading-5 text-[#666]">{question.help}</p>
-                {question.long ? (
-                  <Textarea
-                    id={question.id}
-                    name={question.id}
-                    defaultValue={answers[question.id] ?? ""}
-                    className="mt-2 min-h-24 bg-white"
-                  />
-                ) : (
-                  <Input
-                    id={question.id}
-                    name={question.id}
-                    defaultValue={answers[question.id] ?? ""}
-                    className="mt-2 h-12 bg-white"
-                  />
-                )}
+        {/*
+          The interview is the fallback, so it is presented as one: three
+          questions, and the optional five folded away. Showing all eight at once
+          made answering them look like the main path, which it never was.
+        */}
+        <details className="group mt-6" open={!autoReady}>
+          <summary className="cursor-pointer list-none text-sm font-black text-[#0A66C2]">
+            {autoReady ? "Or answer three questions instead" : "Answer three questions"}
+          </summary>
+
+          <form action={buildVoice} className="mt-4 space-y-5">
+            <input type="hidden" name="interviewId" value={interview?.id ?? ""} />
+
+            <div className="space-y-4">
+              {requiredQuestions.map((question) => (
+                <div key={question.id}>
+                  <label htmlFor={question.id} className="text-sm font-black text-[#191919]">
+                    {question.prompt}
+                  </label>
+                  <p className="mt-1 text-xs leading-5 text-[#666]">{question.help}</p>
+                  {question.long ? (
+                    <Textarea
+                      id={question.id}
+                      name={question.id}
+                      defaultValue={answers[question.id] ?? ""}
+                      className="mt-2 min-h-24 bg-white"
+                    />
+                  ) : (
+                    <Input
+                      id={question.id}
+                      name={question.id}
+                      defaultValue={answers[question.id] ?? ""}
+                      className="mt-2 h-12 bg-white"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <details className="border-t border-[#E2E2E2] pt-4">
+              <summary className="cursor-pointer list-none text-sm font-bold text-[#666]">
+                Add more nuance (optional)
+              </summary>
+              <div className="mt-4 space-y-4">
+                {optionalQuestions.map((question) => (
+                  <div key={question.id}>
+                    <label htmlFor={question.id} className="text-sm font-black text-[#191919]">
+                      {question.prompt}
+                    </label>
+                    <p className="mt-1 text-xs leading-5 text-[#666]">{question.help}</p>
+                    {question.long ? (
+                      <Textarea
+                        id={question.id}
+                        name={question.id}
+                        defaultValue={answers[question.id] ?? ""}
+                        className="mt-2 min-h-24 bg-white"
+                      />
+                    ) : (
+                      <Input
+                        id={question.id}
+                        name={question.id}
+                        defaultValue={answers[question.id] ?? ""}
+                        className="mt-2 h-12 bg-white"
+                      />
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </details>
 
-          <Button className="h-12 w-full rounded-full bg-[#0A66C2] font-black text-white hover:bg-[#004182]">
-            <PenLine className="mr-2 h-4 w-4" />
-            Build my voice profile
-          </Button>
-        </form>
+            <details className="border-t border-[#E2E2E2] pt-4">
+              <summary className="cursor-pointer list-none text-sm font-bold text-[#666]">
+                Paste posts manually instead
+              </summary>
+              <p className="mt-2 text-xs leading-5 text-[#666]">
+                Only needed when the account you write from is not connectable yet. Separate each post
+                with a blank line.
+              </p>
+              <Textarea
+                id="samples"
+                name="samples"
+                placeholder="Paste a few of your best posts here…"
+                className="mt-2 min-h-32 bg-white"
+              />
+            </details>
+
+            <Button className="h-12 w-full rounded-full bg-[#191919] font-black text-white hover:bg-[#0A66C2]">
+              Build from my answers
+            </Button>
+          </form>
+        </details>
       </section>
 
       <section className="space-y-6">
