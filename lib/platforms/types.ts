@@ -27,13 +27,23 @@ import type { Platform } from "@/lib/types/db";
  * aspirational — a `true` here that the adapter cannot honour becomes a feature
  * the user is offered and then silently denied.
  */
+/**
+ * What an adapter can do.
+ *
+ * There is deliberately no `dm` capability and no `sendDm` method. X's adapter
+ * carried a working one for a while with nothing able to call it, which sat
+ * directly against a promise the product makes on /trust, /pricing and in the
+ * lead-capture copy: FollowerSpike never sends a direct message. Keyword capture
+ * answers by email, to an address the recipient types into their own public
+ * reply. Removing the capability is what makes that promise structural instead
+ * of a convention someone could undo by wiring up one call. The X
+ * implementation is in git history if the product ever genuinely changes.
+ */
 export type PlatformCapabilities = {
   /** Can create a post on the user's behalf. */
   publish: boolean;
   /** Can read the replies/comments on a post we published. */
   readReplies: boolean;
-  /** Can send a direct message. */
-  dm: boolean;
   /** Hard character ceiling for a single post, counted in code points. */
   maxChars: number;
   /** Can chain posts into a native thread by replying to our own post. */
@@ -156,18 +166,6 @@ export type FetchRepliesOptions = {
   limit?: number;
 };
 
-export type DmRecipient = {
-  platformUserId: string;
-  handle?: string | null;
-};
-
-export type DmResult = {
-  /** ISO 8601. */
-  sentAt: string;
-  conversationId: string | null;
-  messageId: string | null;
-};
-
 /**
  * The output of a token refresh, ready to be re-encrypted and written back.
  * `refreshToken` may come back rotated; treat a non-null value as replacing the
@@ -204,13 +202,6 @@ export type PlatformAdapter = {
     post: PostRef,
     options?: FetchRepliesOptions
   ): Promise<PlatformReply[]>;
-
-  /** Present only where `capabilities.dm` is true. */
-  sendDm?(
-    credentials: PlatformCredentials,
-    recipient: DmRecipient,
-    message: string
-  ): Promise<DmResult>;
 
   /** Present only where the credential expires and can be renewed without the user. */
   refreshToken?(credentials: PlatformCredentials): Promise<RefreshedToken>;

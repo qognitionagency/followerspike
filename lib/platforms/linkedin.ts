@@ -18,9 +18,9 @@
  * feature on LinkedIn rather than offer it and fail — which `lib/jobs/leads.ts`
  * does by branching on this flag, and `/app/automations` does by naming the
  * platforms where capture is real. Delivery is by email to an address the
- * replier volunteered, not by DM: `capabilities.dm` is false here too, so there
- * is no private channel to answer on. Flipping either flag to true would make
- * the product page a lie before it made the code work.
+ * replier volunteered, not by DM: no adapter can send a direct message on any
+ * platform, so there is no private channel to answer on. Flipping the capture
+ * flag to true would make the product page a lie before it made the code work.
  */
 import { optionalEnv } from "@/lib/env";
 import {
@@ -56,7 +56,6 @@ const CAPABILITIES: PlatformCapabilities = {
   publish: true,
   // See the module comment. Not a stub — there is no endpoint to call.
   readReplies: false,
-  dm: false,
   /** The Posts API caps `commentary` at 3000 characters. */
   maxChars: 3000,
   // LinkedIn has no native thread primitive. Long-form goes in one post, and a
@@ -303,6 +302,5 @@ export const linkedinAdapter: PlatformAdapter = {
   publish,
   fetchProfile,
   fetchReplies,
-  // No sendDm: LinkedIn messaging is Partner-only, matching `capabilities.dm`.
   refreshToken,
 };

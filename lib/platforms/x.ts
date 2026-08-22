@@ -24,8 +24,6 @@ import {
   assertPublishable,
   platformFetch,
   platformJson,
-  type DmRecipient,
-  type DmResult,
   type FetchRepliesOptions,
   type PlatformAdapter,
   type PlatformCapabilities,
@@ -44,7 +42,6 @@ const TOKEN_ENDPOINT = "https://api.x.com/2/oauth2/token";
 const CAPABILITIES: PlatformCapabilities = {
   publish: true,
   readReplies: true,
-  dm: true,
   // 280 for standard accounts. Premium raises it, but we cannot tell from the
   // token which the user holds, so the floor is the safe number to enforce.
   maxChars: 280,
@@ -233,45 +230,6 @@ async function fetchReplies(
     });
 }
 
-// ---------------------------------------------------------------------------
-// DM
-// ---------------------------------------------------------------------------
-
-type DmResponse = { data?: { dm_conversation_id?: string; dm_event_id?: string } };
-
-async function sendDm(
-  credentials: PlatformCredentials,
-  recipient: DmRecipient,
-  message: string
-): Promise<DmResult> {
-  oauthApp();
-
-  if (!recipient.platformUserId) {
-    throw new PlatformUnsupportedError(
-      "x",
-      "messaging by handle",
-      "a numeric user id is required, so resolve the handle first"
-    );
-  }
-
-  const response = await platformFetch(
-    "x",
-    `${API_BASE}/dm_conversations/with/${encodeURIComponent(recipient.platformUserId)}/messages`,
-    {
-      method: "POST",
-      headers: { ...authHeaders(credentials), "content-type": "application/json" },
-      body: JSON.stringify({ text: message }),
-    }
-  );
-
-  const data = await platformJson<DmResponse>("x", response, "direct message");
-
-  return {
-    sentAt: new Date().toISOString(),
-    conversationId: data.data?.dm_conversation_id ?? null,
-    messageId: data.data?.dm_event_id ?? null,
-  };
-}
 
 // ---------------------------------------------------------------------------
 // Token refresh
@@ -329,6 +287,5 @@ export const xAdapter: PlatformAdapter = {
   publish,
   fetchProfile,
   fetchReplies,
-  sendDm,
   refreshToken,
 };

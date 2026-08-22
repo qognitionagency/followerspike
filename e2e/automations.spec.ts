@@ -6,6 +6,8 @@ import {
   crossPostRelayConfig,
   evergreenConfig,
   isImplementedKind,
+  IMPLEMENTED_AUTOMATION_KINDS,
+  type ImplementedAutomationKind,
   unmeasurableTrigger,
   PLUG_DELAY_HOURS,
 } from "../lib/automations/store";
@@ -168,18 +170,34 @@ test.describe("triggers we cannot measure", () => {
 
 test.describe("what the UI may offer", () => {
   test("only kinds with a handler are offerable", () => {
-    // `automations.kind` allows eight values; three of them have no handler and
-    // must not appear in the UI as something a user can switch on.
     expect(isImplementedKind("auto_plug")).toBe(true);
     expect(isImplementedKind("comment_capture")).toBe(true);
-    expect(isImplementedKind("thread_drip")).toBe(false);
-    expect(isImplementedKind("source_watcher")).toBe(false);
-    expect(isImplementedKind("lead_followup")).toBe(false);
 
-    // auto_dm is not merely unimplemented, it was removed from the schema in
-    // 20260822140000_drop_auto_dm_kind.sql. The product promises on /trust and
-    // /pricing that it never sends direct messages, and no adapter has a DM
-    // method; keeping the kind offerable would have contradicted that.
-    expect(isImplementedKind("auto_dm")).toBe(false);
+    // Every kind the UI may offer must reach a registered handler. Automation
+    // kinds are not job kinds: an evergreen automation is executed by the
+    // `evergreen_refill` job and a capture by `lead_poll`, so the mapping is
+    // spelled out rather than assumed. Add an offerable kind without wiring it
+    // to a handler and this fails.
+    const executedBy: Record<ImplementedAutomationKind, string> = {
+      first_comment: "first_comment",
+      auto_plug: "auto_plug",
+      cross_post_relay: "cross_post_relay",
+      comment_capture: "lead_poll",
+      evergreen: "evergreen_refill",
+    };
+
+    for (const kind of IMPLEMENTED_AUTOMATION_KINDS) {
+      const jobKind = executedBy[kind];
+      expect(JOB_KINDS, `${kind} maps to job kind ${jobKind}`).toContain(jobKind);
+      expect(getHandler(jobKind), `${kind} is offerable but ${jobKind} has no handler`).toBeTruthy();
+    }
+
+    // The four kinds removed from the schema stay unoffered. auto_dm was
+    // dropped in 20260822140000 because the product promises on /trust and
+    // /pricing that it never sends a direct message, and no adapter can; the
+    // other three were dropped in 20260822170000 as unbuilt with no spec.
+    for (const removed of ["auto_dm", "thread_drip", "source_watcher", "lead_followup"]) {
+      expect(isImplementedKind(removed), `${removed} was removed from the schema`).toBe(false);
+    }
   });
 });

@@ -101,10 +101,7 @@ export type AutomationKind =
   | "auto_plug"
   | "first_comment"
   | "evergreen"
-  | "cross_post_relay"
-  | "thread_drip"
-  | "source_watcher"
-  | "lead_followup";
+  | "cross_post_relay";
 
 export type Automation = {
   id: string;

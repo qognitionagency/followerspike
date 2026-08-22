@@ -89,6 +89,61 @@ function applyOne(version: string, databaseUrl: string): number {
   return Date.now() - started;
 }
 
+/**
+ * Refuses to migrate production from an interactive shell without being told to.
+ *
+ * Local `.env.local` and production have pointed at the same Neon database, so
+ * `pnpm db:migrate` at a laptop prompt is a production migration and nothing
+ * said so. This is the thing that says so.
+ *
+ * Set PRODUCTION_DATABASE_HOST to the production endpoint host. When
+ * DATABASE_URL resolves to it, this refuses unless `--production` is passed.
+ * Unset, nothing is enforced and the script behaves exactly as before, so this
+ * cannot break a deployment that never configured it.
+ *
+ * CI and Vercel are exempt: they are non-interactive and are supposed to be
+ * pointed wherever their own environment says.
+ */
+function assertProductionIsIntentional(databaseUrl: string): void {
+  const productionHost = process.env.PRODUCTION_DATABASE_HOST?.trim();
+  if (!productionHost) return;
+  if (process.env.CI || process.env.VERCEL) return;
+
+  let host: string;
+  try {
+    host = new URL(databaseUrl).hostname;
+  } catch {
+    // An unparseable URL is psql's problem to report, not this guard's.
+    return;
+  }
+
+  // Neon gives the pooled and direct endpoints different hostnames for the same
+  // branch, so compare on the endpoint id rather than the whole host.
+  const endpointId = (value: string) => value.split(".")[0].replace(/-pooler$/, "");
+  if (endpointId(host) !== endpointId(productionHost)) return;
+
+  if (process.argv.includes("--production")) {
+    console.warn(`\n!!  Migrating PRODUCTION (${host}) because --production was passed.\n`);
+    return;
+  }
+
+  console.error(
+    [
+      "",
+      `Refusing to migrate: DATABASE_URL points at production (${host}).`,
+      "",
+      "This is the database real customers are using. If you meant it:",
+      "",
+      "    pnpm db:migrate -- --production",
+      "",
+      "If you did not, point .env.local at a Neon development branch instead.",
+      "docs/database-environments.md has the steps.",
+      "",
+    ].join("\n")
+  );
+  process.exit(1);
+}
+
 async function main() {
   if (!databaseConfigured()) {
     console.error("DATABASE_URL is not set");
@@ -97,6 +152,9 @@ async function main() {
 
   const databaseUrl = process.env.DATABASE_URL as string;
   const statusOnly = process.argv.includes("--status");
+
+  // Reading is always safe; only applying is gated.
+  if (!statusOnly) assertProductionIsIntentional(databaseUrl);
 
   const onDisk = migrationsOnDisk();
   await bootstrapLedger(databaseUrl, onDisk);

@@ -16,7 +16,17 @@ import { db, databaseConfigured } from "@/lib/db";
 import { isPlatform } from "@/lib/platforms/registry";
 import type { Automation, AutomationKind, Platform } from "@/lib/types/db";
 
-/** The kinds this codebase can actually execute. The table's check constraint is wider on purpose — it also names kinds no handler implements yet, and offering one of those in the UI would be selling something that does not run. */
+/**
+ * The kinds this codebase can actually execute.
+ *
+ * This list, `AutomationKind`, and the table's check constraint are now the
+ * same five values, which is the point: for a long time the constraint was
+ * deliberately wider and named four kinds no handler implemented, so this
+ * existed to keep them out of the UI. Those four were dropped in
+ * 20260822140000 and 20260822170000, and the invariant to preserve is that a
+ * kind is added to all three at once, in the same change that adds its handler.
+ * The e2e test asserts the three stay in agreement.
+ */
 export const IMPLEMENTED_AUTOMATION_KINDS = [
   "first_comment",
   "auto_plug",

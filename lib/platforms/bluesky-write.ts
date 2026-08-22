@@ -58,7 +58,6 @@ const SESSION_TTL_MS = 50 * 60 * 1000;
 const CAPABILITIES: PlatformCapabilities = {
   publish: true,
   readReplies: true,
-  dm: false,
   maxChars: 300,
   supportsThreads: true,
 };
@@ -558,10 +557,6 @@ async function fetchReplies(
 
 /**
  * Bluesky's adapter, complete.
- *
- * No `sendDm`: `chat.bsky.convo` exists but only delivers to accounts that have
- * opted into messages from strangers, so an automation built on it would fail
- * silently for most recipients. `capabilities.dm` is false to match.
  *
  * No `refreshToken`: an app password does not expire. It is revoked, not
  * renewed, and a revoked one surfaces as `PlatformAuthError` at sign-in.

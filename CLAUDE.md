@@ -123,10 +123,15 @@ test account), and it **writes to whatever database it points at**.
 
 ## Environments
 
-**Local `.env.local` and production point at the same Neon database.** There is
-no dev branch. A migration run locally is a production migration, and the
-signed-in e2e project writes to production data. Worth fixing with a Neon
-branch before the user count is above one.
+**Local `.env.local` and production still point at the same Neon database.**
+There is no dev branch yet. A migration run locally is a production migration,
+and the signed-in e2e project writes to production data.
+
+`docs/database-environments.md` is the runbook for splitting them; it needs the
+Neon console. Until that is done, set `PRODUCTION_DATABASE_HOST` in
+`.env.local` and `pnpm db:migrate` will refuse to touch production without
+`-- --production`. `--status` is never blocked, and the guard is inert when the
+variable is unset or when `CI`/`VERCEL` is set.
 
 `vercel env` shows production has `DATABASE_URL`, Clerk, and
 `SESSION_ENCRYPTION_KEY` only — see "Not configured in production" below.
@@ -224,13 +229,16 @@ Roughly priority-ordered. Check items off here as they land.
       `AutomationKind`. The product promises on /trust and /pricing that it never
       sends a DM, so the kind was a schema-level contradiction of a published
       claim. **`lib/platforms/x.ts` still carries a working `sendDm` with no
-      caller.** It is unreachable, but if you want the code to match the promise
-      structurally rather than behaviourally, remove it and the optional
-      `sendDm` on `PlatformAdapter`.
-- [ ] `thread_drip`, `source_watcher` and `lead_followup` remain values of
-      `automations.kind` with nothing behind them.
-      `IMPLEMENTED_AUTOMATION_KINDS` keeps them out of the UI; an e2e test
-      asserts they stay out.
+      caller.** Removed: the method, the `dm` capability flag, and the
+      `DmRecipient`/`DmResult` types are all gone, so no adapter can send a
+      direct message. `lib/platforms/types.ts` records why. Git history has the
+      X implementation if the product ever genuinely changes.
+- [x] ~~`thread_drip`, `source_watcher` and `lead_followup` have no handler~~ —
+      dropped in `20260822170000_drop_unbuilt_automation_kinds.sql`.
+      `AutomationKind`, `IMPLEMENTED_AUTOMATION_KINDS` and the check constraint
+      are now the same five values. **Add a kind to all three in the same change
+      that adds its handler**; the e2e test asserts each offerable kind reaches a
+      registered handler, through the automation-kind to job-kind mapping.
 - [x] ~~X has no scorer at all~~ — `lib/rank/x.ts` scores a pasted X profile on
       the same five pillars, with cadence and engagement reported `unknown` and
       excluded from the total. This was not just a gap: `spike-rank-x` had a
