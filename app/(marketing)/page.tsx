@@ -37,11 +37,16 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: BRAND.name,
     type: "website",
+    // Declared explicitly. Pages that set no openGraph of their own inherit the
+    // root layout and Next appends the generated card automatically; a page that
+    // overrides openGraph, as this one does, loses it unless it says so.
+    images: ["/opengraph-image"],
   },
   twitter: {
     card: "summary_large_image",
     title: "FollowerSpike | Post to X, LinkedIn, and Bluesky in Your Own Voice",
     description: "Post to X, LinkedIn, and Bluesky from one editor, in your own voice.",
+    images: ["/opengraph-image"],
   },
   robots: {
     index: true,

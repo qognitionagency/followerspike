@@ -35,7 +35,7 @@ const isPublicRoute = createRouteMatcher([
   // social card.
   "/opengraph-image",
   "/icon.svg",
-  "/apple-icon.svg",
+  "/apple-icon",
   "/tools(.*)",
   "/features(.*)",
   "/free-tools(.*)",
